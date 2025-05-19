@@ -393,7 +393,16 @@ function App() {
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               />
               <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">40 years or older</span>
-              <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded p-2 w-64">
+              <button
+                type="button"
+                className="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:text-gray-600 dark:focus:text-gray-200"
+                aria-label="More information about age requirement"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block group-focus-within:block bg-gray-800 text-white text-xs rounded p-2 w-64 z-10">
                 This includes nursing care insurance premiums in your health insurance cost calculation
               </div>
             </label>
