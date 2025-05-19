@@ -111,6 +111,9 @@ interface TaxInputs {
   isEmploymentIncome: boolean
   isOver40: boolean
   prefecture: string
+  showDetailedInput: boolean
+  healthInsuranceProvider: string
+  numberOfDependents: number
 }
 
 // Define types for tax calculation results
@@ -129,7 +132,10 @@ function App() {
     annualIncome: 5000000, // 5 million yen
     isEmploymentIncome: true,
     isOver40: false,
-    prefecture: 'Tokyo'
+    prefecture: 'Tokyo',
+    showDetailedInput: false,
+    healthInsuranceProvider: 'Kyokai Kenpo',
+    numberOfDependents: 0
   }
 
   // State for form inputs
@@ -155,14 +161,25 @@ function App() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement
 
-    setInputs(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' 
-        ? (e.target as HTMLInputElement).checked 
-        : type === 'number' || type === 'range'
-          ? parseFloat(value) || 0 
-          : value
-    }))
+    setInputs(prev => {
+      const newInputs = {
+        ...prev,
+        [name]: type === 'checkbox' 
+          ? (e.target as HTMLInputElement).checked 
+          : type === 'number' || type === 'range'
+            ? parseFloat(value) || 0 
+            : value
+      }
+
+      // Update health insurance provider based on employment income status
+      if (name === 'isEmploymentIncome') {
+        newInputs.healthInsuranceProvider = (e.target as HTMLInputElement).checked 
+          ? 'Kyokai Kenpo' 
+          : 'National Health Insurance'
+      }
+
+      return newInputs
+    })
   }
 
   // Listen for theme changes
@@ -423,23 +440,89 @@ function App() {
             </label>
           </div>
 
+          {/* Detailed Input Section */}
           <div className="mb-4">
-            <label htmlFor="prefecture" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Prefecture
-            </label>
-            <select
-              id="prefecture"
-              name="prefecture"
-              value={inputs.prefecture}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <button
+              type="button"
+              onClick={() => setInputs(prev => ({ ...prev, showDetailedInput: !prev.showDetailedInput }))}
+              className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
-              <option value="Tokyo">Tokyo</option>
-              <option value="Osaka">Osaka</option>
-              <option value="Kyoto">Kyoto</option>
-              <option value="Hokkaido">Hokkaido</option>
-              <option value="Fukuoka">Fukuoka</option>
-            </select>
+              <span>Detailed Input</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className={`h-5 w-5 ml-1 transform transition-transform ${inputs.showDetailedInput ? 'rotate-180' : ''}`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {inputs.showDetailedInput && (
+              <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
+                <div className="mb-4">
+                  <label htmlFor="prefecture" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Prefecture
+                  </label>
+                  <select
+                    id="prefecture"
+                    name="prefecture"
+                    value={inputs.prefecture}
+                    onChange={handleInputChange}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md cursor-not-allowed"
+                  >
+                    <option value="Tokyo">Tokyo</option>
+                    <option value="Osaka">Osaka</option>
+                    <option value="Kyoto">Kyoto</option>
+                    <option value="Hokkaido">Hokkaido</option>
+                    <option value="Fukuoka">Fukuoka</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="healthInsuranceProvider" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Health Insurance Provider
+                  </label>
+                  <select
+                    id="healthInsuranceProvider"
+                    name="healthInsuranceProvider"
+                    value={inputs.healthInsuranceProvider}
+                    onChange={handleInputChange}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md cursor-not-allowed"
+                  >
+                    <option value="Kyokai Kenpo">Kyokai Kenpo (Employee Health Insurance)</option>
+                    <option value="National Health Insurance">National Health Insurance</option>
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {inputs.isEmploymentIncome 
+                      ? 'Automatically set to Kyokai Kenpo for employment income'
+                      : 'Automatically set to National Health Insurance for non-employment income'}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="numberOfDependents" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Number of Dependents
+                  </label>
+                  <input
+                    type="number"
+                    id="numberOfDependents"
+                    name="numberOfDependents"
+                    value={inputs.numberOfDependents}
+                    onChange={handleInputChange}
+                    disabled
+                    min="0"
+                    max="10"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-md cursor-not-allowed"
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Dependent calculations will be implemented in a future update
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
