@@ -12,6 +12,7 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import ThemeToggle from './components/ThemeToggle'
+import { Slider } from '@mui/material'
 
 // Format currency for display
 const formatCurrency = (amount: number) => {
@@ -134,6 +135,12 @@ function App() {
   // State for form inputs
   const [inputs, setInputs] = useState<TaxInputs>(defaultInputs)
 
+  // State for chart range
+  const [chartRange, setChartRange] = useState({
+    min: 0,
+    max: 10000000 // 10 million yen
+  })
+
   // State for calculation results
   const [results, setResults] = useState<TaxResults | null>(null)
 
@@ -228,26 +235,28 @@ function App() {
 
   // Generate chart data for different income levels
   const generateChartData = (currentIncome: number) => {
-    // Create a fixed set of income points for proportional grid spacing
-    const incomePoints = Array.from({ length: 11 }, (_, i) => i * 1000000)
-
-    const labels = incomePoints.map(income => 
-      `¥${(income / 10000).toFixed(0)}万`
+    // Create income points based on the current range
+    const step = 1000000 // 1 million yen
+    const numPoints = Math.floor((chartRange.max - chartRange.min) / step) + 1
+    const incomePoints = Array.from(
+      { length: numPoints },
+      (_, i) => chartRange.min + (i * step)
     )
 
     // Calculate the position of current income and median income on the x-axis
-    const maxIncome = incomePoints[incomePoints.length - 1]
-    const minIncome = incomePoints[0]
-    const currentIncomePosition = (currentIncome - minIncome) / (maxIncome - minIncome)
-    const medianIncomePosition = (medianIncome - minIncome) / (maxIncome - minIncome)
+    const maxIncome = chartRange.max
+    const minIncome = chartRange.min
+    const currentIncomePosition = Math.max(0, Math.min(1, (currentIncome - minIncome) / (maxIncome - minIncome)))
+    const medianIncomePosition = Math.max(0, Math.min(1, (medianIncome - minIncome) / (maxIncome - minIncome)))
 
     // Create datasets with proper alignment
     const datasets = [
       {
         label: 'National Income Tax',
-        data: incomePoints.map(income => 
-          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).nationalIncomeTax
-        ),
+        data: incomePoints.map(income => ({
+          x: income,
+          y: calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).nationalIncomeTax
+        })),
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
         yAxisID: 'y',
@@ -256,9 +265,10 @@ function App() {
       },
       {
         label: 'Residence Tax',
-        data: incomePoints.map(income => 
-          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).residenceTax
-        ),
+        data: incomePoints.map(income => ({
+          x: income,
+          y: calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).residenceTax
+        })),
         borderColor: 'rgb(54, 162, 235)',
         backgroundColor: 'rgba(54, 162, 235, 0.5)',
         yAxisID: 'y',
@@ -267,9 +277,10 @@ function App() {
       },
       {
         label: 'Health Insurance',
-        data: incomePoints.map(income => 
-          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).healthInsurance
-        ),
+        data: incomePoints.map(income => ({
+          x: income,
+          y: calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).healthInsurance
+        })),
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         yAxisID: 'y',
@@ -278,9 +289,10 @@ function App() {
       },
       {
         label: 'Pension Payments',
-        data: incomePoints.map(income => 
-          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).pensionPayments
-        ),
+        data: incomePoints.map(income => ({
+          x: income,
+          y: calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).pensionPayments
+        })),
         borderColor: 'rgb(153, 102, 255)',
         backgroundColor: 'rgba(153, 102, 255, 0.5)',
         yAxisID: 'y',
@@ -289,9 +301,10 @@ function App() {
       },
       {
         label: 'Net Income',
-        data: incomePoints.map(income => 
-          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).netIncome
-        ),
+        data: incomePoints.map(income => ({
+          x: income,
+          y: calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).netIncome
+        })),
         borderColor: 'rgb(34, 197, 94)',
         backgroundColor: 'rgba(34, 197, 94, 0.5)',
         yAxisID: 'y',
@@ -302,7 +315,10 @@ function App() {
         label: 'Take-Home Pay %',
         data: incomePoints.map(income => {
           const result = calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40)
-          return (result.netIncome / income) * 100
+          return {
+            x: income,
+            y: (result.netIncome / income) * 100
+          }
         }),
         borderColor: 'rgb(255, 159, 64)',
         backgroundColor: 'rgba(255, 159, 64, 0.5)',
@@ -313,7 +329,6 @@ function App() {
     ]
 
     return {
-      labels,
       datasets,
       currentIncomePosition,
       medianIncomePosition,
@@ -327,7 +342,7 @@ function App() {
     const results = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40)
     setResults(results)
     setChartData(generateChartData(inputs.annualIncome))
-  }, [inputs])
+  }, [inputs, chartRange])
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
@@ -478,6 +493,7 @@ function App() {
       {chartData && (
         <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Tax Breakdown Across Income Levels</h2>
+          
           <div className="h-80">
             <Line 
               data={chartData}
@@ -497,8 +513,8 @@ function App() {
                     intersect: false,
                     callbacks: {
                       title: function(context) {
-                        const income = context[0].label;
-                        return `Income: ${income}`;
+                        const income = context[0].parsed.x;
+                        return `Income: ${formatCurrency(income)}`;
                       },
                       label: function(context) {
                         let label = context.dataset.label || '';
@@ -527,14 +543,18 @@ function App() {
                 },
                 scales: {
                   x: {
+                    type: 'linear',
                     grid: {
                       offset: false
                     },
                     ticks: {
-                      align: 'center'
+                      align: 'center',
+                      callback: function(value) {
+                        return `¥${(value as number / 10000).toFixed(0)}万`;
+                      }
                     },
-                    min: 0,
-                    max: 10000000,
+                    min: chartRange.min,
+                    max: chartRange.max,
                     offset: false
                   },
                   y: {
@@ -575,6 +595,7 @@ function App() {
               ref={(ref) => setChartInstance(ref)}
             />
           </div>
+
           <div className="mt-4 flex flex-wrap gap-4 justify-center">
             <div className="flex items-center">
               <span className="h-3 w-0.5 bg-red-500 mr-1"></span>
@@ -583,6 +604,37 @@ function App() {
             <div className="flex items-center">
               <span className="h-3 w-0.5 bg-yellow-400 mr-1"></span>
               <span className="text-sm text-gray-700 dark:text-gray-300">Median Income</span>
+            </div>
+          </div>
+
+          {/* Chart Range Controls */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Chart Income Range
+            </label>
+            <div className="px-2">
+              <Slider
+                min={0}
+                max={100000000}
+                step={1000000}
+                value={[chartRange.min, chartRange.max]}
+                onChange={(_, newValue) => {
+                  if (Array.isArray(newValue)) {
+                    setChartRange({
+                      min: newValue[0],
+                      max: newValue[1]
+                    });
+                  }
+                }}
+                valueLabelDisplay="auto"
+                valueLabelFormat={(value) => formatCurrency(value)}
+                disableSwap
+                className="chart-range-slider"
+              />
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <span>{formatCurrency(chartRange.min)}</span>
+              <span>{formatCurrency(chartRange.max)}</span>
             </div>
           </div>
         </div>

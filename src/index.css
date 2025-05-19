@@ -16,3 +16,36 @@ body {
 .dark body {
   @apply bg-gray-900 text-white;
 }
+
+/* Chart Range Slider Styles */
+.chart-range-slider {
+  color: #3b82f6; /* blue-500 */
+}
+
+.chart-range-slider .MuiSlider-thumb {
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  border: 2px solid currentColor;
+}
+
+.chart-range-slider .MuiSlider-thumb:hover,
+.chart-range-slider .MuiSlider-thumb.Mui-focusVisible {
+  box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.16);
+}
+
+.chart-range-slider .MuiSlider-track {
+  border: none;
+}
+
+.chart-range-slider .MuiSlider-rail {
+  opacity: 0.5;
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.chart-range-slider .MuiSlider-valueLabel {
+  background-color: #3b82f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
