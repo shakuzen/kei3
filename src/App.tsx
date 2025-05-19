@@ -5,6 +5,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -46,6 +47,10 @@ const customPlugin = {
       return;
     }
 
+    // Check if dark mode is active
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const labelBgColor = isDarkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+
     // Draw Your Income vertical line
     const yourIncomeX = left + (width * chartData.currentIncomePosition);
     ctx.save();
@@ -59,8 +64,12 @@ const customPlugin = {
     // Add label for Your Income
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255, 99, 132, 1)';
-    ctx.fillText('Your Income', yourIncomeX, top - 10);
-    ctx.fillText(formatCurrency(chartData.currentIncome), yourIncomeX, top - 25);
+    // Draw background for better readability
+    ctx.fillStyle = labelBgColor;
+    ctx.fillRect(yourIncomeX - 60, top + 5, 120, 40);
+    ctx.fillStyle = 'rgba(255, 99, 132, 1)';
+    ctx.fillText('Your Income', yourIncomeX, top + 20);
+    ctx.fillText(formatCurrency(chartData.currentIncome), yourIncomeX, top + 35);
 
     // Draw Median Income vertical line
     const medianIncomeX = left + (width * chartData.medianIncomePosition);
@@ -72,9 +81,11 @@ const customPlugin = {
     ctx.stroke();
 
     // Add label for Median Income
+    ctx.fillStyle = labelBgColor;
+    ctx.fillRect(medianIncomeX - 60, top + 5, 120, 40);
     ctx.fillStyle = 'rgba(255, 206, 86, 1)';
-    ctx.fillText('Median Income', medianIncomeX, top - 10);
-    ctx.fillText(formatCurrency(chartData.medianIncome), medianIncomeX, top - 25);
+    ctx.fillText('Median Income', medianIncomeX, top + 20);
+    ctx.fillText(formatCurrency(chartData.medianIncome), medianIncomeX, top + 35);
 
     ctx.restore();
   }
@@ -86,6 +97,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -95,10 +107,9 @@ ChartJS.register(
 // Define types for form inputs
 interface TaxInputs {
   annualIncome: number
-  dependents: number
-  isMarried: boolean
+  isEmploymentIncome: boolean
+  isOver40: boolean
   prefecture: string
-  city: string
 }
 
 // Define types for tax calculation results
@@ -115,10 +126,9 @@ function App() {
   // Default values for the form
   const defaultInputs: TaxInputs = {
     annualIncome: 5000000, // 5 million yen
-    dependents: 0,
-    isMarried: false,
-    prefecture: 'Tokyo',
-    city: 'Shibuya'
+    isEmploymentIncome: true,
+    isOver40: false,
+    prefecture: 'Tokyo'
   }
 
   // State for form inputs
@@ -129,6 +139,7 @@ function App() {
 
   // State for chart data
   const [chartData, setChartData] = useState<any>(null)
+  const [chartInstance, setChartInstance] = useState<any>(null)
 
   // Median income in Japan (approximate)
   const medianIncome = 4330000 // 4.33 million yen
@@ -147,8 +158,29 @@ function App() {
     }))
   }
 
+  // Listen for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          // Redraw chart when theme changes
+          if (chartInstance) {
+            chartInstance.update();
+          }
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, [chartInstance]);
+
   // Calculate taxes based on inputs (simplified estimation)
-  const calculateTaxes = (income: number, deps: number, married: boolean): TaxResults => {
+  const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOver40: boolean): TaxResults => {
     // These are simplified calculations for demonstration
     // In a real app, these would be more complex and accurate
 
@@ -170,15 +202,12 @@ function App() {
       nationalIncomeTax = income * 0.45 - 4796000
     }
 
-    // Deductions for dependents and marriage
-    const deductions = (deps * 380000) + (married ? 380000 : 0)
-    nationalIncomeTax = Math.max(0, nationalIncomeTax - deductions * 0.1)
-
     // Residence tax (simplified)
-    const residenceTax = income * 0.1 - Math.min(deductions, income * 0.1)
+    const residenceTax = income * 0.1
 
     // Health insurance (simplified)
-    const healthInsurance = Math.min(income * 0.1, 1500000)
+    // Include nursing care insurance for those over 40
+    const healthInsurance = Math.min(income * (isOver40 ? 0.11 : 0.1), 1500000)
 
     // Pension payments (simplified)
     const pensionPayments = Math.min(income * 0.09, 800000)
@@ -206,70 +235,88 @@ function App() {
       `¥${(income / 10000).toFixed(0)}万`
     )
 
-    const nationalTaxData = incomePoints.map(income => 
-      calculateTaxes(income, inputs.dependents, inputs.isMarried).nationalIncomeTax
-    )
-
-    const residenceTaxData = incomePoints.map(income => 
-      calculateTaxes(income, inputs.dependents, inputs.isMarried).residenceTax
-    )
-
-    const healthInsuranceData = incomePoints.map(income => 
-      calculateTaxes(income, inputs.dependents, inputs.isMarried).healthInsurance
-    )
-
-    const pensionData = incomePoints.map(income => 
-      calculateTaxes(income, inputs.dependents, inputs.isMarried).pensionPayments
-    )
-
-    const netIncomeData = incomePoints.map(income => 
-      calculateTaxes(income, inputs.dependents, inputs.isMarried).netIncome
-    )
-
     // Calculate the position of current income and median income on the x-axis
-    // This will be used for vertical line annotations
     const maxIncome = incomePoints[incomePoints.length - 1]
-    const currentIncomePosition = currentIncome / maxIncome
-    const medianIncomePosition = medianIncome / maxIncome
+    const minIncome = incomePoints[0]
+    const currentIncomePosition = (currentIncome - minIncome) / (maxIncome - minIncome)
+    const medianIncomePosition = (medianIncome - minIncome) / (maxIncome - minIncome)
+
+    // Create datasets with proper alignment
+    const datasets = [
+      {
+        label: 'National Income Tax',
+        data: incomePoints.map(income => 
+          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).nationalIncomeTax
+        ),
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        yAxisID: 'y',
+        type: 'bar',
+        stack: 'stack0',
+      },
+      {
+        label: 'Residence Tax',
+        data: incomePoints.map(income => 
+          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).residenceTax
+        ),
+        borderColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+        yAxisID: 'y',
+        type: 'bar',
+        stack: 'stack0',
+      },
+      {
+        label: 'Health Insurance',
+        data: incomePoints.map(income => 
+          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).healthInsurance
+        ),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        yAxisID: 'y',
+        type: 'bar',
+        stack: 'stack0',
+      },
+      {
+        label: 'Pension Payments',
+        data: incomePoints.map(income => 
+          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).pensionPayments
+        ),
+        borderColor: 'rgb(153, 102, 255)',
+        backgroundColor: 'rgba(153, 102, 255, 0.5)',
+        yAxisID: 'y',
+        type: 'bar',
+        stack: 'stack0',
+      },
+      {
+        label: 'Net Income',
+        data: incomePoints.map(income => 
+          calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40).netIncome
+        ),
+        borderColor: 'rgb(34, 197, 94)',
+        backgroundColor: 'rgba(34, 197, 94, 0.5)',
+        yAxisID: 'y',
+        type: 'bar',
+        stack: 'stack0',
+      },
+      {
+        label: 'Take-Home Pay %',
+        data: incomePoints.map(income => {
+          const result = calculateTaxes(income, inputs.isEmploymentIncome, inputs.isOver40)
+          return (result.netIncome / income) * 100
+        }),
+        borderColor: 'rgb(255, 159, 64)',
+        backgroundColor: 'rgba(255, 159, 64, 0.5)',
+        yAxisID: 'y1',
+        borderDash: [5, 5],
+        type: 'line',
+      }
+    ]
 
     return {
       labels,
-      datasets: [
-        {
-          label: 'National Income Tax',
-          data: nationalTaxData,
-          borderColor: 'rgb(255, 99, 132)',
-          backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        },
-        {
-          label: 'Residence Tax',
-          data: residenceTaxData,
-          borderColor: 'rgb(54, 162, 235)',
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        },
-        {
-          label: 'Health Insurance',
-          data: healthInsuranceData,
-          borderColor: 'rgb(75, 192, 192)',
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        },
-        {
-          label: 'Pension Payments',
-          data: pensionData,
-          borderColor: 'rgb(153, 102, 255)',
-          backgroundColor: 'rgba(153, 102, 255, 0.5)',
-        },
-        {
-          label: 'Net Income',
-          data: netIncomeData,
-          borderColor: 'rgb(34, 197, 94)',
-          backgroundColor: 'rgba(34, 197, 94, 0.5)',
-        }
-      ],
-      // Store the positions for vertical lines
+      datasets,
       currentIncomePosition,
       medianIncomePosition,
-      // Store the actual values for tooltips
       currentIncome,
       medianIncome
     }
@@ -277,7 +324,7 @@ function App() {
 
   // Calculate taxes and update chart when inputs change
   useEffect(() => {
-    const results = calculateTaxes(inputs.annualIncome, inputs.dependents, inputs.isMarried)
+    const results = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40)
     setResults(results)
     setChartData(generateChartData(inputs.annualIncome))
   }, [inputs])
@@ -295,13 +342,25 @@ function App() {
           <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Your Information</h2>
 
           <div className="mb-4">
+            <label className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                name="isEmploymentIncome"
+                checked={inputs.isEmploymentIncome}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Employment Income</span>
+            </label>
+
             <label htmlFor="annualIncome" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Annual Income (¥)
+              {inputs.isEmploymentIncome ? 'Gross Annual Employment Income (¥)' : 'Net Annual Income (Business income, etc.) (¥)'}
             </label>
             <input
               type="number"
               id="annualIncome"
               name="annualIncome"
+              step="10000"
               value={inputs.annualIncome}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
@@ -310,7 +369,7 @@ function App() {
               type="range"
               id="annualIncomeSlider"
               name="annualIncome"
-              min="0"
+              min="200000"
               max="20000000"
               step="10000"
               value={inputs.annualIncome}
@@ -318,37 +377,25 @@ function App() {
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <span>¥0</span>
+              <span>¥200,000</span>
               <span>¥10M</span>
               <span>¥20M</span>
             </div>
           </div>
 
           <div className="mb-4">
-            <label htmlFor="dependents" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Number of Dependents
-            </label>
-            <input
-              type="number"
-              id="dependents"
-              name="dependents"
-              min="0"
-              value={inputs.dependents}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="flex items-center">
+            <label className="flex items-center group relative">
               <input
                 type="checkbox"
-                name="isMarried"
-                checked={inputs.isMarried}
+                name="isOver40"
+                checked={inputs.isOver40}
                 onChange={handleInputChange}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               />
-              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Married</span>
+              <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">40 years or older</span>
+              <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded p-2 w-64">
+                This includes nursing care insurance premiums in your health insurance cost calculation
+              </div>
             </label>
           </div>
 
@@ -369,20 +416,6 @@ function App() {
               <option value="Hokkaido">Hokkaido</option>
               <option value="Fukuoka">Fukuoka</option>
             </select>
-          </div>
-
-          <div className="mb-4">
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              City
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={inputs.city}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
           </div>
         </div>
 
@@ -421,9 +454,9 @@ function App() {
                   <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatCurrency(results.netIncome)}</p>
                 </div>
                 <div className="flex justify-between items-center mt-2">
-                  <p className="text-gray-700 dark:text-gray-300">Effective Tax Rate</p>
+                  <p className="text-gray-700 dark:text-gray-300">Take-Home Pay Percentage</p>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {((results.totalTax / inputs.annualIncome) * 100).toFixed(1)}%
+                    {((results.netIncome / inputs.annualIncome) * 100).toFixed(1)}%
                   </p>
                 </div>
               </div>
@@ -442,25 +475,38 @@ function App() {
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                  mode: 'index',
+                  intersect: false,
+                },
                 plugins: {
                   legend: {
                     position: 'top' as const,
                   },
                   tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     callbacks: {
+                      title: function(context) {
+                        const income = context[0].label;
+                        return `Income: ${income}`;
+                      },
                       label: function(context) {
                         let label = context.dataset.label || '';
                         if (label) {
                           label += ': ';
                         }
                         if (context.parsed.y !== null) {
-                          label += formatCurrency(context.parsed.y);
+                          if (context.dataset.yAxisID === 'y1') {
+                            label += context.parsed.y.toFixed(1) + '%';
+                          } else {
+                            label += formatCurrency(context.parsed.y);
+                          }
                         }
                         return label;
                       }
                     }
                   },
-                  // Pass data to the custom plugin
                   customPlugin: {
                     data: {
                       currentIncomePosition: chartData.currentIncomePosition,
@@ -471,30 +517,63 @@ function App() {
                   }
                 },
                 scales: {
+                  x: {
+                    grid: {
+                      offset: false
+                    },
+                    ticks: {
+                      align: 'center'
+                    },
+                    min: 0,
+                    max: 10000000,
+                    offset: false
+                  },
                   y: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'left' as const,
                     ticks: {
                       callback: function(value) {
                         return formatCurrency(value as number);
                       }
                     }
+                  },
+                  y1: {
+                    type: 'linear' as const,
+                    display: true,
+                    position: 'right' as const,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                      callback: function(value) {
+                        return value + '%';
+                      }
+                    },
+                    grid: {
+                      drawOnChartArea: false,
+                    },
                   }
                 },
                 elements: {
                   point: {
-                    radius: 3, // All points have the same radius now
+                    radius: 3,
+                  },
+                  bar: {
+                    borderWidth: 0
                   }
                 }
               }}
+              ref={(ref) => setChartInstance(ref)}
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-4 justify-center">
             <div className="flex items-center">
               <span className="h-3 w-0.5 bg-red-500 mr-1"></span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Your Income (vertical line)</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Your Income</span>
             </div>
             <div className="flex items-center">
               <span className="h-3 w-0.5 bg-yellow-400 mr-1"></span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">Median Income (vertical line)</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Median Income</span>
             </div>
           </div>
         </div>
