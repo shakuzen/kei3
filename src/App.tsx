@@ -1,35 +1,10 @@
 import { useState, useEffect } from 'react'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js'
 import ThemeToggle from './components/ThemeToggle'
 import { TakeHomeInputForm } from './components/TakeHomeCalculator/InputForm'
 import { TakeHomeResultsDisplay } from './components/TakeHomeCalculator/TakeHomeResults'
 import { TakeHomeChart } from './components/TakeHomeCalculator/TakeHomeChart'
 import type { TakeHomeInputs, TakeHomeResults } from './types/tax'
 import { calculateTaxes } from './utils/taxCalculations'
-import { currentAndMedianIncomeChartPlugin } from './utils/chartConfig'
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  currentAndMedianIncomeChartPlugin // Register our custom plugin
-)
 
 function App() {
   // Default values for the form

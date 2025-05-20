@@ -1,9 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { Chart } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  BarController,
+  LineController
+} from 'chart.js'
 import { Slider } from '@mui/material'
 import type { ChartRange } from '../../types/tax'
 import { formatJPY } from '../../utils/formatters'
-import { generateChartData, getChartOptions } from '../../utils/chartConfig'
+import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig'
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  BarController,
+  LineController,
+  currentAndMedianIncomeChartPlugin
+)
 
 interface TaxChartProps {
   currentIncome: number
