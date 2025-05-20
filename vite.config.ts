@@ -8,4 +8,10 @@ export default defineConfig({
       react(),
       tailwindcss()
   ],
+  base: '/kei3/', // Replace with your repository name
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: true
+  }
 })
