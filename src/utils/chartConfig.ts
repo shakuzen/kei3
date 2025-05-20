@@ -131,7 +131,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Net Income',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).netIncome
+        y: calculateTaxes(income, isEmploymentIncome, isOver40).takeHomeIncome
       })),
       borderColor: 'rgb(34, 197, 94)',
       backgroundColor: 'rgba(34, 197, 94, 0.5)',
@@ -145,7 +145,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
         const result = calculateTaxes(income, isEmploymentIncome, isOver40)
         return {
           x: income,
-          y: (result.netIncome / income) * 100
+          y: (result.takeHomeIncome / income) * 100
         }
       }),
       borderColor: 'rgb(255, 159, 64)',

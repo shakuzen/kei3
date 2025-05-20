@@ -14,7 +14,7 @@ export interface TaxResults {
   healthInsurance: number
   pensionPayments: number
   totalTax: number
-  netIncome: number
+  takeHomeIncome: number
 }
 
 export interface ChartRange {
