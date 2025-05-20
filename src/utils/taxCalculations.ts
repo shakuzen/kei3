@@ -1,4 +1,4 @@
-import type { TaxResults } from '../types/tax'
+import type { TakeHomeResults } from '../types/tax'
 
 /**
  * Calculates health insurance premiums for the insured person based on income and age
@@ -174,7 +174,7 @@ export const calculateResidenceTax = (
     return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
 }
 
-export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOver40: boolean): TaxResults => {
+export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOver40: boolean): TakeHomeResults => {
     if (income <= 0) {
         return {
             nationalIncomeTax: 0,

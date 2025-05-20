@@ -128,7 +128,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       stack: 'stack0',
     },
     {
-      label: 'Net Income',
+      label: 'Take-Home Pay',
       data: incomePoints.map(income => ({
         x: income,
         y: calculateTaxes(income, isEmploymentIncome, isOver40).takeHomeIncome

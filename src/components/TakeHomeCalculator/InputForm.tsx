@@ -1,12 +1,12 @@
 import React from 'react'
-import type { TaxInputs } from '../../types/tax'
+import type { TakeHomeInputs } from '../../types/tax'
 
 interface TaxInputFormProps {
-  inputs: TaxInputs
+  inputs: TakeHomeInputs
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
 }
 
-export const TaxInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInputChange }) => {
+export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInputChange }) => {
   const handleDetailedInputToggle = () => {
     // Create a synthetic event that matches the expected type
     const syntheticEvent = {

@@ -1,4 +1,4 @@
-export interface TaxInputs {
+export interface TakeHomeInputs {
   annualIncome: number
   isEmploymentIncome: boolean
   isOver40: boolean
@@ -8,7 +8,7 @@ export interface TaxInputs {
   numberOfDependents: number
 }
 
-export interface TaxResults {
+export interface TakeHomeResults {
   nationalIncomeTax: number
   residenceTax: number
   healthInsurance: number

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { TaxResults as TaxResultsType } from '../../types/tax'
+import type { TakeHomeResults as TaxResultsType } from '../../types/tax'
 import { formatJPY } from '../../utils/formatters'
 
 interface TaxResultsProps {
@@ -7,10 +7,10 @@ interface TaxResultsProps {
   annualIncome: number
 }
 
-export const TaxResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome }) => {
+export const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Tax Calculation Results</h2>
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Results</h2>
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -38,7 +38,7 @@ export const TaxResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIn
             <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.totalTax)}</p>
           </div>
           <div className="flex justify-between items-center">
-            <p className="text-gray-700 dark:text-gray-300">Net Income</p>
+            <p className="text-gray-700 dark:text-gray-300">Take-Home Pay</p>
             <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatJPY(results.takeHomeIncome)}</p>
           </div>
           <div className="flex justify-between items-center mt-2">

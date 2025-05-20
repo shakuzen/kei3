@@ -11,10 +11,10 @@ import {
   Legend
 } from 'chart.js'
 import ThemeToggle from './components/ThemeToggle'
-import { TaxInputForm } from './components/TaxCalculator/TaxInputForm'
-import { TaxResultsDisplay } from './components/TaxCalculator/TaxResults'
-import { TaxChart } from './components/TaxCalculator/TaxChart'
-import type { TaxInputs, TaxResults } from './types/tax'
+import { TakeHomeInputForm } from './components/TakeHomeCalculator/InputForm'
+import { TakeHomeResultsDisplay } from './components/TakeHomeCalculator/TakeHomeResults'
+import { TakeHomeChart } from './components/TakeHomeCalculator/TakeHomeChart'
+import type { TakeHomeInputs, TakeHomeResults } from './types/tax'
 import { calculateTaxes } from './utils/taxCalculations'
 import { currentAndMedianIncomeChartPlugin } from './utils/chartConfig'
 
@@ -33,7 +33,7 @@ ChartJS.register(
 
 function App() {
   // Default values for the form
-  const defaultInputs: TaxInputs = {
+  const defaultInputs: TakeHomeInputs = {
     annualIncome: 5000000, // 5 million yen
     isEmploymentIncome: true,
     isOver40: false,
@@ -44,10 +44,10 @@ function App() {
   }
 
   // State for form inputs
-  const [inputs, setInputs] = useState<TaxInputs>(defaultInputs)
+  const [inputs, setInputs] = useState<TakeHomeInputs>(defaultInputs)
 
   // State for calculation results
-  const [results, setResults] = useState<TaxResults | null>(null)
+  const [results, setResults] = useState<TakeHomeResults | null>(null)
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -83,16 +83,16 @@ function App() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-center">Japan Tax Calculator</h1>
+        <h1 className="text-3xl font-bold text-center">Japan Take-Home Pay Calculator</h1>
         <ThemeToggle />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <TaxInputForm inputs={inputs} onInputChange={handleInputChange} />
-        {results && <TaxResultsDisplay results={results} annualIncome={inputs.annualIncome} />}
+        <TakeHomeInputForm inputs={inputs} onInputChange={handleInputChange} />
+        {results && <TakeHomeResultsDisplay results={results} annualIncome={inputs.annualIncome} />}
       </div>
 
-      <TaxChart 
+      <TakeHomeChart 
         currentIncome={inputs.annualIncome}
         isEmploymentIncome={inputs.isEmploymentIncome}
         isOver40={inputs.isOver40}

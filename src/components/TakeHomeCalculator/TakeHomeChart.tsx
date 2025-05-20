@@ -11,7 +11,7 @@ interface TaxChartProps {
   isOver40: boolean
 }
 
-export const TaxChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentIncome, isOver40 }) => {
+export const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentIncome, isOver40 }) => {
   const [chartRange, setChartRange] = useState<ChartRange>({
     min: 0,
     max: 10000000 // 10 million yen
@@ -43,7 +43,7 @@ export const TaxChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentI
 
   return (
     <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Tax Breakdown Across Income Levels</h2>
+      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Across Income Levels</h2>
       
       <div className="h-80">
         <Chart 
