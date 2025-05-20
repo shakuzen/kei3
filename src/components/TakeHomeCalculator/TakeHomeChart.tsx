@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Chart } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
-  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -13,14 +12,13 @@ import {
   BarController,
   LineController
 } from 'chart.js'
-import { Slider } from '@mui/material'
+import Slider from '@mui/material/Slider'
 import type { ChartRange } from '../../types/tax'
 import { formatJPY } from '../../utils/formatters'
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig'
 
-// Register Chart.js components
+// Register only the Chart.js components we need
 ChartJS.register(
-  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -39,7 +37,7 @@ interface TaxChartProps {
   isOver40: boolean
 }
 
-export const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentIncome, isOver40 }) => {
+const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentIncome, isOver40 }) => {
   const [chartRange, setChartRange] = useState<ChartRange>({
     min: 0,
     max: 10000000 // 10 million yen
@@ -143,4 +141,6 @@ export const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploy
       </div>
     </div>
   )
-} 
+}
+
+export default TakeHomeChart 

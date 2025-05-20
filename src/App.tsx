@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import ThemeToggle from './components/ThemeToggle'
 import { TakeHomeInputForm } from './components/TakeHomeCalculator/InputForm'
-import { TakeHomeResultsDisplay } from './components/TakeHomeCalculator/TakeHomeResults'
-import { TakeHomeChart } from './components/TakeHomeCalculator/TakeHomeChart'
 import type { TakeHomeInputs, TakeHomeResults } from './types/tax'
 import { calculateTaxes } from './utils/taxCalculations'
+
+// Lazy load components that aren't immediately needed
+const TakeHomeResultsDisplay = lazy(() => import('./components/TakeHomeCalculator/TakeHomeResults'))
+const TakeHomeChart = lazy(() => import('./components/TakeHomeCalculator/TakeHomeChart'))
 
 function App() {
   // Default values for the form
@@ -64,16 +66,22 @@ function App() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <TakeHomeInputForm inputs={inputs} onInputChange={handleInputChange} />
-        {results && <TakeHomeResultsDisplay results={results} annualIncome={inputs.annualIncome} />}
+        {results && (
+          <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg"></div>}>
+            <TakeHomeResultsDisplay results={results} annualIncome={inputs.annualIncome} />
+          </Suspense>
+        )}
       </div>
 
-      <TakeHomeChart 
-        currentIncome={inputs.annualIncome}
-        isEmploymentIncome={inputs.isEmploymentIncome}
-        isOver40={inputs.isOver40}
-      />
+      <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg mt-8"></div>}>
+        <TakeHomeChart 
+          currentIncome={inputs.annualIncome}
+          isEmploymentIncome={inputs.isEmploymentIncome}
+          isOver40={inputs.isOver40}
+        />
+      </Suspense>
 
-      <footer className="mt-12 text-center text-gray-500 dark:text-gray-400 text-sm">
+      <footer className="mt-12 mb-8 text-center text-gray-500 dark:text-gray-400 text-sm h-16">
         <p>This calculator provides estimates only. Tax rules and rates may change.</p>
         <p className="mt-1">Consult with a tax professional for accurate advice.</p>
       </footer>

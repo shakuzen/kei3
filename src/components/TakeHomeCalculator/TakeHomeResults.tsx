@@ -7,7 +7,7 @@ interface TaxResultsProps {
   annualIncome: number
 }
 
-export const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome }) => {
+const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Results</h2>
@@ -51,4 +51,6 @@ export const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, ann
       </div>
     </div>
   )
-} 
+}
+
+export default TakeHomeResultsDisplay 
