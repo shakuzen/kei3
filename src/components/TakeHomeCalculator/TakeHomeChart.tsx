@@ -45,6 +45,7 @@ export const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploy
     max: 10000000 // 10 million yen
   })
   const [chartInstance, setChartInstance] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Listen for theme changes
   useEffect(() => {
@@ -73,12 +74,29 @@ export const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploy
     <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Across Income Levels</h2>
       
-      <div className="h-80">
+      <div className="relative h-80 w-full" style={{ minHeight: '320px' }}>
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+            <div className="animate-pulse text-gray-400">Loading chart...</div>
+          </div>
+        )}
         <Chart 
           type="bar"
           data={chartData}
-          options={getChartOptions(chartRange, currentIncome)}
-          ref={(ref) => setChartInstance(ref)}
+          options={{
+            ...getChartOptions(chartRange, currentIncome),
+            maintainAspectRatio: false,
+            responsive: true,
+            animation: {
+              duration: 0 // Disable animations to prevent layout shifts
+            }
+          }}
+          ref={(ref) => {
+            setChartInstance(ref);
+            if (ref) {
+              setIsLoading(false);
+            }
+          }}
         />
       </div>
 
