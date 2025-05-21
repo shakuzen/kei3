@@ -42,7 +42,7 @@ const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentInc
     min: 0,
     max: 10000000 // 10 million yen
   })
-  const [chartInstance, setChartInstance] = useState<any>(null)
+  const [chartInstance, setChartInstance] = useState<ChartJS<'bar' | 'line'> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Listen for theme changes
@@ -90,7 +90,7 @@ const TakeHomeChart: React.FC<TaxChartProps> = ({ currentIncome, isEmploymentInc
             }
           }}
           ref={(ref) => {
-            setChartInstance(ref);
+            setChartInstance(ref as ChartJS<'bar' | 'line'> | null);
             if (ref) {
               setIsLoading(false);
             }

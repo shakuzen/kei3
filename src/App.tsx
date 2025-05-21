@@ -26,16 +26,24 @@ function App() {
   // State for calculation results
   const [results, setResults] = useState<TakeHomeResults | null>(null)
 
+  // Calculate taxes when inputs change
+  useEffect(() => {
+    const results = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40)
+    setResults(results)
+  }, [inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40])
+
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement
+    const { name, value, type } = e.target
+    const isCheckbox = type === 'checkbox'
+    const isNumber = type === 'number' || type === 'range'
 
     setInputs(prev => {
       const newInputs = {
         ...prev,
-        [name]: type === 'checkbox' 
+        [name]: isCheckbox 
           ? (e.target as HTMLInputElement).checked 
-          : type === 'number' || type === 'range'
+          : isNumber
             ? parseFloat(value) || 0 
             : value
       }
@@ -50,12 +58,6 @@ function App() {
       return newInputs
     })
   }
-
-  // Calculate taxes when inputs change
-  useEffect(() => {
-    const results = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40)
-    setResults(results)
-  }, [inputs])
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">

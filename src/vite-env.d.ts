@@ -1,10 +1,11 @@
 /// <reference types="vite/client" />
 
 // Extend Chart.js types to include our custom plugin
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ChartType } from 'chart.js';
 
 declare module 'chart.js' {
-  interface PluginOptionsByType<TType extends ChartType> {
+  interface PluginOptionsByType {
     customPlugin?: {
       id?: string;
       data?: {

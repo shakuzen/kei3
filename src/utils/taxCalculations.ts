@@ -167,10 +167,10 @@ export const calculateResidenceTax = (
     netIncome: number,
     socialInsuranceDeduction: number
 ): number => {
-    let residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
-    let taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000;
-    let cityTax = Math.floor(taxableIncome * 0.06 / 100) * 100;
-    let prefecturalTax = Math.floor(taxableIncome * 0.04 / 100) * 100;
+    const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
+    const taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000;
+    const cityTax = Math.floor(taxableIncome * 0.06 / 100) * 100;
+    const prefecturalTax = Math.floor(taxableIncome * 0.04 / 100) * 100;
     return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
 }
 
@@ -186,26 +186,26 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
             takeHomeIncome: 0
         }
     }
-    let netIncome = isEmploymentIncome ? income - getEmploymentIncomeDeduction(income) : income;
+    const netIncome = isEmploymentIncome ? income - getEmploymentIncomeDeduction(income) : income;
 
     // Health insurance (simplified)
     // Include nursing care insurance for those over 40
-    let healthInsurance = calculateHealthInsurance(income, isOver40);
+    const healthInsurance = calculateHealthInsurance(income, isOver40);
 
-    let pensionPayments = calculatePensionPayments(income, isEmploymentIncome);
+    const pensionPayments = calculatePensionPayments(income, isEmploymentIncome);
 
-    let employmentInsurance = calculateEmploymentInsurance(income, isEmploymentIncome);
+    const employmentInsurance = calculateEmploymentInsurance(income, isEmploymentIncome);
 
-    let socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
+    const socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
 
-    let nationalIncomeTaxBasicDeduction = calculateNationalIncomeTaxBasicDeduction(netIncome);
+    const nationalIncomeTaxBasicDeduction = calculateNationalIncomeTaxBasicDeduction(netIncome);
 
     // Round down taxable income to the nearest thousand yen
-    let taxableIncomeForNationalIncomeTax = Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000;
+    const taxableIncomeForNationalIncomeTax = Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000;
 
-    let nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
+    const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
 
-    let residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
+    const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
     // Calculate totals
     const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance

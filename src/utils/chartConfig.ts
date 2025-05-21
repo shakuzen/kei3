@@ -1,12 +1,12 @@
 import type { ChartRange } from '../types/tax'
 import { formatJPY } from './formatters'
 import { calculateTaxes } from './taxCalculations'
-import type { ChartData, ChartOptions } from 'chart.js'
+import type { ChartData, ChartOptions, Chart, TooltipItem, Scale, CoreScaleOptions, Plugin } from 'chart.js'
 
 // Create custom plugin for vertical lines
-export const currentAndMedianIncomeChartPlugin = {
+export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
   id: 'currentAndMedianIncomeChartPlugin',
-  beforeDraw: (chart: any) => {
+  beforeDraw: (chart: Chart) => {
     if (!chart.data.datasets || !chart.data.datasets.length) return;
 
     const { ctx, chartArea } = chart;
@@ -42,7 +42,7 @@ export const currentAndMedianIncomeChartPlugin = {
       ctx.fillRect(yourIncomeX - 60, top + 5, 120, 40);
       ctx.fillStyle = 'rgba(255, 99, 132, 1)';
       ctx.fillText('Your Income', yourIncomeX, top + 20);
-      ctx.fillText(formatJPY(chartData.currentIncome), yourIncomeX, top + 35);
+      ctx.fillText(formatJPY(chartData.currentIncome || 0), yourIncomeX, top + 35);
       ctx.restore();
     }
 
@@ -62,7 +62,7 @@ export const currentAndMedianIncomeChartPlugin = {
       ctx.fillRect(medianIncomeX - 60, top + 5, 120, 40);
       ctx.fillStyle = 'rgba(255, 206, 86, 1)';
       ctx.fillText('Median Income', medianIncomeX, top + 20);
-      ctx.fillText(formatJPY(chartData.medianIncome), medianIncomeX, top + 35);
+      ctx.fillText(formatJPY(chartData.medianIncome || 0), medianIncomeX, top + 35);
       ctx.restore();
     }
   }
@@ -195,11 +195,11 @@ export const getChartOptions = (chartRange: ChartRange, currentIncome: number): 
         mode: 'index' as const,
         intersect: false,
         callbacks: {
-          title: function(context: any) {
+          title: function(context: TooltipItem<'bar' | 'line'>[]) {
             const income = context[0].parsed.x;
             return `Income: ${formatJPY(income)}`;
           },
-          label: function(context: any) {
+          label: function(context: TooltipItem<'bar' | 'line'>) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -232,7 +232,8 @@ export const getChartOptions = (chartRange: ChartRange, currentIncome: number): 
         },
         ticks: {
           align: 'center',
-          callback: function(value: any) {
+          callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
+            const value = Number(tickValue);
             return `¥${(value / 10000).toFixed(0)}万`;
           }
         },
@@ -245,7 +246,8 @@ export const getChartOptions = (chartRange: ChartRange, currentIncome: number): 
         display: true,
         position: 'left' as const,
         ticks: {
-          callback: function(value: any) {
+          callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
+            const value = Number(tickValue);
             return formatJPY(value);
           }
         }
@@ -254,16 +256,15 @@ export const getChartOptions = (chartRange: ChartRange, currentIncome: number): 
         type: 'linear' as const,
         display: true,
         position: 'right' as const,
-        min: 0,
-        max: 100,
-        ticks: {
-          callback: function(value: any) {
-            return value + '%';
-          }
-        },
         grid: {
           drawOnChartArea: false,
         },
+        ticks: {
+          callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
+            const value = Number(tickValue);
+            return value.toFixed(1) + '%';
+          }
+        }
       }
     },
     elements: {
