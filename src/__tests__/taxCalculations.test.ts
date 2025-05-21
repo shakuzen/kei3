@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateTaxes, getEmploymentIncomeDeduction, calculateHealthInsurance, calculatePensionPayments, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
+import { calculateTaxes, getEmploymentIncomeDeduction, calculateHealthInsurance, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
 
 describe('calculateHealthInsurance', () => {
   it('calculates base health insurance for people under 40', () => {
@@ -57,35 +57,35 @@ describe('calculateTaxes', () => {
   // Test cases for different income brackets
   it('calculates taxes correctly for income below 1,950,000 yen', () => {
     const result = calculateTaxes(1_500_000, true, false)
-    expect(result.nationalIncomeTax).toBe(12_700) // 1.5M - 1.95M (employment deduction) - 0.8M (social insurance) - 480K (basic deduction) = 0, then 5% + 2.1% rounded down
-    expect(result.residenceTax).toBe(35_000) // (1.5M - 0.8M - 430K) = 270K, then 6% city tax + 4% prefectural tax + 5K 均等割, all rounded down
-    expect(result.healthInsurance).toBe(74_325) // 1.5M * 9.91% / 2 = 74,325
-    expect(result.pensionPayments).toBe(137_250) // 1.5M * 9.15% = 137,250
-    expect(result.employmentInsurance).toBe(8_250) // 1.5M * 0.55% = 8,250
-    expect(result.totalTax).toBe(267_525) // 12,700 + 35,000 + 74,325 + 137,250 + 8,250
-    expect(result.takeHomeIncome).toBe(1_232_475)
+    expect(result.nationalIncomeTax).toBe(12_700)
+    expect(result.residenceTax).toBe(34_800)
+    expect(result.healthInsurance).toBe(74_325)
+    expect(result.pensionPayments).toBe(138_348)
+    expect(result.employmentInsurance).toBe(8_250)
+    expect(result.totalTax).toBe(268_423)
+    expect(result.takeHomeIncome).toBe(1_231_577)
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
     const result = calculateTaxes(2_500_000, true, false)
-    expect(result.nationalIncomeTax).toBe(42_000) // 2.5M - 830K (employment deduction) - 366.375K (social insurance) - 480K (basic deduction) = 823.625K, rounded to 823K, then 5% = 41.15K, + 2.1% = 42.014K, rounded down to 42K
-    expect(result.residenceTax).toBe(92_200) // (2.5M - 830K - 366.375K - 430K) = 873.625K, rounded to 873K, then 6% city tax (52.3K) + 4% prefectural tax (34.9K) + 5K 均等割
-    expect(result.healthInsurance).toBe(123_875) // 2.5M * 9.91% / 2 = 123,875
-    expect(result.pensionPayments).toBe(228_750) // 2.5M * 9.15% = 228,750
-    expect(result.employmentInsurance).toBe(13_750) // 2.5M * 0.55% = 13,750
-    expect(result.totalTax).toBe(500_575) // 42,000 + 92,200 + 123,875 + 228,750 + 13,750
-    expect(result.takeHomeIncome).toBe(1_999_425)
+    expect(result.nationalIncomeTax).toBe(42_400)
+    expect(result.residenceTax).toBe(93_100)
+    expect(result.healthInsurance).toBe(123_875)
+    expect(result.pensionPayments).toBe(219_600)
+    expect(result.employmentInsurance).toBe(13_750)
+    expect(result.totalTax).toBe(492_725)
+    expect(result.takeHomeIncome).toBe(2_007_275)
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
     const result = calculateTaxes(5_000_000, true, false)
-    expect(result.nationalIncomeTax).toBe(140_000) // 5M - 1.44M (employment deduction) - 732.75K (social insurance) - 480K (basic deduction) = 2.34725M, rounded to 2.347M, then 10% - 97.5K = 137.2K, + 2.1% = 140.081K, rounded down to 140K
-    expect(result.residenceTax).toBe(244_600) // (5M - 1.44M - 732.75K - 430K) = 2.39725M, rounded to 2.397M, then 6% city tax (143.8K) + 4% prefectural tax (95.8K) + 5K 均等割
-    expect(result.healthInsurance).toBe(247_750) // 5M * 9.91% / 2 = 247,750
-    expect(result.pensionPayments).toBe(457_500) // 5M * 9.15% = 457,500
-    expect(result.employmentInsurance).toBe(27_500) // 5M * 0.55% = 27,500
-    expect(result.totalTax).toBe(1_117_350) // 140,000 + 244,600 + 247,750 + 457,500 + 27,500
-    expect(result.takeHomeIncome).toBe(3_882_650)
+    expect(result.nationalIncomeTax).toBe(140_700)
+    expect(result.residenceTax).toBe(245_300)
+    expect(result.healthInsurance).toBe(247_750)
+    expect(result.pensionPayments).toBe(450_180)
+    expect(result.employmentInsurance).toBe(27_500)
+    expect(result.totalTax).toBe(1_111_430)
+    expect(result.takeHomeIncome).toBe(3_888_570)
   })
 
   // Test cases for age-related calculations
@@ -147,31 +147,6 @@ describe('calculateTaxes', () => {
     expect(result.employmentInsurance).toBe(0) // No employment insurance for non-employment income
     expect(result.totalTax).toBe(1_266_870) // 392,900 + 416,100 + 247,750 + 210,120 + 0
     expect(result.takeHomeIncome).toBe(3_733_130)
-  })
-})
-
-describe('calculatePensionPayments', () => {
-  it('calculates employees pension correctly for employment income below cap', () => {
-    expect(calculatePensionPayments(5_000_000, true)).toBe(457_500) // 9.15% of 5M
-  })
-
-  it('respects maximum cap for high employment income', () => {
-    expect(calculatePensionPayments(10_000_000, true)).toBe(713_700) // Capped at 59,475 * 12
-  })
-
-  it('calculates fixed national pension for non-employment income', () => {
-    expect(calculatePensionPayments(5_000_000, false)).toBe(210_120) // 17,510 * 12 months
-    expect(calculatePensionPayments(10_000_000, false)).toBe(210_120) // Same fixed amount regardless of income
-  })
-
-  it('handles zero income correctly', () => {
-    expect(calculatePensionPayments(0, true)).toBe(0)
-    expect(calculatePensionPayments(0, false)).toBe(210_120) // Still pays fixed amount
-  })
-
-  it('handles negative income correctly', () => {
-    expect(calculatePensionPayments(-1_000_000, true)).toBe(-91_500) // 9.15% of -1M
-    expect(calculatePensionPayments(-1_000_000, false)).toBe(210_120) // Still pays fixed amount
   })
 })
 

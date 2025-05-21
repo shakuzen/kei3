@@ -1,4 +1,5 @@
 import type { TakeHomeResults } from '../types/tax'
+import { calculatePensionPremium } from './pensionCalculator';
 
 /**
  * Calculates health insurance premiums for the insured person based on income and age
@@ -21,28 +22,6 @@ export const calculateHealthInsurance = (income: number, isOver40: boolean): num
     const annualCap = Math.round(monthlyCap * 12);
 
     return Math.round(Math.min(income * totalRate, annualCap));
-}
-
-/**
- * Calculates pension payments based on income and employment status
- * Source: Japan Pension Service rates
- * For employment income: 9.15% of income (employees' pension) with monthly cap of 59,475 yen
- * https://www.nenkin.go.jp/service/kounen/hokenryo/ryogaku/ryogakuhyo/20200825.html
- * For non-employment income: Fixed annual national pension contribution (17,510 yen per month for 2025)
- * https://www.nenkin.go.jp/service/kokunen/hokenryo/hokenryo.html#cms01
- */
-export const calculatePensionPayments = (income: number, isEmploymentIncome: boolean): number => {
-    if (isEmploymentIncome) {
-        // Employees' pension (厚生年金) - 9.15% of income with cap
-        const baseRate = 0.0915;
-        const monthlyCap = 59475;
-        const annualCap = monthlyCap * 12;
-        return Math.min(income * baseRate, annualCap);
-    } else {
-        // National pension (国民年金) - fixed monthly contribution
-        const monthlyContribution = 17510;
-        return monthlyContribution * 12; // Annual contribution
-    }
 }
 
 /**
@@ -174,8 +153,8 @@ export const calculateResidenceTax = (
     return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
 }
 
-export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOver40: boolean): TakeHomeResults => {
-    if (income <= 0) {
+export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean, isOver40: boolean): TakeHomeResults => {
+    if (annualIncome <= 0) {
         return {
             nationalIncomeTax: 0,
             residenceTax: 0,
@@ -186,15 +165,15 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
             takeHomeIncome: 0
         }
     }
-    const netIncome = isEmploymentIncome ? income - getEmploymentIncomeDeduction(income) : income;
+    const netIncome = isEmploymentIncome ? annualIncome - getEmploymentIncomeDeduction(annualIncome) : annualIncome;
 
     // Health insurance (simplified)
     // Include nursing care insurance for those over 40
-    const healthInsurance = calculateHealthInsurance(income, isOver40);
+    const healthInsurance = calculateHealthInsurance(annualIncome, isOver40);
 
-    const pensionPayments = calculatePensionPayments(income, isEmploymentIncome);
+    const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
-    const employmentInsurance = calculateEmploymentInsurance(income, isEmploymentIncome);
+    const employmentInsurance = calculateEmploymentInsurance(annualIncome, isEmploymentIncome);
 
     const socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
 
@@ -209,7 +188,7 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
 
     // Calculate totals
     const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance
-    const takeHomeIncome = income - totalTax
+    const takeHomeIncome = annualIncome - totalTax
 
     return {
         nationalIncomeTax,
