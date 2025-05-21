@@ -41,11 +41,11 @@ const EMPLOYEES_PENSION_PREMIUM: IncomeBracketToPensionPremium[] = [
 ];
 
 /**
- * Calculates the insurance premium based on monthly income
+ * Calculates the annual insurance premium based on monthly income
  * @param monthlyIncome - Monthly income in JPY
  * @param isEmployee - Whether the income is from employment (厚生年金)
  * @param isHalfAmount - Whether to return the half amount (折半額) instead of full amount (全額)
- * @returns The calculated insurance premium amount
+ * @returns The calculated annual insurance premium amount
  * @see https://www.nenkin.go.jp/service/kounen/hokenryo/ryogaku/ryogakuhyo/20200825.html
  * @see https://www.nenkin.go.jp/service/kokunen/hokenryo/hokenryo.html#cms01
  */

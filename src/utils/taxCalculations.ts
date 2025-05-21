@@ -1,28 +1,6 @@
 import type { TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
-
-/**
- * Calculates health insurance premiums for the insured person based on income and age
- * Includes nursing care insurance for those over 40
- * Source: Kyokai Kenpo Tokyo https://www.kyoukaikenpo.or.jp/g7/cat330/sb3150/r07/r7ryougakuhyou3gatukara/
- */
-export const calculateHealthInsurance = (income: number, isOver40: boolean): number => {
-    // Base health insurance rate (9.91% of income)
-    const baseRate = 0.0991;
-
-    // Nursing care insurance rate (1.59% of income) for those over 40
-    const nursingCareRate = isOver40 ? 0.0159 : 0;
-
-    // Total rate (employee pays 50%)
-    const totalRate = (baseRate + nursingCareRate) / 2;
-
-    // Calculate premium with maximum cap
-    // Maximum monthly premium is 79,925 yen for over 40, 68,874.5 yen for under 40
-    const monthlyCap = isOver40 ? 79925 : 68874.5;
-    const annualCap = Math.round(monthlyCap * 12);
-
-    return Math.round(Math.min(income * totalRate, annualCap));
-}
+import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
 
 /**
  * Calculates the employment income deduction based on the 2025 tax rules
@@ -169,7 +147,7 @@ export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean
 
     // Health insurance (simplified)
     // Include nursing care insurance for those over 40
-    const healthInsurance = calculateHealthInsurance(annualIncome, isOver40);
+    const healthInsurance = calculateHealthInsurancePremium(annualIncome / 12, isOver40);
 
     const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
