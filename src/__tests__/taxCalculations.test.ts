@@ -61,8 +61,9 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(35_000) // (1.5M - 0.8M - 430K) = 270K, then 6% city tax + 4% prefectural tax + 5K 均等割, all rounded down
     expect(result.healthInsurance).toBe(74_325) // 1.5M * 9.91% / 2 = 74,325
     expect(result.pensionPayments).toBe(137_250) // 1.5M * 9.15% = 137,250
-    expect(result.totalTax).toBe(259_275)
-    expect(result.takeHomeIncome).toBe(1_240_725)
+    expect(result.employmentInsurance).toBe(8_250) // 1.5M * 0.55% = 8,250
+    expect(result.totalTax).toBe(267_525) // 12,700 + 35,000 + 74,325 + 137,250 + 8,250
+    expect(result.takeHomeIncome).toBe(1_232_475)
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
@@ -71,8 +72,9 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(92_200) // (2.5M - 830K - 366.375K - 430K) = 873.625K, rounded to 873K, then 6% city tax (52.3K) + 4% prefectural tax (34.9K) + 5K 均等割
     expect(result.healthInsurance).toBe(123_875) // 2.5M * 9.91% / 2 = 123,875
     expect(result.pensionPayments).toBe(228_750) // 2.5M * 9.15% = 228,750
-    expect(result.totalTax).toBe(486_825)
-    expect(result.takeHomeIncome).toBe(2_013_175)
+    expect(result.employmentInsurance).toBe(13_750) // 2.5M * 0.55% = 13,750
+    expect(result.totalTax).toBe(500_575) // 42,000 + 92,200 + 123,875 + 228,750 + 13,750
+    expect(result.takeHomeIncome).toBe(1_999_425)
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
@@ -81,14 +83,16 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(244_600) // (5M - 1.44M - 732.75K - 430K) = 2.39725M, rounded to 2.397M, then 6% city tax (143.8K) + 4% prefectural tax (95.8K) + 5K 均等割
     expect(result.healthInsurance).toBe(247_750) // 5M * 9.91% / 2 = 247,750
     expect(result.pensionPayments).toBe(457_500) // 5M * 9.15% = 457,500
-    expect(result.totalTax).toBe(1_089_850)
-    expect(result.takeHomeIncome).toBe(3_910_150)
+    expect(result.employmentInsurance).toBe(27_500) // 5M * 0.55% = 27,500
+    expect(result.totalTax).toBe(1_117_350) // 140,000 + 244,600 + 247,750 + 457,500 + 27,500
+    expect(result.takeHomeIncome).toBe(3_882_650)
   })
 
   // Test cases for age-related calculations
   it('calculates higher health insurance for people over 40', () => {
     const result = calculateTaxes(5_000_000, true, true)
     expect(result.healthInsurance).toBe(287_500) // 5M * (9.91% + 1.59%) / 2 = 287,500
+    expect(result.employmentInsurance).toBe(27_500) // 5M * 0.55% = 27,500
   })
 
   // Test cases for maximum caps
@@ -96,6 +100,7 @@ describe('calculateTaxes', () => {
     const result = calculateTaxes(20_000_000, true, false)
     expect(result.healthInsurance).toBe(826_494) // Capped at 68,874.5 * 12
     expect(result.pensionPayments).toBe(713_700) // Capped at 59,475 * 12
+    expect(result.employmentInsurance).toBe(110_000) // 20M * 0.55% = 110,000
   })
 
   // Test cases for high income brackets
@@ -105,8 +110,9 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(4_628_300) // (50M - 1.95M - 1.815194M - 0) = 46.234806M, rounded to 46.234M, then 6% city tax (2.774M) + 4% prefectural tax (1.8493M) + 5K 均等割
     expect(result.healthInsurance).toBe(826_494) // Capped at 68,874.5 * 12
     expect(result.pensionPayments).toBe(713_700) // Capped at 59,475 * 12
-    expect(result.totalTax).toBe(22_513_894)
-    expect(result.takeHomeIncome).toBe(27_486_106)
+    expect(result.employmentInsurance).toBe(275_000) // 50M * 0.55% = 275,000
+    expect(result.totalTax).toBe(22_788_894) // 16,345,400 + 4,628,300 + 826,494 + 713,700 + 275,000
+    expect(result.takeHomeIncome).toBe(27_211_106)
   })
 
   // Test edge cases
@@ -116,6 +122,7 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
+    expect(result.employmentInsurance).toBe(0)
     expect(result.totalTax).toBe(0)
     expect(result.takeHomeIncome).toBe(0)
   })
@@ -126,6 +133,7 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
+    expect(result.employmentInsurance).toBe(0)
     expect(result.totalTax).toBe(0)
     expect(result.takeHomeIncome).toBe(0)
   })
@@ -136,7 +144,8 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(416_100) // (5M - 457.87K - 430K) = 4.11213M, rounded to 4.112M, then 6% city tax (246.7K) + 4% prefectural tax (164.4K) + 5K 均等割
     expect(result.healthInsurance).toBe(247_750) // 5M * 9.91% / 2 = 247,750
     expect(result.pensionPayments).toBe(210_120) // Fixed national pension (17,510 * 12)
-    expect(result.totalTax).toBe(1_266_870)
+    expect(result.employmentInsurance).toBe(0) // No employment insurance for non-employment income
+    expect(result.totalTax).toBe(1_266_870) // 392,900 + 416,100 + 247,750 + 210,120 + 0
     expect(result.takeHomeIncome).toBe(3_733_130)
   })
 })
