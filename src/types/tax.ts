@@ -13,6 +13,7 @@ export interface TakeHomeResults {
   residenceTax: number
   healthInsurance: number
   pensionPayments: number
+  employmentInsurance: number
   totalTax: number
   takeHomeIncome: number
 }

@@ -5,9 +5,10 @@ import { formatJPY } from '../../utils/formatters'
 interface TaxResultsProps {
   results: TaxResultsType
   annualIncome: number
+  isEmploymentIncome: boolean
 }
 
-const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome }) => {
+const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome, isEmploymentIncome }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Results</h2>
@@ -30,6 +31,12 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
             <p className="text-sm text-gray-500 dark:text-gray-400">Pension Payments</p>
             <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.pensionPayments)}</p>
           </div>
+          {isEmploymentIncome && (
+            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Employment Insurance</p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.employmentInsurance)}</p>
+            </div>
+          )}
         </div>
 
         <div className="border-t dark:border-gray-700 pt-4 mt-4">

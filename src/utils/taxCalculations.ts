@@ -181,6 +181,7 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
             residenceTax: 0,
             healthInsurance: 0,
             pensionPayments: 0,
+            employmentInsurance: 0,
             totalTax: 0,
             takeHomeIncome: 0
         }
@@ -207,7 +208,7 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
     let residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
     // Calculate totals
-    const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments
+    const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance
     const takeHomeIncome = income - totalTax
 
     return {
@@ -215,6 +216,7 @@ export const calculateTaxes = (income: number, isEmploymentIncome: boolean, isOv
         residenceTax,
         healthInsurance,
         pensionPayments,
+        employmentInsurance,
         totalTax,
         takeHomeIncome
     }

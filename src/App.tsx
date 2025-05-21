@@ -68,7 +68,11 @@ function App() {
         <TakeHomeInputForm inputs={inputs} onInputChange={handleInputChange} />
         {results && (
           <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg"></div>}>
-            <TakeHomeResultsDisplay results={results} annualIncome={inputs.annualIncome} />
+            <TakeHomeResultsDisplay 
+              results={results} 
+              annualIncome={inputs.annualIncome} 
+              isEmploymentIncome={inputs.isEmploymentIncome}
+            />
           </Suspense>
         )}
       </div>

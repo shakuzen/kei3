@@ -80,7 +80,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
   // Create datasets with proper alignment
   const datasets = [
     {
-      label: 'National Income Tax',
+      label: 'Income Tax',
       data: incomePoints.map(income => ({
         x: income,
         y: calculateTaxes(income, isEmploymentIncome, isOver40).nationalIncomeTax
@@ -116,7 +116,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       stack: 'stack0',
     },
     {
-      label: 'Pension Payments',
+      label: 'Pension',
       data: incomePoints.map(income => ({
         x: income,
         y: calculateTaxes(income, isEmploymentIncome, isOver40).pensionPayments
@@ -127,6 +127,18 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       type: 'bar' as const,
       stack: 'stack0',
     },
+    ...(isEmploymentIncome ? [{
+      label: 'Employment Insurance',
+      data: incomePoints.map(income => ({
+        x: income,
+        y: calculateTaxes(income, isEmploymentIncome, isOver40).employmentInsurance
+      })),
+      borderColor: 'rgb(255, 159, 64)',
+      backgroundColor: 'rgba(255, 159, 64, 0.5)',
+      yAxisID: 'y',
+      type: 'bar' as const,
+      stack: 'stack0',
+    }] : []),
     {
       label: 'Take-Home Pay',
       data: incomePoints.map(income => ({
@@ -140,7 +152,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       stack: 'stack0',
     },
     {
-      label: 'Take-Home Pay %',
+      label: 'Take-Home %',
       data: incomePoints.map(income => {
         const result = calculateTaxes(income, isEmploymentIncome, isOver40)
         return {

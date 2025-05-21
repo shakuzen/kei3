@@ -34,7 +34,6 @@ export default defineConfig({
     target: 'es2020'
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
-    exclude: ['react-dom/client']
+    include: ['react', 'react-dom', 'react-dom/client']
   }
 })
