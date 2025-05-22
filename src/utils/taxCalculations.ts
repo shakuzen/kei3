@@ -138,6 +138,9 @@ export const calculateResidenceTax = (
     netIncome: number,
     socialInsuranceDeduction: number
 ): number => {
+    if (netIncome <= 450_000) {
+        return 0; // 非課税制度
+    }
     const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
     const taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000;
     const cityTax = Math.floor(taxableIncome * 0.06 / 100) * 100;

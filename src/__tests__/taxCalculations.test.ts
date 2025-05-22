@@ -278,16 +278,26 @@ describe('calculateResidenceTax', () => {
     expect(calculateResidenceTax(26_000_000, 1_000_000)).toBe(2_505_000) // (26M - 1M - 0) * 0.1 + 5000
   })
 
-  it('returns minimum tax amount when deductions exceed income', () => {
+  it('returns minimum tax amount when deductions exceed net income', () => {
     // Example: 1M income, 2M social insurance
     expect(calculateResidenceTax(1_000_000, 2_000_000)).toBe(5_000) // Only 5000 yen 均等割 when taxable income is 0
   })
 
+  it('returns 0 yen when net income is 450,000 yen or less due to 非課税制度', () => {
+    expect(calculateResidenceTax(449_999, 0)).toBe(0)
+    expect(calculateResidenceTax(450_000, 0)).toBe(0)
+  })
+
+  it('returns 5000 yen 均等割 when taxable income is 0', () => {
+    expect(calculateResidenceTax(450_001, 20_001)).toBe(5_000)
+    expect(calculateResidenceTax(1_000_000, 600_000)).toBe(5_000)
+  })
+
   it('handles zero income correctly', () => {
-    expect(calculateResidenceTax(0, 0)).toBe(5_000) // Only 5000 yen 均等割 when taxable income is 0
+    expect(calculateResidenceTax(0, 0)).toBe(0)
   })
 
   it('handles negative income correctly', () => {
-    expect(calculateResidenceTax(-1_000_000, 0)).toBe(5_000) // Only 5000 yen 均等割 when taxable income is 0
+    expect(calculateResidenceTax(-1_000_000, 0)).toBe(0)
   })
 }) 
