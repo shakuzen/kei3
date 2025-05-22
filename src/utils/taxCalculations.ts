@@ -7,18 +7,16 @@ import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
  * Source: https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm
  */
 export const getEmploymentIncomeDeduction = (income: number): number => {
-    if (income <= 1625000) {
-        return 550000
-    } else if (income <= 1800000) {
-        return income * 0.4 - 100000
-    } else if (income <= 3600000) {
-        return income * 0.3 + 80000
-    } else if (income <= 6600000) {
-        return income * 0.2 + 440000
-    } else if (income <= 8500000) {
-        return income * 0.1 + 1100000
+    if (income <= 1_900_000) {
+        return 650_000 // 2025 Update
+    } else if (income <= 3_600_000) {
+        return income * 0.3 + 80_000
+    } else if (income <= 6_600_000) {
+        return income * 0.2 + 440_000
+    } else if (income <= 8_500_000) {
+        return income * 0.1 + 1_100_000
     } else {
-        return 1950000 // Maximum cap
+        return 1_950_000 // Maximum cap
     }
 }
 
@@ -43,16 +41,32 @@ export const calculateEmploymentInsurance = (income: number, isEmploymentIncome:
 /**
  * Calculates the basic deduction (基礎控除) for national income tax based on income
  * Source: National Tax Agency https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1199.htm
- * - 480,000 yen for income up to 24,000,000 yen
- * - Gradually decreases from 24,000,001 yen to 25,000,000 yen
- * - 0 yen for income above 25,000,000 yen
+ * 2025 Update: https://www.nta.go.jp/users/gensen/2025kiso/index.htm#a-01
+ * 
+ * 2025 Changes:
+ * - 1,320,000 yen or less: 950,000 yen (was 480,000 yen)
+ * - 1,320,001 - 3,360,000 yen: 880,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
+ * - 3,360,001 - 4,890,000 yen: 680,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
+ * - 4,890,001 - 6,550,000 yen: 630,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
+ * - 6,550,001 - 23,500,000 yen: 580,000 yen (was 480,000 yen)
+ * - Over 23,500,000 yen: no change
  */
 export const calculateNationalIncomeTaxBasicDeduction = (netIncome: number): number => {
-    if (netIncome <= 24000000) {
+    if (netIncome <= 1_320_000) {
+        return 950_000; // Up from 480,000 yen
+    } else if (netIncome <= 3_360_000) {
+        return 880_000; // Will be 580,000 from 2027 (currently 480,000 in 2024)
+    } else if (netIncome <= 4_890_000) {
+        return 680_000; // Will be 580,000 from 2027 (currently 480,000 in 2024)
+    } else if (netIncome <= 6_550_000) {
+        return 630_000; // Will be 580,000 from 2027 (currently 480,000 in 2024)
+    } else if (netIncome <= 23_500_000) {
+        return 580_000; // Up from 480,000 yen
+    } else if (netIncome <= 24000000) { // No change for income over 23.5M yen
         return 480000;
-    } else if (netIncome <= 24500000) {
+    } else if (netIncome <= 24500000) { // No change for income over 23.5M yen
         return 320000;
-    } else if (netIncome <= 25000000) {
+    } else if (netIncome <= 25000000) { // No change for income over 23.5M yen
         return 160000;
     } else {
         return 0;

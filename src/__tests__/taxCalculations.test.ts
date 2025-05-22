@@ -2,16 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { calculateTaxes, getEmploymentIncomeDeduction, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
 
 describe('getEmploymentIncomeDeduction', () => {
-  it('returns 550,000 yen for income up to 1,625,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(1_500_000)).toBe(550_000)
-    expect(getEmploymentIncomeDeduction(1_625_000)).toBe(550_000)
+  it('returns 650,000 yen for income up to 1,900,000 yen', () => {
+    expect(getEmploymentIncomeDeduction(1_500_000)).toBe(650_000)
+    expect(getEmploymentIncomeDeduction(1_900_000)).toBe(650_000)
   })
 
-  it('calculates deduction correctly for income between 1,625,001 and 1,800,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(1_700_000)).toBe(1_700_000 * 0.4 - 100_000)
-  })
-
-  it('calculates deduction correctly for income between 1,800,001 and 3,600,000 yen', () => {
+  it('calculates deduction correctly for income between 1,900,001 and 3,600,000 yen', () => {
     expect(getEmploymentIncomeDeduction(2_500_000)).toBe(2_500_000 * 0.3 + 80_000)
   })
 
@@ -33,35 +29,35 @@ describe('calculateTaxes', () => {
   // Test cases for different income brackets
   it('calculates taxes correctly for income below 1,950,000 yen', () => {
     const result = calculateTaxes(1_500_000, true, false)
-    expect(result.nationalIncomeTax).toBe(12_600)
-    expect(result.residenceTax).toBe(34_700)
+    expect(result.nationalIncomeTax).toBe(0)
+    expect(result.residenceTax).toBe(24_700)
     expect(result.healthInsurance).toBe(74_916)
     expect(result.pensionPayments).toBe(138_348)
     expect(result.employmentInsurance).toBe(8_250)
-    expect(result.totalTax).toBe(268_814)
-    expect(result.takeHomeIncome).toBe(1_231_186)
+    expect(result.totalTax).toBe(246_214)
+    expect(result.takeHomeIncome).toBe(1_253_786)
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
     const result = calculateTaxes(2_500_000, true, false)
-    expect(result.nationalIncomeTax).toBe(42_700)
+    expect(result.nationalIncomeTax).toBe(22_300)
     expect(result.residenceTax).toBe(93_600)
     expect(result.healthInsurance).toBe(118_920)
     expect(result.pensionPayments).toBe(219_600)
     expect(result.employmentInsurance).toBe(13_750)
-    expect(result.totalTax).toBe(488_570)
-    expect(result.takeHomeIncome).toBe(2_011_430)
+    expect(result.totalTax).toBe(468_170)
+    expect(result.takeHomeIncome).toBe(2_031_830)
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
     const result = calculateTaxes(5_000_000, true, false)
-    expect(result.nationalIncomeTax).toBe(141_200)
+    expect(result.nationalIncomeTax).toBe(120_700)
     expect(result.residenceTax).toBe(245_700)
     expect(result.healthInsurance).toBe(243_792)
     expect(result.pensionPayments).toBe(450_180)
     expect(result.employmentInsurance).toBe(27_500)
-    expect(result.totalTax).toBe(1_108_372)
-    expect(result.takeHomeIncome).toBe(3_891_628)
+    expect(result.totalTax).toBe(1_087_872)
+    expect(result.takeHomeIncome).toBe(3_912_128)
   })
 
   // Test cases for high income brackets
@@ -101,13 +97,13 @@ describe('calculateTaxes', () => {
 
   it('calculates taxes correctly for non-employment income', () => {
     const result = calculateTaxes(5_000_000, false, false)
-    expect(result.nationalIncomeTax).toBe(333_300)
+    expect(result.nationalIncomeTax).toBe(302_700)
     expect(result.residenceTax).toBe(387_000)
     expect(result.healthInsurance).toBe(539_380)
     expect(result.pensionPayments).toBe(210_120)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(1_469_800)
-    expect(result.takeHomeIncome).toBe(3_530_200)
+    expect(result.totalTax).toBe(1_439_200)
+    expect(result.takeHomeIncome).toBe(3_560_800)
   })
 })
 
@@ -134,9 +130,38 @@ describe('calculateEmploymentInsurance', () => {
 })
 
 describe('calculateNationalIncomeTaxBasicDeduction', () => {
-  it('returns 480,000 yen for income up to 24,000,000 yen', () => {
-    expect(calculateNationalIncomeTaxBasicDeduction(0)).toBe(480_000)
-    expect(calculateNationalIncomeTaxBasicDeduction(10_000_000)).toBe(480_000)
+  it('returns 950,000 yen for income up to 1,320,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(0)).toBe(950_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(1_000_000)).toBe(950_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(1_320_000)).toBe(950_000)
+  })
+
+  it('returns 880,000 yen for income between 1,320,001 and 3,360,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(1_320_001)).toBe(880_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(2_000_000)).toBe(880_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(3_360_000)).toBe(880_000)
+  })
+
+  it('returns 680,000 yen for income between 3,360,001 and 4,890,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(3_360_001)).toBe(680_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(4_000_000)).toBe(680_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(4_890_000)).toBe(680_000)
+  })
+
+  it('returns 630,000 yen for income between 4,890,001 and 6,550,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(4_890_001)).toBe(630_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(5_000_000)).toBe(630_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(6_550_000)).toBe(630_000)
+  })
+
+  it('returns 580,000 yen for income between 6,550,001 and 23,500,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(6_550_001)).toBe(580_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(10_000_000)).toBe(580_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(23_500_000)).toBe(580_000)
+  })
+
+  it('returns 480,000 yen for income between 23,500,001 and 24,000,000 yen', () => {
+    expect(calculateNationalIncomeTaxBasicDeduction(23_500_001)).toBe(480_000)
     expect(calculateNationalIncomeTaxBasicDeduction(24_000_000)).toBe(480_000)
   })
 
@@ -156,7 +181,7 @@ describe('calculateNationalIncomeTaxBasicDeduction', () => {
   })
 
   it('handles negative income correctly', () => {
-    expect(calculateNationalIncomeTaxBasicDeduction(-1_000_000)).toBe(480_000)
+    expect(calculateNationalIncomeTaxBasicDeduction(-1_000_000)).toBe(950_000)
   })
 })
 
