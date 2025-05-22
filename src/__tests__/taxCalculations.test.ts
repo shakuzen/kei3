@@ -101,13 +101,13 @@ describe('calculateTaxes', () => {
 
   it('calculates taxes correctly for non-employment income', () => {
     const result = calculateTaxes(5_000_000, false, false)
-    expect(result.nationalIncomeTax).toBe(393_700)
-    expect(result.residenceTax).toBe(416_500)
-    expect(result.healthInsurance).toBe(243_792)
+    expect(result.nationalIncomeTax).toBe(333_300)
+    expect(result.residenceTax).toBe(387_000)
+    expect(result.healthInsurance).toBe(539_380)
     expect(result.pensionPayments).toBe(210_120)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(1_264_112)
-    expect(result.takeHomeIncome).toBe(3_735_888)
+    expect(result.totalTax).toBe(1_469_800)
+    expect(result.takeHomeIncome).toBe(3_530_200)
   })
 })
 

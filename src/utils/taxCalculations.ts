@@ -145,9 +145,7 @@ export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean
     }
     const netIncome = isEmploymentIncome ? annualIncome - getEmploymentIncomeDeduction(annualIncome) : annualIncome;
 
-    // Health insurance (simplified)
-    // Include nursing care insurance for those over 40
-    const healthInsurance = calculateHealthInsurancePremium(annualIncome / 12, isOver40);
+    const healthInsurance = calculateHealthInsurancePremium(annualIncome, isOver40, isEmploymentIncome);
 
     const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
