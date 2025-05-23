@@ -33,9 +33,12 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(24_700)
     expect(result.healthInsurance).toBe(74_916)
     expect(result.pensionPayments).toBe(138_348)
-    expect(result.employmentInsurance).toBe(8_250)
-    expect(result.totalTax).toBe(246_214)
-    expect(result.takeHomeIncome).toBe(1_253_786)
+    // 1,500,000 / 12 = 125,000 per month
+    // 125,000 * 0.55% = 687.5 per month → 687 yen (exactly 0.5 yen → round down)
+    // 687 * 12 = 8,244 yen annually
+    expect(result.employmentInsurance).toBe(8_244)
+    expect(result.totalTax).toBe(246_208)
+    expect(result.takeHomeIncome).toBe(1_253_792)
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
@@ -44,9 +47,12 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(93_600)
     expect(result.healthInsurance).toBe(118_920)
     expect(result.pensionPayments).toBe(219_600)
-    expect(result.employmentInsurance).toBe(13_750)
-    expect(result.totalTax).toBe(468_170)
-    expect(result.takeHomeIncome).toBe(2_031_830)
+    // 2,500,000 / 12 ≈ 208,333.33 per month
+    // 208,333.33 * 0.55% ≈ 1,145.83 per month → 1,146 yen (round up)
+    // 1,146 * 12 = 13,752 yen annually
+    expect(result.employmentInsurance).toBe(13_752)
+    expect(result.totalTax).toBe(468_172)
+    expect(result.takeHomeIncome).toBe(2_031_828)
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
@@ -55,9 +61,12 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(245_700)
     expect(result.healthInsurance).toBe(243_792)
     expect(result.pensionPayments).toBe(450_180)
-    expect(result.employmentInsurance).toBe(27_500)
-    expect(result.totalTax).toBe(1_087_872)
-    expect(result.takeHomeIncome).toBe(3_912_128)
+    // 5,000,000 / 12 ≈ 416,666.67 per month
+    // 416,666.67 * 0.55% ≈ 2,291.67 per month → 2,292 yen (round up)
+    // 2,292 * 12 = 27,504 yen annually
+    expect(result.employmentInsurance).toBe(27_504)
+    expect(result.totalTax).toBe(1_087_876)
+    expect(result.takeHomeIncome).toBe(3_912_124)
   })
 
   // Test cases for high income brackets
@@ -67,9 +76,12 @@ describe('calculateTaxes', () => {
     expect(result.residenceTax).toBe(4_628_300) // (50M - 1.95M - 1.815194M - 0) = 46.234806M, rounded to 46.234M, then 6% city tax (2.774M) + 4% prefectural tax (1.8493M) + 5K 均等割
     expect(result.healthInsurance).toBe(826_500) // Capped at 68,874.5 * 12
     expect(result.pensionPayments).toBe(713_700) // Capped at 59,475 * 12
-    expect(result.employmentInsurance).toBe(275_000) // 50M * 0.55% = 275,000
-    expect(result.totalTax).toBe(22_788_900) // 16,345,400 + 4,628,300 + 826,494 + 713,700 + 275,000
-    expect(result.takeHomeIncome).toBe(27_211_100)
+    // 50,000,000 / 12 ≈ 4,166,666.67 per month
+    // 4,166,666.67 * 0.55% = 22,916.67 per month → 22,917 yen (round up)
+    // 22,917 * 12 = 275,004 yen annually
+    expect(result.employmentInsurance).toBe(275_004)
+    expect(result.totalTax).toBe(22_788_904) // 16,345,400 + 4,628,300 + 826,500 + 713,700 + 275,004
+    expect(result.takeHomeIncome).toBe(27_211_096)
   })
 
   // Test edge cases
@@ -108,24 +120,81 @@ describe('calculateTaxes', () => {
 })
 
 describe('calculateEmploymentInsurance', () => {
-  it('calculates employment insurance correctly for employment income', () => {
-    expect(calculateEmploymentInsurance(5_000_000, true)).toBe(27_500) // 0.55% of 5M
-    expect(calculateEmploymentInsurance(10_000_000, true)).toBe(55_000) // 0.55% of 10M
+  // Test cases with annual amounts that divide evenly by 12
+  it('calculates insurance for employment income with even monthly amounts', () => {
+    // 1,200,000 / 12 = 100,000 per month
+    // 100,000 * 0.55% = 550 yen per month
+    // 550 * 12 = 6,600 yen annually
+    expect(calculateEmploymentInsurance(1_200_000, true)).toBe(6_600)
+    
+    // 2,400,000 / 12 = 200,000 per month
+    // 200,000 * 0.55% = 1,100 yen per month
+    // 1,100 * 12 = 13,200 yen annually
+    expect(calculateEmploymentInsurance(2_400_000, true)).toBe(13_200)
   })
 
-  it('returns zero for non-employment income', () => {
+  // Test cases with non-even monthly amounts to verify rounding
+  it('applies correct rounding for monthly premiums', () => {
+    // 1,000,000 / 12 ≈ 83,333.33 per month
+    // 83,333.33 * 0.55% ≈ 458.33 per month
+    // Rounded to 458 yen per month (decimal .33 < .50 → round down)
+    // 458 * 12 = 5,496 yen annually
+    expect(calculateEmploymentInsurance(1_000_000, true)).toBe(5_496)
+    
+    // 1,100,000 / 12 ≈ 91,666.67 per month
+    // 91,666.67 * 0.55% ≈ 504.17 per month
+    // Rounded to 504 yen per month (decimal .17 < .50 → round down)
+    // 504 * 12 = 6,048 yen annually
+    expect(calculateEmploymentInsurance(1_100_000, true)).toBe(6_048)
+    
+    // 1,111,111 / 12 ≈ 92,592.58 per month
+    // 92,592.58 * 0.55% ≈ 509.26 per month
+    // Rounded to 509 yen per month (decimal .26 < .50 → round down)
+    // 509 * 12 = 6,108 yen annually
+    expect(calculateEmploymentInsurance(1_111_111, true)).toBe(6_108)
+    
+    // 1,200,001 / 12 = 100,000.083 per month
+    // 100,000.083 * 0.55% ≈ 550.00046 per month
+    // Rounded to 550 yen per month (decimal .00046 < .50 → round down)
+    // 550 * 12 = 6,600 yen annually
+    expect(calculateEmploymentInsurance(1_200_001, true)).toBe(6_600)
+    
+    // 1,999,999 / 12 ≈ 166,666.58 per month
+    // 166,666.58 * 0.55% ≈ 916.67 per month
+    // Rounded to 917 yen per month (decimal .67 > .50 → round up)
+    // 917 * 12 = 11,004 yen annually
+    expect(calculateEmploymentInsurance(1_999_999, true)).toBe(11_004)
+  })
+
+  // Test edge cases
+  it('returns 0 for non-employment income', () => {
     expect(calculateEmploymentInsurance(5_000_000, false)).toBe(0)
     expect(calculateEmploymentInsurance(10_000_000, false)).toBe(0)
   })
 
-  it('handles zero income correctly', () => {
+  it('returns 0 for zero income', () => {
     expect(calculateEmploymentInsurance(0, true)).toBe(0)
     expect(calculateEmploymentInsurance(0, false)).toBe(0)
   })
 
-  it('handles negative income correctly', () => {
+  it('returns 0 for negative income', () => {
     expect(calculateEmploymentInsurance(-1_000_000, true)).toBe(0)
     expect(calculateEmploymentInsurance(-1_000_000, false)).toBe(0)
+  })
+  
+  // Test with very small amounts to ensure rounding works correctly
+  it('handles very small amounts correctly', () => {
+    // 10,000 / 12 ≈ 833.33 per month
+    // 833.33 * 0.55% ≈ 4.58 per month
+    // Rounded to 5 yen per month (decimal .58 > .50 → round up)
+    // 5 * 12 = 60 yen annually
+    expect(calculateEmploymentInsurance(10_000, true)).toBe(60)
+    
+    // 9,090 / 12 = 757.5 per month
+    // 757.5 * 0.55% ≈ 4.17 per month
+    // Rounded to 4 yen per month (decimal .17 < .50 → round down)
+    // 4 * 12 = 48 yen annually
+    expect(calculateEmploymentInsurance(9_090, true)).toBe(48)
   })
 })
 

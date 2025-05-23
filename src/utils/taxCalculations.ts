@@ -25,17 +25,41 @@ export const getEmploymentIncomeDeduction = (income: number): number => {
  * Source: Ministry of Health, Labour and Welfare (MHLW) rates for 2025
  * https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html
  * Note: Only calculates employee portion (0.55% of income)
+ * 
+ * The premium is calculated monthly with special rounding rules:
+ * - 0.55% of monthly salary
+ * - Rounding: 
+ *   - If decimal is 0.50 yen or less → round down
+ *   - If decimal is 0.51 yen or more → round up
+ * - Annual total is the sum of 12 monthly premiums
  */
-export const calculateEmploymentInsurance = (income: number, isEmploymentIncome: boolean): number => {
+export const calculateEmploymentInsurance = (annualIncome: number, isEmploymentIncome: boolean): number => {
     // If not employment income, no employment insurance is required
-    if (!isEmploymentIncome) {
+    if (!isEmploymentIncome || annualIncome <= 0) {
         return 0;
     }
 
-    // Employee portion is 0.55% of income
-    const employeeRate = 0.0055;
+    const monthlySalary = annualIncome / 12;
+    const monthlyRate = 0.0055; // 0.55%
+    let annualPremium = 0;
 
-    return Math.max(Math.round(income * employeeRate), 0);
+
+    for (let i = 0; i < 12; i++) {
+        const monthlyPremium = monthlySalary * monthlyRate;
+        // Apply special rounding rules
+        const decimal = monthlyPremium - Math.floor(monthlyPremium);
+        let roundedPremium: number;
+        
+        if (decimal <= 0.5) {
+            roundedPremium = Math.floor(monthlyPremium);
+        } else {
+            roundedPremium = Math.ceil(monthlyPremium);
+        }
+        
+        annualPremium += roundedPremium;
+    }
+
+    return Math.max(annualPremium, 0);
 }
 
 /**
