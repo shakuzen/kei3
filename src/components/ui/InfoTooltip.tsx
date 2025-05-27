@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   IconButton, 
   Tooltip as MuiTooltip, 
-  Typography, 
   Box, 
   Dialog, 
   DialogTitle, 
@@ -91,7 +90,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
     <MuiTooltip 
       title={tooltipContent} 
       arrow
-      componentsProps={{
+      slotProps={{
         tooltip: {
           sx: {
             bgcolor: 'background.paper',

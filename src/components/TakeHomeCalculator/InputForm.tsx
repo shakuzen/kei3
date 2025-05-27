@@ -179,7 +179,6 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       <Typography variant="h5" component="h2" gutterBottom>
         Your Information
       </Typography>
-
       <Box className="form-group">
         {/* Combined Employment Income Switch and Annual Income TextField Section */}
         <Box sx={styles.formSection}>
@@ -236,32 +235,6 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               value={inputs.annualIncome}
               onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
               label="Annual Income"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Typography color="text.secondary">¥</Typography>
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <Typography variant="caption" color="text.secondary">
-                      JPY
-                    </Typography>
-                  </InputAdornment>
-                ),
-                inputProps: {
-                  min: 0,
-                  step: 10000,
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
-                  style: { textAlign: 'right' },
-                  'aria-label': 'Annual income in Japanese Yen',
-                  size: 10
-                }
-              }}
               helperText={inputs.annualIncome > 0 ? `¥${inputs.annualIncome.toLocaleString()}` : 'Enter your annual income'}
               sx={{
                 width: '100%', // TextField takes full width of its parent Box
@@ -272,7 +245,35 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                   mt: '0 !important'
                 }
               }}
-            />
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Typography color="text.secondary">¥</Typography>
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Typography variant="caption" color="text.secondary">
+                        JPY
+                      </Typography>
+                    </InputAdornment>
+                  ),
+                  inputProps: {
+                    min: 0,
+                    step: 10000,
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                    style: { textAlign: 'right' },
+                    'aria-label': 'Annual income in Japanese Yen',
+                    size: 10
+                  }
+                },
+
+                inputLabel: {
+                  shrink: true,
+                }
+              }} />
           </Box>
         </Box>
 
@@ -431,12 +432,14 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 }}
                 type="number"
                 fullWidth
-                InputLabelProps={{ shrink: true }}
-                inputProps={{
-                  min: 0,
-                  'aria-label': 'Number of dependents'
-                }}
-              />
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    'aria-label': 'Number of dependents'
+                  },
+
+                  inputLabel: { shrink: true }
+                }} />
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                 Dependent calculations will be implemented in a future update
               </Typography>
@@ -445,5 +448,5 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         </Accordion>
       </Box>
     </Box>
-  )
+  );
 } 
