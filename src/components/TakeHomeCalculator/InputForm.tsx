@@ -9,14 +9,13 @@ import {
   Slider, 
   InputAdornment, 
   Switch, 
-  Tooltip,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   useTheme
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { InfoTooltip } from '../ui/InfoTooltip';
 
 import type { TakeHomeInputs } from '../../types/tax';
 
@@ -49,19 +48,31 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       display: 'flex',
       flexDirection: { xs: 'column', sm: 'row' },
       gap: { xs: 2, sm: 3 },
-      alignItems: { sm: 'flex-start' },
-      mb: 3
+      alignItems: { xs: 'stretch', sm: 'flex-start' },
+      mb: 3,
+      width: '100%',
+      '& > *': {
+        flex: '1 1 auto',
+        minWidth: 0, // Prevent overflow
+      }
     },
     incomeTypeToggle: {
-      width: { xs: '100%', sm: 'auto' }
+      width: '100%',
+      maxWidth: { sm: '280px' },
+      '& > *': {
+        width: '100%',
+      }
     },
     incomeInput: {
       width: '100%',
       '& .MuiInputBase-root': {
-        fontSize: '1.1rem',
+        fontSize: { xs: '1rem', sm: '1.1rem' },
       },
       '& .MuiInputAdornment-positionStart': {
         mt: '0 !important'
+      },
+      '& .MuiInputBase-input': {
+        fontSize: { xs: '0.95rem', sm: '1rem' },
       }
     },
     ageToggle: {
@@ -174,39 +185,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         <Box sx={styles.formSection}>
           {/* Employment Income Switch Section */}
           <Box sx={styles.incomeTypeToggle}>
-            <Typography variant="subtitle2" className="form-label">
-              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
-                Income Type
-                <Tooltip 
-                  title="Select if your income is from employment or other sources (e.g., business, miscellaneous)"
-                  arrow
-                  placement="top"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        bgcolor: 'background.paper',
-                        color: 'text.primary',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        boxShadow: 1,
-                        '& .MuiTooltip-arrow': {
-                          color: 'background.paper',
-                          '&:before': {
-                            border: '1px solid',
-                            borderColor: 'divider',
-                          },
-                        },
-                      }
-                    }
-                  }}
-                >
-                  <HelpOutlineIcon 
-                    color="action" 
-                    fontSize="small" 
-                    sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 0.9 } }} 
-                  />
-                </Tooltip>
-              </Box>
+            <Typography variant="subtitle2" className="form-label" sx={{ display: 'flex', alignItems: 'center' }}>
+              Income Type
+              <InfoTooltip title="Select if your income is from employment or other sources (e.g., business, miscellaneous)" />
             </Typography>
             <Box sx={{ 
               display: 'flex', 
@@ -244,7 +225,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
           </Box>
 
           {/* Income Input Section */}
-          <Box sx={{ width: { xs: '100%', sm: '280px' } }}> {/* Define width for income section on larger screens */}
+          <Box sx={{ width: '100%', maxWidth: { sm: '400px' } }}> {/* Responsive width for income input */}
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               {inputs.isEmploymentIncome ? 'Gross Annual Employment Income' : 'Net Annual Income (Business income, etc.)'}
             </Typography>
@@ -318,37 +299,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
 
         {/* Age Section */}
         <Box sx={{ mt: 4, mb: 1, width: { xs: '100%', sm: 'auto' } }}> {/* Added mt: 4 for spacing */}
-          <Typography variant="subtitle2" sx={{ mb: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
             Age
-            <Tooltip 
-              title="Your obligation to pay nursing insurance premiums depends on your age."
-              arrow
-              placement="top"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    bgcolor: 'background.paper',
-                    color: 'text.primary',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    boxShadow: 1,
-                    '& .MuiTooltip-arrow': {
-                      color: 'background.paper',
-                      '&:before': {
-                        border: '1px solid',
-                        borderColor: 'divider',
-                      },
-                    },
-                  },
-                },
-              }}
-            >
-              <HelpOutlineIcon 
-                color="action" 
-                fontSize="small" 
-                sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 0.9 } }} 
-              />
-            </Tooltip>
+            <InfoTooltip title="Your obligation to pay nursing insurance premiums depends on your age." />
           </Typography>
           <Box sx={{ 
             display: 'flex', 
@@ -416,26 +369,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
           </AccordionSummary>
           <AccordionDetails>
             <FormControl fullWidth sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                 Prefecture
-                <Tooltip 
-                  title="Select your prefecture for local tax calculations"
-                  arrow
-                  placement="top"
-                  slotProps={{
-                    tooltip: {
-                      sx: {
-                        bgcolor: 'background.paper',
-                        color: 'text.primary',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        boxShadow: 1,
-                      }
-                    }
-                  }}
-                >
-                  <HelpOutlineIcon fontSize="small" sx={{ color: 'text.secondary', ml: 0.5 }} />
-                </Tooltip>
+                <InfoTooltip title="Select your prefecture for local tax calculations" />
               </Typography>
               <Select
                 id="prefecture"
@@ -454,8 +390,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
             </FormControl>
 
             <FormControl fullWidth sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                 Health Insurance Provider
+                <InfoTooltip title="Your health insurance provider affects your premium calculations" />
               </Typography>
               <Select
                 id="healthInsuranceProvider"

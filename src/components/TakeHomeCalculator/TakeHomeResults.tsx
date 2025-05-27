@@ -60,16 +60,19 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
         height: '100%',
       }}
     >
-      <Typography variant="h6" component="h2" gutterBottom>
+      <Typography variant="h6" component="h2" gutterBottom sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>
         Take-Home Pay Breakdown
       </Typography>
 
       <Box 
         sx={{ 
           display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
-          gap: 2, 
-          mb: 3 
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, 
+          gap: { xs: 1.5, sm: 2 },
+          mb: 3,
+          '& > *': {
+            minWidth: 0, // Prevent overflow
+          }
         }}
       >
         <StatBox 
@@ -98,7 +101,14 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
 
       <Divider sx={{ my: 2 }} />
 
-      <Box sx={{ '& > *:not(:last-child)': { mb: 1.5 } }}>
+      <Box sx={{ 
+        '& > *:not(:last-child)': { 
+          mb: { xs: 1.25, sm: 1.5 } 
+        },
+        '& .MuiTypography-body1, & .MuiTypography-body2': {
+          fontSize: { xs: '0.875rem', sm: '1rem' }
+        }
+      }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body1" color="text.secondary">
             Total Tax and Payments

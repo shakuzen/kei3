@@ -80,21 +80,29 @@ function App({ mode, toggleColorMode }: AppProps) {
     <Box sx={{
       maxWidth: 1536, // max-w-6xl equivalent
       mx: 'auto',
-      px: 4,
-      py: 8,
+      px: { xs: 2, sm: 3, md: 4 },
+      py: { xs: 4, sm: 6, md: 8 },
       minHeight: '100vh',
       bgcolor: 'background.default',
       color: 'text.primary',
+      overflowX: 'hidden',
     }}>
       <Box sx={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        mb: 8,
+        mb: { xs: 4, sm: 6, md: 8 },
         flexDirection: { xs: 'column', sm: 'row' },
-        gap: 2
+        gap: 2,
+        '& h1': {
+          fontSize: { xs: '1.75rem', sm: '2rem' },
+          lineHeight: 1.2
+        }
       }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', textAlign: { xs: 'center', sm: 'left' } }}>
+        <Typography variant="h4" component="h1" sx={{ 
+          fontWeight: 'bold', 
+          textAlign: { xs: 'center', sm: 'left' },
+        }}>
           Japan Take-Home Pay Calculator
         </Typography>
         <ThemeToggle mode={mode} toggleColorMode={toggleColorMode} />
@@ -102,9 +110,12 @@ function App({ mode, toggleColorMode }: AppProps) {
 
       <Box sx={{
         display: 'grid',
-        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-        gap: 4,
-        width: '100%'
+        gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+        gap: { xs: 3, md: 4 },
+        width: '100%',
+        '& > *': {
+          minWidth: 0, // Prevent overflow issues
+        }
       }}>
         <TakeHomeInputForm inputs={inputs} onInputChange={handleInputChange} />
         {results && (
