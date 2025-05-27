@@ -1,51 +1,424 @@
-@import "tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
+/* Base Styles */
+:root {
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+}
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: light dark;
+  color: var(--color-gray-900);
+  background-color: #ffffff;
 }
 
 body {
   min-height: 100vh;
-  @apply bg-white text-gray-900 transition-colors duration-200;
+  margin: 0;
+  background-color: var(--color-gray-50);
+  color: var(--color-gray-900);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-.dark body {
-  @apply bg-gray-900 text-white;
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #ffffff;
+    background-color: var(--color-gray-900);
+  }
+  
+  body {
+    background-color: var(--color-gray-900);
+    color: #ffffff;
+  }
 }
 
-/* Chart Range Slider Styles */
-.chart-range-slider {
-  color: #3b82f6; /* blue-500 */
+/* Common Paper Component Styles */
+.paper {
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
 }
 
-.chart-range-slider .MuiSlider-thumb {
-  width: 16px;
+.paper:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Card Styles */
+.card {
+  padding: 1.5rem;
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--mui-palette-divider);
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Stat Box Styles */
+.stat-box {
+  padding: 1rem;
+  background-color: var(--mui-palette-background-paper);
+  border: 1px solid var(--mui-palette-divider);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.stat-box:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Chart Card Container */
+.chart-card {
+  width: 100%;
+  padding: 1.5rem;
+  background-color: var(--mui-palette-background-paper);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--mui-palette-divider);
+  margin-top: 1.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.chart-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Chart Container */
+.chart-container {
+  height: 400px;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.legend-marker {
+  width: 3px;
   height: 16px;
-  background-color: #fff;
-  border: 2px solid currentColor;
+  margin-right: 0.5rem;
+  border-radius: 2px;
 }
 
-.chart-range-slider .MuiSlider-thumb:hover,
-.chart-range-slider .MuiSlider-thumb.Mui-focusVisible {
-  box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.16);
+/* Slider Container */
+.slider-container {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--mui-palette-background-paper);
+  border: 1px solid var(--mui-palette-divider);
+  border-radius: 0.5rem;
+  position: relative;
+  overflow: visible;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.chart-range-slider .MuiSlider-track {
-  border: none;
+/* Slider Styles */
+.range-slider {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
 }
 
-.chart-range-slider .MuiSlider-rail {
-  opacity: 0.5;
-  background-color: #e5e7eb; /* gray-200 */
+.range-slider .MuiSlider-rail,
+.range-slider .MuiSlider-track {
+  height: 4px !important;
 }
 
-.chart-range-slider .MuiSlider-valueLabel {
-  background-color: #3b82f6;
-  padding: 2px 6px;
-  border-radius: 4px;
+.range-slider .MuiSlider-mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.range-slider .MuiSlider-mark.MuiSlider-markActive {
+  opacity: 1;
+  background-color: currentColor;
+}
+
+.range-slider .MuiSlider-markLabel {
   font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  margin-top: 8px;
+}
+
+[data-mui-color-scheme="dark"] .range-slider .MuiSlider-markLabel {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.range-slider .MuiSlider-valueLabel {
+  background-color: var(--mui-palette-primary-main);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.range-slider .MuiSlider-valueLabel:before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--mui-palette-primary-main);
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .range-slider .MuiSlider-mark[data-index^="m"] {
+    display: none;
+  }
+}
+
+/* Chart container */
+.chart-container {
+  height: 400px;
+  margin-bottom: 2rem;
+}
+
+/* Legend styles */
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0.5rem 0 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.legend-marker {
+  width: 3px;
+  height: 16px;
+  margin-right: 4px;
+  border-radius: 2px;
+}
+
+/* Results section */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Utility classes */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.text-success {
+  color: var(--mui-palette-success-main);
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* Input Form Styles */
+.input-form {
+  background-color: var(--mui-palette-background-paper);
+  color: var(--mui-palette-text-primary);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--mui-palette-divider);
+}
+
+.input-form .MuiTypography-root {
+  color: var(--mui-palette-text-primary);
+}
+
+.input-form .MuiFormLabel-root {
+  color: var(--mui-palette-text-secondary);
+}
+
+.input-form .MuiFormLabel-root.Mui-focused {
+  color: var(--mui-palette-primary-main);
+}
+
+.input-form .MuiInputBase-root {
+  color: var(--mui-palette-text-primary);
+}
+
+.input-form .MuiInputBase-root:before {
+  border-bottom-color: var(--mui-palette-divider);
+}
+
+.input-form .MuiInputBase-root:hover:not(.Mui-disabled, .Mui-error):before {
+  border-bottom-color: var(--mui-palette-text-secondary);
+}
+
+.input-form .MuiInputBase-root.Mui-focused:after {
+  border-bottom-color: var(--mui-palette-primary-main);
+}
+
+.input-form .MuiOutlinedInput-notchedOutline {
+  border-color: var(--mui-palette-divider);
+}
+
+.input-form .MuiOutlinedInput-notchedOutline:hover {
+  border-color: var(--mui-palette-text-secondary);
+}
+
+.input-form .Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--mui-palette-primary-main);
+  border-width: 1px;
+}
+
+.input-form .MuiSvgIcon-root {
+  color: var(--mui-palette-text-secondary);
+}
+
+/* Slider Styles */
+.income-slider {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.income-slider .MuiSlider-rail,
+.income-slider .MuiSlider-track {
+  height: 4px !important;
+}
+
+.income-slider .MuiSlider-mark {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.income-slider .MuiSlider-mark.MuiSlider-markActive {
+  opacity: 1;
+  background-color: currentColor;
+}
+
+.income-slider .MuiSlider-markLabel {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  margin-top: 8px;
+}
+
+[data-mui-color-scheme="dark"] .income-slider .MuiSlider-markLabel {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.income-slider .MuiSlider-valueLabel {
+  background-color: var(--mui-palette-primary-main);
+  border-radius: 4px;
+  padding: 8px;
+  color: #fff;
+}
+
+.income-slider .MuiSlider-valueLabel:before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--mui-palette-primary-main);
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .income-slider .MuiSlider-mark[data-index^="m"] {
+    display: none;
+  }
+}
+
+/* Income Type Toggle */
+.income-type-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: var(--mui-palette-action-hover);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  width: fit-content;
+}
+
+.income-type-label {
+  min-width: 60px;
+  text-align: center;
+  color: var(--mui-palette-text-secondary);
+  font-weight: 400;
+}
+
+.income-type-label.active {
+  color: var(--mui-palette-primary-main);
+  font-weight: 600;
+}
+
+/* Tooltip Styles */
+.help-tooltip {
+  background-color: var(--mui-palette-background-paper);
+  color: var(--mui-palette-text-primary);
+  border: 1px solid var(--mui-palette-divider);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.help-tooltip .MuiTooltip-arrow {
+  color: var(--mui-palette-background-paper);
+}
+
+.help-tooltip .MuiTooltip-arrow:before {
+  border: 1px solid var(--mui-palette-divider);
+}
+
+.help-icon {
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.help-icon:hover {
+  opacity: 0.9;
 }

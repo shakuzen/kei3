@@ -1,6 +1,9 @@
 import { createTheme } from '@mui/material/styles';
 
 export const getTheme = (mode: 'light' | 'dark') => {
+  // Update the HTML element with the current color scheme
+  document.documentElement.setAttribute('data-mui-color-scheme', mode);
+  
   return createTheme({
     palette: {
       mode,

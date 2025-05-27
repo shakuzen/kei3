@@ -11,7 +11,7 @@ import { Chart as ChartJS,
   BarController,
   LineController } from 'chart.js';
 import type { ChartData, ChartOptions } from 'chart.js';
-import { Box, Slider, Typography, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Paper, Slider, Typography, useTheme, useMediaQuery } from '@mui/material';
 import type { ChartRange } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig';
@@ -120,15 +120,15 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
   const medianIncomeIsVisibleInChart = MEDIAN_INCOME_VALUE >= chartRange.min && MEDIAN_INCOME_VALUE <= chartRange.max;
 
   return (
-    <Box 
+    <Paper 
+      elevation={0}
       className={className}
       sx={{
-        width: '100%',
         p: 3,
+        mt: 3,
         bgcolor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 1,
-        mt: 4,
+        border: '1px solid',
+        borderColor: 'divider',
         ...style
       }}
     >
@@ -141,7 +141,7 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
         </Typography>
       </Box>
       
-      <Box sx={{ height: '400px', mb: 4 }}>
+      <Box className="chart-container">
         <Chart 
           ref={chartRef}
           type="bar" 
@@ -152,54 +152,50 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
       </Box>
 
       {/* Custom Legend for Income Lines */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 1, mb: 3, flexWrap: 'wrap' }}>
+      <Box className="chart-legend">
         {currentIncome > 0 && (
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              opacity: yourIncomeIsVisibleInChart ? 1 : 0.5,
-              transition: 'opacity 0.3s ease-in-out' // Optional: smooth transition for opacity change
-            }}
+          <div 
+            className="legend-item" 
+            style={{ opacity: yourIncomeIsVisibleInChart ? 1 : 0.5 }}
           >
-            <Box sx={{ width: 3, height: 16, bgcolor: YOUR_INCOME_COLOR, mr: 1, borderRadius: '2px' }} />
+            <span 
+              className="legend-marker" 
+              style={{ backgroundColor: YOUR_INCOME_COLOR }}
+            />
             <Typography variant="body2" color="text.secondary">
               Your Income: {formatJPY(currentIncome)}
             </Typography>
-          </Box>
+          </div>
         )}
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            opacity: medianIncomeIsVisibleInChart ? 1 : 0.5,
-            transition: 'opacity 0.3s ease-in-out' // Optional: smooth transition for opacity change
-          }}
+        <div 
+          className="legend-item"
+          style={{ opacity: medianIncomeIsVisibleInChart ? 1 : 0.5 }}
         >
-          <Box sx={{ width: 3, height: 16, bgcolor: MEDIAN_INCOME_COLOR, mr: 1, borderRadius: '2px' }} />
+          <span 
+            className="legend-marker" 
+            style={{ backgroundColor: MEDIAN_INCOME_COLOR }}
+          />
           <Typography variant="body2" color="text.secondary">
             Median Income: {formatJPY(MEDIAN_INCOME_VALUE)}
           </Typography>
-        </Box>
+        </div>
       </Box>
 
       
-      <Box sx={{ 
-        mt: 4,
-        p: 3, 
-        bgcolor: 'background.default', 
-        borderRadius: 1,
-        position: 'relative',
-        overflow: 'visible',
-        width: '100%',
-        maxWidth: '100%',
-        '& > .MuiBox-root': {
+      <Paper 
+        elevation={0}
+        sx={{
+          mt: 3,
+          p: 3,
+          bgcolor: 'action.hover',
+          borderRadius: 1,
+          position: 'relative',
+          overflow: 'visible',
           width: '100%',
           maxWidth: '100%',
-          overflow: 'visible',
-        }
-      }}>
-        <Box sx={{ position: 'relative', zIndex: 1 }}>
+        }}
+      >
+        <Box sx={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '100%', overflow: 'visible' }}>
           <Typography id="range-slider" variant="subtitle2" gutterBottom>
             Chart Income Range: {formatJPY(chartRange.min)} - {formatJPY(chartRange.max)}
           </Typography>
@@ -214,70 +210,10 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
             marks={visibleMarks}
             valueLabelFormat={(value) => `¥${value.toLocaleString()}`}
             aria-labelledby="range-slider"
-            sx={{
-              width: 'calc(100% - 20px)',
-              mx: 'auto',
-              display: 'block',
-              '& .MuiSlider-rail, & .MuiSlider-track': {
-                height: 4,
-              },
-              '& .MuiSlider-mark': {
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                backgroundColor: 'currentColor',
-                '&.MuiSlider-markActive': {
-                  opacity: 1,
-                  backgroundColor: 'currentColor',
-                },
-                // Hide minor marks on small screens
-                [theme.breakpoints.down('md')]: {
-                  '&[data-index^="m"]': {
-                    display: 'none',
-                  },
-                },
-              },
-              '& .MuiSlider-markLabel': {
-                fontSize: '0.75rem',
-                color: 'text.secondary',
-                whiteSpace: 'nowrap',
-                mt: 1,
-                '&[data-index="0"], &[data-index="5"]': {
-                  // First and last labels (0 and 100M)
-                  transform: 'translateX(0%)',
-                  '&[data-index="0"]': {
-                    left: '4px !important',
-                  },
-                  '&[data-index="5"]': {
-                    left: 'auto !important',
-                    right: '0 !important',
-                    transform: 'translateX(0%)',
-                  },
-                },
-                '&:not([data-index="0"]):not([data-index="5"]):not([data-index^="m"])': {
-                  // Middle labels (20M-80M), excluding minor marks (which have index starting with 'm')
-                  transform: 'translateX(-50%)',
-                },
-              },
-              '& .MuiSlider-valueLabel': {
-                backgroundColor: 'primary.main',
-                borderRadius: 1,
-                p: 1,
-                '&:before': {
-                  content: '""',
-                  width: 8,
-                  height: 8,
-                  backgroundColor: 'primary.main',
-                  position: 'absolute',
-                  bottom: -4,
-                  left: '50%',
-                  transform: 'translateX(-50%) rotate(45deg)',
-                },
-              },
-            }}
-        />
-      </Box>
-    </Box>
+            className="range-slider"
+          />
+        </Paper>
+      </Paper>
   );
 };
 

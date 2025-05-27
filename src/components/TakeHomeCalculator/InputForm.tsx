@@ -198,16 +198,13 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 />
               </Tooltip>
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: 1.5,
-              bgcolor: 'action.hover',
-              borderRadius: 2,
-              p: 1,
-              width: 'fit-content'
-            }}>
-              <Typography variant="body2" color={!inputs.isEmploymentIncome ? 'primary' : 'text.secondary'} fontWeight={!inputs.isEmploymentIncome ? 600 : 400} sx={{ minWidth: 60, textAlign: 'center' }}>Other</Typography>
+            <Box className="income-type-toggle">
+              <Typography 
+                variant="body2" 
+                className={`income-type-label ${!inputs.isEmploymentIncome ? 'active' : ''}`}
+              >
+                Other
+              </Typography>
               <Switch
                 id="isEmploymentIncome"
                 name="isEmploymentIncome"
@@ -215,7 +212,13 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
                 color="primary"
               />
-              <Typography variant="body2" color={inputs.isEmploymentIncome ? 'primary' : 'text.secondary'} fontWeight={inputs.isEmploymentIncome ? 600 : 400} sx={{ minWidth: 80, textAlign: 'center' }}>Employment</Typography>
+              <Typography 
+                variant="body2" 
+                className={`income-type-label ${inputs.isEmploymentIncome ? 'active' : ''}`}
+                sx={{ minWidth: 80 }}
+              >
+                Employment
+              </Typography>
             </Box>
           </Box>
 
@@ -272,8 +275,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         </Box>
 
         {/* Annual Income Slider */}
-        <Box sx={{ width: '100%' }}>
+        <Box sx={{ px: 1 }}>
           <Slider
+            className="income-slider"
             value={inputs.annualIncome}
             onChange={handleSliderChange}
             min={0}
@@ -288,29 +292,6 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               { value: 15000000, label: '¥15M' },
               { value: 20000000, label: '¥20M' },
             ]}
-            sx={{
-              '& .MuiSlider-markLabel': {
-                transform: 'translateX(-50%)',
-                mt: 1,
-                fontSize: '0.75rem',
-                color: 'text.secondary',
-              },
-              '& .MuiSlider-valueLabel': {
-                backgroundColor: 'primary.main',
-                borderRadius: 1,
-                p: 1,
-                '&:before': {
-                  content: '""',
-                  width: 8,
-                  height: 8,
-                  backgroundColor: 'primary.main',
-                  position: 'absolute',
-                  bottom: -4,
-                  left: '50%',
-                  transform: 'translateX(-50%) rotate(45deg)',
-                },
-              },
-            }}
           />
         </Box>
 

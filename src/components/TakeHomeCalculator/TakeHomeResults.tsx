@@ -4,7 +4,8 @@ import {
   Typography, 
   Paper, 
   Divider,
-  useTheme } from '@mui/material';
+  useTheme 
+} from '@mui/material';
 import type { TakeHomeResults as TaxResultsType } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 
@@ -63,7 +64,14 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
         Take-Home Pay Results
       </Typography>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 3 }}>
+      <Box 
+        sx={{ 
+          display: 'grid', 
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, 
+          gap: 2, 
+          mb: 3 
+        }}
+      >
         <StatBox 
           label="National Income Tax" 
           value={formatJPY(results.nationalIncomeTax)} 
@@ -109,7 +117,12 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
           </Typography>
         </Box>
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          pt: 1 
+        }}>
           <Typography variant="body2" color="text.secondary">
             Take-Home Pay Percentage
           </Typography>
@@ -117,7 +130,6 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
             {((results.takeHomeIncome / annualIncome) * 100).toFixed(1)}%
           </Typography>
         </Box>
-        
       </Box>
     </Paper>
   )
