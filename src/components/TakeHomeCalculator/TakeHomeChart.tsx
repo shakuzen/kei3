@@ -134,10 +134,7 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
     >
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Income Breakdown
-        </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
-          Adjust the range to see how different income levels affect your take-home pay
+          Take-Home Pay Chart
         </Typography>
       </Box>
       

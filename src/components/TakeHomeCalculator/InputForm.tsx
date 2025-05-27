@@ -321,7 +321,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
           <Typography variant="subtitle2" sx={{ mb: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
             Age
             <Tooltip 
-              title="Age affects pension and health insurance calculations"
+              title="Your obligation to pay nursing insurance premiums depends on your age."
               arrow
               placement="top"
               slotProps={{

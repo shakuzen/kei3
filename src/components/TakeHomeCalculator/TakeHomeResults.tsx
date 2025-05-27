@@ -61,7 +61,7 @@ const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualInco
       }}
     >
       <Typography variant="h6" component="h2" gutterBottom>
-        Take-Home Pay Results
+        Take-Home Pay Breakdown
       </Typography>
 
       <Box 
