@@ -28,28 +28,99 @@ interface TaxInputFormProps {
 export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInputChange }) => {
   const theme = useTheme();
   
-  const disabledStyles = {
-    '& .Mui-disabled': {
-      color: 'text.disabled',
-      WebkitTextFillColor: 'text.disabled',
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'divider',
+  // Component-specific styles that can't be in the global CSS
+  const styles = {
+    slider: {
+      color: 'primary.main',
+      '& .MuiSlider-thumb': {
+        '&:hover, &.Mui-focusVisible': {
+          boxShadow: `0 0 0 8px ${theme.palette.mode === 'dark' 
+            ? 'rgba(66, 165, 245, 0.16)' 
+            : 'rgba(25, 118, 210, 0.16)'}`,
+        },
+        '&.Mui-active': {
+          boxShadow: `0 0 0 14px ${theme.palette.mode === 'dark' 
+            ? 'rgba(66, 165, 245, 0.16)' 
+            : 'rgba(25, 118, 210, 0.16)'}`,
+        },
       },
-      '& .MuiFormLabel-root': {
-        color: 'text.disabled',
+    },
+    formSection: {
+      display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
+      gap: { xs: 2, sm: 3 },
+      alignItems: { sm: 'flex-start' },
+      mb: 3
+    },
+    incomeTypeToggle: {
+      width: { xs: '100%', sm: 'auto' }
+    },
+    incomeInput: {
+      width: '100%',
+      '& .MuiInputBase-root': {
+        fontSize: '1.1rem',
       },
-      '& .MuiSelect-icon': {
-        color: 'action.disabled',
+      '& .MuiInputAdornment-positionStart': {
+        mt: '0 !important'
       }
     },
-    '& .MuiFormLabel-root': {
-      color: 'text.secondary',
+    ageToggle: {
+      mt: 4, 
+      mb: 1, 
+      width: { xs: '100%', sm: 'auto' }
     },
-    '& .MuiInputBase-input': {
-      color: 'text.primary',
+    ageToggleContainer: {
+      display: 'flex', 
+      alignItems: 'center',
+      gap: 1.5,
+      bgcolor: 'action.hover',
+      borderRadius: 2,
+      p: 1,
+      width: 'fit-content'
     },
-    '& .MuiInputLabel-root': {
-      color: 'text.secondary',
+    ageToggleOption: {
+      minWidth: 60, 
+      textAlign: 'center',
+      cursor: 'pointer',
+      padding: '4px 8px',
+      borderRadius: 1,
+      transition: 'all 0.2s',
+      '&:hover': {
+        bgcolor: 'action.selected',
+      }
+    },
+    accordion: {
+      mt: 3,
+      bgcolor: 'background.paper',
+      boxShadow: 'none',
+      '&:before': {
+        display: 'none',
+      },
+      '&.Mui-expanded': {
+        margin: 0,
+        marginTop: 3,
+      },
+    },
+    accordionSummary: {
+      bgcolor: 'action.hover',
+      borderRadius: 1,
+      minHeight: '48px !important',
+      '&.Mui-expanded': {
+        minHeight: '48px !important',
+      },
+      '& .MuiAccordionSummary-content': {
+        margin: '12px 0',
+        '&.Mui-expanded': {
+          margin: '12px 0',
+        },
+      },
+    },
+    accordionDetails: {
+      p: 2,
+      pt: 3,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 2,
     },
   };
   const handleSliderChange = (_: Event, value: number | number[]) => {
@@ -93,115 +164,64 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
   };
 
   return (
-    <Box sx={{ 
-      bgcolor: 'background.paper',
-      color: 'text.primary',
-      p: 3, 
-      borderRadius: 2, 
-      boxShadow: 1,
-      border: '1px solid',
-      borderColor: 'divider',
-      '& .MuiTypography-root': {
-        color: 'text.primary'
-      },
-      '& .MuiFormLabel-root': {
-        color: 'text.secondary',
-        '&.Mui-focused': {
-          color: 'primary.main'
-        }
-      },
-      '& .MuiInputBase-root': {
-        color: 'text.primary',
-        '&:before': {
-          borderBottomColor: 'divider'
-        },
-        '&:hover:not(.Mui-disabled, .Mui-error):before': {
-          borderBottomColor: 'text.secondary'
-        },
-        '&.Mui-focused:after': {
-          borderBottomColor: 'primary.main'
-        }
-      },
-      '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'divider',
-        '&:hover': {
-          borderColor: 'text.secondary'
-        }
-      },
-      '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
-        borderColor: 'primary.main',
-        borderWidth: 1
-      },
-      '& .MuiSvgIcon-root': {
-        color: 'text.secondary'
-      },
-      '& .MuiSlider-root': {
-        color: 'primary.main',
-        '& .MuiSlider-thumb': {
-          '&:hover, &.Mui-focusVisible': {
-            boxShadow: `0 0 0 8px ${theme.palette.mode === 'dark' 
-              ? 'rgba(66, 165, 245, 0.16)' 
-              : 'rgba(25, 118, 210, 0.16)'}`,
-          },
-          '&.Mui-active': {
-            boxShadow: `0 0 0 14px ${theme.palette.mode === 'dark' 
-              ? 'rgba(66, 165, 245, 0.16)' 
-              : 'rgba(25, 118, 210, 0.16)'}`,
-          },
-        },
-      },
-    }}>
+    <Box className="form-container">
       <Typography variant="h5" component="h2" gutterBottom>
         Your Information
       </Typography>
 
-      <Box sx={{ mb: 4 }}>
+      <Box className="form-group">
         {/* Combined Employment Income Switch and Annual Income TextField Section */}
-        <Box sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: { xs: 2, sm: 3 }, // Spacing between Income and Age sections
-          alignItems: { sm: 'flex-start' }, // Align items to their top
-          mb: 3 // Margin before the income slider
-        }}>
+        <Box sx={styles.formSection}>
           {/* Employment Income Switch Section */}
-          <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
-              Income Type
-              <Tooltip 
-                title="Select if your income is from employment or other sources (e.g., business, miscellaneous)"
-                arrow
-                placement="top"
-                slotProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: 'background.paper',
-                      color: 'text.primary',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      boxShadow: 1,
-                      '& .MuiTooltip-arrow': {
-                        color: 'background.paper',
-                        '&:before': {
-                          border: '1px solid',
-                          borderColor: 'divider',
+          <Box sx={styles.incomeTypeToggle}>
+            <Typography variant="subtitle2" className="form-label">
+              <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                Income Type
+                <Tooltip 
+                  title="Select if your income is from employment or other sources (e.g., business, miscellaneous)"
+                  arrow
+                  placement="top"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: 'background.paper',
+                        color: 'text.primary',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: 1,
+                        '& .MuiTooltip-arrow': {
+                          color: 'background.paper',
+                          '&:before': {
+                            border: '1px solid',
+                            borderColor: 'divider',
+                          },
                         },
-                      },
-                    },
-                  },
-                }}
-              >
-                <HelpOutlineIcon 
-                  color="action" 
-                  fontSize="small" 
-                  sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 0.9 } }} 
-                />
-              </Tooltip>
+                      }
+                    }
+                  }}
+                >
+                  <HelpOutlineIcon 
+                    color="action" 
+                    fontSize="small" 
+                    sx={{ ml: 0.5, opacity: 0.6, '&:hover': { opacity: 0.9 } }} 
+                  />
+                </Tooltip>
+              </Box>
             </Typography>
-            <Box className="income-type-toggle">
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: 1.5,
+              bgcolor: 'action.hover',
+              borderRadius: 2,
+              p: 1,
+              width: 'fit-content'
+            }}>
               <Typography 
                 variant="body2" 
-                className={`income-type-label ${!inputs.isEmploymentIncome ? 'active' : ''}`}
+                color={!inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
+                fontWeight={!inputs.isEmploymentIncome ? 600 : 400}
+                sx={{ minWidth: 60, textAlign: 'center' }}
               >
                 Other
               </Typography>
@@ -214,8 +234,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               />
               <Typography 
                 variant="body2" 
-                className={`income-type-label ${inputs.isEmploymentIncome ? 'active' : ''}`}
-                sx={{ minWidth: 80 }}
+                color={inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
+                fontWeight={inputs.isEmploymentIncome ? 600 : 400}
+                sx={{ minWidth: 80, textAlign: 'center' }}
               >
                 Employment
               </Typography>
@@ -297,7 +318,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
 
         {/* Age Section */}
         <Box sx={{ mt: 4, mb: 1, width: { xs: '100%', sm: 'auto' } }}> {/* Added mt: 4 for spacing */}
-          <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
             Age
             <Tooltip 
               title="Age affects pension and health insurance calculations"
@@ -394,9 +415,27 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
             <Typography variant="subtitle2">Advanced Options</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <FormControl fullWidth sx={{ mb: 3, ...disabledStyles }}>
-              <Typography variant="subtitle2" gutterBottom>
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" gutterBottom sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
                 Prefecture
+                <Tooltip 
+                  title="Select your prefecture for local tax calculations"
+                  arrow
+                  placement="top"
+                  slotProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: 'background.paper',
+                        color: 'text.primary',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        boxShadow: 1,
+                      }
+                    }
+                  }}
+                >
+                  <HelpOutlineIcon fontSize="small" sx={{ color: 'text.secondary', ml: 0.5 }} />
+                </Tooltip>
               </Typography>
               <Select
                 id="prefecture"
@@ -414,7 +453,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               </Select>
             </FormControl>
 
-            <FormControl fullWidth sx={{ mb: 3, ...disabledStyles }}>
+            <FormControl fullWidth sx={{ mb: 3 }}>
               <Typography variant="subtitle2" gutterBottom>
                 Health Insurance Provider
               </Typography>
@@ -436,7 +475,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               </Typography>
             </FormControl>
 
-            <FormControl fullWidth sx={disabledStyles}>
+            <FormControl fullWidth>
               <TextField
                 id="numberOfDependents"
                 name="numberOfDependents"

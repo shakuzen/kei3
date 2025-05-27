@@ -166,13 +166,9 @@ body {
 
 .range-slider .MuiSlider-markLabel {
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.6));
   white-space: nowrap;
   margin-top: 8px;
-}
-
-[data-mui-color-scheme="dark"] .range-slider .MuiSlider-markLabel {
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .range-slider .MuiSlider-valueLabel {
@@ -260,59 +256,105 @@ body {
   font-weight: 600;
 }
 
-/* Input Form Styles */
-.input-form {
-  background-color: var(--mui-palette-background-paper);
-  color: var(--mui-palette-text-primary);
+/* Form Base Styles */
+.form-container {
+  background-color: var(--background-paper, #ffffff);
+  color: var(--text-primary, rgba(0, 0, 0, 0.87));
   padding: 1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--mui-palette-divider);
+  border: 1px solid var(--divider, rgba(0, 0, 0, 0.12));
+  transition: background-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
 }
 
-.input-form .MuiTypography-root {
-  color: var(--mui-palette-text-primary);
+/* Typography */
+.form-container .MuiTypography-root {
+  color: var(--text-primary);
 }
 
-.input-form .MuiFormLabel-root {
-  color: var(--mui-palette-text-secondary);
+/* Form Labels */
+.form-container .MuiFormLabel-root {
+  color: var(--text-secondary);
 }
 
-.input-form .MuiFormLabel-root.Mui-focused {
-  color: var(--mui-palette-primary-main);
+.form-container .MuiFormLabel-root.Mui-focused {
+  color: var(--primary-main, #1976d2);
 }
 
-.input-form .MuiInputBase-root {
-  color: var(--mui-palette-text-primary);
+/* Input Fields */
+.form-container .MuiInputBase-root {
+  color: var(--text-primary);
 }
 
-.input-form .MuiInputBase-root:before {
-  border-bottom-color: var(--mui-palette-divider);
+.form-container .MuiInputBase-root:before {
+  border-bottom-color: var(--divider);
 }
 
-.input-form .MuiInputBase-root:hover:not(.Mui-disabled, .Mui-error):before {
-  border-bottom-color: var(--mui-palette-text-secondary);
+.form-container .MuiInputBase-root:hover:not(.Mui-disabled, .Mui-error):before {
+  border-bottom-color: var(--text-secondary);
 }
 
-.input-form .MuiInputBase-root.Mui-focused:after {
-  border-bottom-color: var(--mui-palette-primary-main);
+.form-container .MuiInputBase-root.Mui-focused:after {
+  border-bottom-color: var(--primary-main, #1976d2);
 }
 
-.input-form .MuiOutlinedInput-notchedOutline {
-  border-color: var(--mui-palette-divider);
+/* Outlined Inputs */
+.form-container .MuiOutlinedInput-notchedOutline {
+  border-color: var(--divider);
 }
 
-.input-form .MuiOutlinedInput-notchedOutline:hover {
-  border-color: var(--mui-palette-text-secondary);
+.form-container .MuiOutlinedInput-notchedOutline:hover {
+  border-color: var(--text-secondary);
 }
 
-.input-form .Mui-focused .MuiOutlinedInput-notchedOutline {
+.form-container .Mui-focused .MuiOutlinedInput-notchedOutline {
   border-color: var(--mui-palette-primary-main);
   border-width: 1px;
 }
 
-.input-form .MuiSvgIcon-root {
+/* Icons */
+.form-container .MuiSvgIcon-root {
   color: var(--mui-palette-text-secondary);
+}
+
+/* Disabled State */
+.form-container .Mui-disabled {
+  color: var(--mui-palette-text-disabled);
+  -webkit-text-fill-color: var(--mui-palette-text-disabled);
+}
+
+.form-container .Mui-disabled .MuiOutlinedInput-notchedOutline {
+  border-color: var(--mui-palette-divider);
+}
+
+.form-container .Mui-disabled .MuiFormLabel-root {
+  color: var(--mui-palette-text-disabled);
+}
+
+.form-container .Mui-disabled .MuiSelect-icon {
+  color: var(--mui-palette-action-disabled);
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive Form Groups */
+@media (min-width: 600px) {
+  .form-group-row {
+    flex-direction: row;
+    align-items: flex-start;
+  }
 }
 
 /* Slider Styles */
@@ -341,13 +383,9 @@ body {
 
 .income-slider .MuiSlider-markLabel {
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: var(--text-secondary, rgba(0, 0, 0, 0.6));
   white-space: nowrap;
   margin-top: 8px;
-}
-
-[data-mui-color-scheme="dark"] .income-slider .MuiSlider-markLabel {
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .income-slider .MuiSlider-valueLabel {
