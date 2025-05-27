@@ -1,4 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
+import { Box, Typography } from '@mui/material'
 import ThemeToggle from './components/ThemeToggle'
 import { TakeHomeInputForm } from './components/TakeHomeCalculator/InputForm'
 import type { TakeHomeInputs, TakeHomeResults } from './types/tax'
@@ -8,7 +9,12 @@ import { calculateTaxes } from './utils/taxCalculations'
 const TakeHomeResultsDisplay = lazy(() => import('./components/TakeHomeCalculator/TakeHomeResults'))
 const TakeHomeChart = lazy(() => import('./components/TakeHomeCalculator/TakeHomeChart'))
 
-function App() {
+interface AppProps {
+  mode: 'light' | 'dark';
+  toggleColorMode: () => void;
+}
+
+function App({ mode, toggleColorMode }: AppProps) {
   // Default values for the form
   const defaultInputs: TakeHomeInputs = {
     annualIncome: 5000000, // 5 million yen
@@ -33,43 +39,87 @@ function App() {
   }, [inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40])
 
   // Handle input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target
-    const isCheckbox = type === 'checkbox'
-    const isNumber = type === 'number' || type === 'range'
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
+    const isCheckbox = type === 'checkbox';
+    const isRadio = type === 'radio';
+    const isNumber = type === 'number' || type === 'range';
 
     setInputs(prev => {
+      let newValue: string | number | boolean;
+      
+      if (isCheckbox) {
+        newValue = target.checked;
+      } else if (isRadio) {
+        // For radio buttons, the value comes as a string 'true' or 'false'
+        newValue = value === 'true';
+      } else if (isNumber) {
+        newValue = parseFloat(value as string) || 0;
+      } else {
+        newValue = value;
+      }
+
       const newInputs = {
         ...prev,
-        [name]: isCheckbox 
-          ? (e.target as HTMLInputElement).checked 
-          : isNumber
-            ? parseFloat(value) || 0 
-            : value
-      }
+        [name]: newValue
+      };
 
       // Update health insurance provider based on employment income status
       if (name === 'isEmploymentIncome') {
-        newInputs.healthInsuranceProvider = (e.target as HTMLInputElement).checked 
+        newInputs.healthInsuranceProvider = target.checked 
           ? 'Kyokai Kenpo' 
-          : 'National Health Insurance'
+          : 'National Health Insurance';
       }
 
-      return newInputs
-    })
+      return newInputs;
+    });
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-center">Japan Take-Home Pay Calculator</h1>
-        <ThemeToggle />
-      </div>
+    <Box sx={{
+      maxWidth: 1536, // max-w-6xl equivalent
+      mx: 'auto',
+      px: 4,
+      py: 8,
+      minHeight: '100vh',
+      bgcolor: 'background.default',
+      color: 'text.primary',
+    }}>
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mb: 8,
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: 2
+      }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', textAlign: { xs: 'center', sm: 'left' } }}>
+          Japan Take-Home Pay Calculator
+        </Typography>
+        <ThemeToggle mode={mode} toggleColorMode={toggleColorMode} />
+      </Box>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+        gap: 4,
+        width: '100%'
+      }}>
         <TakeHomeInputForm inputs={inputs} onInputChange={handleInputChange} />
         {results && (
-          <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-64 rounded-lg"></div>}>
+          <Suspense fallback={
+            <Box sx={{
+              height: 256,
+              borderRadius: 1,
+              bgcolor: 'action.hover',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.5 },
+              },
+            }} />
+          }>
             <TakeHomeResultsDisplay 
               results={results} 
               annualIncome={inputs.annualIncome} 
@@ -77,9 +127,17 @@ function App() {
             />
           </Suspense>
         )}
-      </div>
+      </Box>
 
-      <Suspense fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-96 rounded-lg mt-8"></div>}>
+      <Suspense fallback={
+        <Box sx={{
+          height: 384,
+          mt: 4,
+          borderRadius: 1,
+          bgcolor: 'action.hover',
+          animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        }} />
+      }>
         <TakeHomeChart 
           currentIncome={inputs.annualIncome}
           isEmploymentIncome={inputs.isEmploymentIncome}
@@ -87,11 +145,16 @@ function App() {
         />
       </Suspense>
 
-      <footer className="mt-12 mb-8 text-center text-gray-500 dark:text-gray-400 text-sm h-16">
+      <Box sx={{
+        mt: 12,
+        mb: 8,
+        textAlign: 'center',
+        color: 'text.secondary'
+      }}>
         <p>This calculator provides estimates only. Tax rules and rates may change.</p>
         <p className="mt-1">Consult with a tax professional for accurate advice.</p>
-      </footer>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

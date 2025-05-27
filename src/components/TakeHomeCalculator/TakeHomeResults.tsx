@@ -1,6 +1,12 @@
-import React from 'react'
-import type { TakeHomeResults as TaxResultsType } from '../../types/tax'
-import { formatJPY } from '../../utils/formatters'
+import React from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Divider,
+  useTheme } from '@mui/material';
+import type { TakeHomeResults as TaxResultsType } from '../../types/tax';
+import { formatJPY } from '../../utils/formatters';
 
 interface TaxResultsProps {
   results: TaxResultsType
@@ -9,55 +15,112 @@ interface TaxResultsProps {
 }
 
 const TakeHomeResultsDisplay: React.FC<TaxResultsProps> = ({ results, annualIncome, isEmploymentIncome }) => {
+  const theme = useTheme();
+
+  const StatBox = ({ label, value, variant = 'default' }: { label: string; value: string; variant?: 'default' | 'total' | 'takeHome' }) => (
+    <Paper 
+      elevation={0}
+      sx={{
+        p: 2,
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          boxShadow: theme.shadows[2],
+        },
+      }}
+    >
+      <Typography 
+        variant="body2" 
+        color="text.secondary"
+        sx={{ mb: 0.5 }}
+      >
+        {label}
+      </Typography>
+      <Typography 
+        variant={variant === 'takeHome' ? 'h5' : 'h6'} 
+        color={variant === 'takeHome' ? 'success.main' : 'text.primary'}
+        fontWeight={500}
+      >
+        {value}
+      </Typography>
+    </Paper>
+  );
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Take-Home Pay Results</h2>
+    <Paper 
+      elevation={0}
+      sx={{
+        p: 3,
+        bgcolor: 'background.paper',
+        borderRadius: 2,
+        boxShadow: 1,
+        height: '100%',
+      }}
+    >
+      <Typography variant="h6" component="h2" gutterBottom>
+        Take-Home Pay Results
+      </Typography>
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
-            <p className="text-sm text-gray-500 dark:text-gray-400">National Income Tax</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.nationalIncomeTax)}</p>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Residence Tax</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.residenceTax)}</p>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Health Insurance</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.healthInsurance)}</p>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Pension Payments</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.pensionPayments)}</p>
-          </div>
-          {isEmploymentIncome && (
-            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded">
-              <p className="text-sm text-gray-500 dark:text-gray-400">Employment Insurance</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.employmentInsurance)}</p>
-            </div>
-          )}
-        </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 3 }}>
+        <StatBox 
+          label="National Income Tax" 
+          value={formatJPY(results.nationalIncomeTax)} 
+        />
+        <StatBox 
+          label="Residence Tax" 
+          value={formatJPY(results.residenceTax)} 
+        />
+        <StatBox 
+          label="Health Insurance" 
+          value={formatJPY(results.healthInsurance)} 
+        />
+        <StatBox 
+          label="Pension Payments" 
+          value={formatJPY(results.pensionPayments)} 
+        />
+        {isEmploymentIncome && (
+          <StatBox 
+            label="Employment Insurance" 
+            value={formatJPY(results.employmentInsurance)} 
+          />
+        )}
+      </Box>
 
-        <div className="border-t dark:border-gray-700 pt-4 mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-gray-700 dark:text-gray-300">Total Tax and Payments</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatJPY(results.totalTax)}</p>
-          </div>
-          <div className="flex justify-between items-center">
-            <p className="text-gray-700 dark:text-gray-300">Take-Home Pay</p>
-            <p className="text-xl font-bold text-green-600 dark:text-green-400">{formatJPY(results.takeHomeIncome)}</p>
-          </div>
-          <div className="flex justify-between items-center mt-2">
-            <p className="text-gray-700 dark:text-gray-300">Take-Home Pay Percentage</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
-              {((results.takeHomeIncome / annualIncome) * 100).toFixed(1)}%
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Divider sx={{ my: 2 }} />
+
+      <Box sx={{ '& > *:not(:last-child)': { mb: 1.5 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body1" color="text.secondary">
+            Total Tax and Payments
+          </Typography>
+          <Typography variant="subtitle1" fontWeight={500}>
+            {formatJPY(results.totalTax)}
+          </Typography>
+        </Box>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body1" color="text.secondary">
+            Take-Home Pay
+          </Typography>
+          <Typography variant="h6" color="success.main" fontWeight={600}>
+            {formatJPY(results.takeHomeIncome)}
+          </Typography>
+        </Box>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Take-Home Pay Percentage
+          </Typography>
+          <Typography variant="body1" fontWeight={500}>
+            {((results.takeHomeIncome / annualIncome) * 100).toFixed(1)}%
+          </Typography>
+        </Box>
+        
+      </Box>
+    </Paper>
   )
 }
 
-export default TakeHomeResultsDisplay 
+export default TakeHomeResultsDisplay

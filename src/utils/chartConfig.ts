@@ -3,6 +3,7 @@ import { formatJPY } from './formatters'
 import { calculateTaxes } from './taxCalculations'
 import type { ChartData, ChartOptions, Chart, TooltipItem, Scale, CoreScaleOptions, Plugin } from 'chart.js'
 
+
 // Create custom plugin for vertical lines
 export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
   id: 'currentAndMedianIncomeChartPlugin',
@@ -15,19 +16,16 @@ export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
     const { left, right, top, bottom } = chartArea;
     const width = right - left;
 
-    // Get the data from the plugin options
-    if (!chart.options?.plugins?.customPlugin?.data) {
+    const pluginData = chart.options?.plugins?.customPlugin?.data;
+
+    if (!pluginData) {
       console.error('Custom plugin data not found in chart options');
       return;
     }
 
-    const chartData = chart.options.plugins.customPlugin.data;
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    const labelBgColor = isDarkMode ? 'rgba(31, 41, 55, 0.8)' : 'rgba(255, 255, 255, 0.8)';
-
     // Draw Your Income line if it exists and is within the chart range
-    if (typeof chartData.currentIncomePosition === 'number' && chartData.currentIncomePosition >= 0 && chartData.currentIncomePosition <= 1) {
-      const yourIncomeX = left + (width * chartData.currentIncomePosition);
+    if (typeof pluginData.currentIncomePosition === 'number' && pluginData.currentIncomePosition >= 0 && pluginData.currentIncomePosition <= 1) {
+      const yourIncomeX = left + (width * pluginData.currentIncomePosition);
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(yourIncomeX, top);
@@ -36,19 +34,12 @@ export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
       ctx.strokeStyle = 'rgba(255, 99, 132, 1)';
       ctx.stroke();
 
-      // Add label for Your Income
-      ctx.textAlign = 'center';
-      ctx.fillStyle = labelBgColor;
-      ctx.fillRect(yourIncomeX - 60, top + 5, 120, 40);
-      ctx.fillStyle = 'rgba(255, 99, 132, 1)';
-      ctx.fillText('Your Income', yourIncomeX, top + 20);
-      ctx.fillText(formatJPY(chartData.currentIncome || 0), yourIncomeX, top + 35);
       ctx.restore();
     }
 
     // Draw Median Income line if it exists and is within the chart range
-    if (typeof chartData.medianIncomePosition === 'number' && chartData.medianIncomePosition >= 0 && chartData.medianIncomePosition <= 1) {
-      const medianIncomeX = left + (width * chartData.medianIncomePosition);
+    if (typeof pluginData.medianIncomePosition === 'number' && pluginData.medianIncomePosition >= 0 && pluginData.medianIncomePosition <= 1) {
+      const medianIncomeX = left + (width * pluginData.medianIncomePosition);
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(medianIncomeX, top);
@@ -57,12 +48,6 @@ export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
       ctx.strokeStyle = 'rgba(255, 206, 86, 1)';
       ctx.stroke();
 
-      // Add label for Median Income
-      ctx.fillStyle = labelBgColor;
-      ctx.fillRect(medianIncomeX - 60, top + 5, 120, 40);
-      ctx.fillStyle = 'rgba(255, 206, 86, 1)';
-      ctx.fillText('Median Income', medianIncomeX, top + 20);
-      ctx.fillText(formatJPY(chartData.medianIncome || 0), medianIncomeX, top + 35);
       ctx.restore();
     }
   }
@@ -174,7 +159,10 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
   }
 }
 
-export const getChartOptions = (chartRange: ChartRange, currentIncome: number): ChartOptions<'bar' | 'line'> => {
+export const getChartOptions = (
+  chartRange: ChartRange,
+  currentIncome: number
+): ChartOptions<'bar' | 'line'> => {
   const maxIncome = chartRange.max
   const minIncome = chartRange.min
   const currentIncomePosition = Math.max(0, Math.min(1, (currentIncome - minIncome) / (maxIncome - minIncome)))
@@ -220,7 +208,7 @@ export const getChartOptions = (chartRange: ChartRange, currentIncome: number): 
           currentIncomePosition,
           medianIncomePosition,
           currentIncome,
-          medianIncome: 4330000
+          medianIncome: 4330000,
         }
       }
     },
