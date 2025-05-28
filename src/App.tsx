@@ -32,11 +32,23 @@ function App({ mode, toggleColorMode }: AppProps) {
   // State for calculation results
   const [results, setResults] = useState<TakeHomeResults | null>(null)
 
-  // Calculate taxes when inputs change
+  // Debounce the tax calculation to prevent excessive updates from rapid slider changes
   useEffect(() => {
-    const results = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40)
-    setResults(results)
-  }, [inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40])
+    const calculateAndSetResults = () => {
+      // console.log('Debounced: Calculating taxes with income:', inputs.annualIncome); // Optional: for debugging
+      const takeHomePayResults = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40);
+      setResults(takeHomePayResults);
+    };
+
+    const handler = setTimeout(() => {
+      calculateAndSetResults();
+    }, 50);
+
+    // Cleanup function: clear the timeout if the effect re-runs before the timeout completes
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40]);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
