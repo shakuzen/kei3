@@ -299,9 +299,9 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
           </Box>
 
           {/* Income Input Section */}
-          <Box sx={{ width: '100%', maxWidth: { sm: '400px' } }}> {/* Responsive width for income input */}
+          <Box sx={{ width: '100%', maxWidth: { sm: '300px' } }}> {/* Responsive width for income input */}
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              {inputs.isEmploymentIncome ? 'Gross Annual Employment Income' : 'Net Annual Income (Business income, etc.)'}
+              {inputs.isEmploymentIncome ? 'Gross Employment Income' : 'Net Income (Business income, etc.)'}
             </Typography>
             <TextField
               id="annualIncome"
@@ -336,6 +336,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                   ),
                   inputProps: {
                     min: 0,
+                    max: 1000000000, // Cap at 1 billion yen
                     step: 10000,
                     inputMode: 'numeric',
                     pattern: '[0-9]*',
