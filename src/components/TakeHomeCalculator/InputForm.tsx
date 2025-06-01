@@ -52,6 +52,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     formSection: {
       display: 'flex',
       flexDirection: { xs: 'column', sm: 'row' },
+      flexWrap: 'wrap',
       gap: { xs: 2, sm: 3 },
       alignItems: { xs: 'stretch', sm: 'flex-start' },
       mb: 3,
@@ -62,11 +63,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       }
     },
     incomeTypeToggle: {
-      width: '100%',
       maxWidth: { sm: '280px' },
-      '& > *': {
-        width: '100%',
-      }
     },
     incomeInput: {
       width: '100%',
@@ -80,30 +77,20 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         fontSize: { xs: '0.95rem', sm: '1rem' },
       }
     },
-    ageToggle: {
-      mt: 4, 
-      mb: 1, 
-      width: { xs: '100%', sm: 'auto' }
-    },
-    ageToggleContainer: {
-      display: 'flex', 
+    // Common style for the Box containing a Switch and its labels
+    sharedSwitchControlBox: {
+      display: 'flex',
       alignItems: 'center',
-      gap: 1.5,
+      gap: 1,
       bgcolor: 'action.hover',
       borderRadius: 2,
       p: 1,
       width: 'fit-content'
     },
-    ageToggleOption: {
-      minWidth: 60, 
-      textAlign: 'center',
-      cursor: 'pointer',
-      padding: '4px 8px',
-      borderRadius: 1,
-      transition: 'all 0.2s',
-      '&:hover': {
-        bgcolor: 'action.selected',
-      }
+    ageToggleOuter: {
+      mt: 4,
+      mb: 1,
+      width: { xs: '100%', sm: 'auto' }
     },
     accordion: {
       mt: 3,
@@ -257,21 +244,17 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       <Box className="form-group">
         {/* Combined Employment Income Switch and Annual Income TextField Section */}
         <Box sx={styles.formSection}>
-          {/* Employment Income Switch Section */}
-          <Box sx={styles.incomeTypeToggle}>
+          {/* Employment Income Switch Section - Child 1 of formSection */}
+          <Box sx={{
+            ...styles.incomeTypeToggle, // Provides maxWidth
+            flexGrow: { sm: 0 },       // Prevent growing on sm+ screens
+            flexShrink: { sm: 0 },     // Prevent shrinking on sm+ screens
+          }}>
             <Typography variant="subtitle2" className="form-label" sx={{ display: 'flex', alignItems: 'center' }}>
               Income Type
               <InfoTooltip title="Select if your income is from employment or other sources (e.g., business, miscellaneous)" />
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: 1.5,
-              bgcolor: 'action.hover',
-              borderRadius: 2,
-              p: 1,
-              width: 'fit-content'
-            }}>
+            <Box sx={styles.sharedSwitchControlBox}>
               <Typography 
                 variant="body2" 
                 color={!inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
@@ -291,17 +274,21 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 variant="body2" 
                 color={inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
                 fontWeight={inputs.isEmploymentIncome ? 600 : 400}
-                sx={{ minWidth: 80, textAlign: 'center' }}
+                sx={{ minWidth: 70, textAlign: 'center' }} // Reduced minWidth
               >
                 Employment
               </Typography>
             </Box>
           </Box>
 
-          {/* Income Input Section */}
-          <Box sx={{ width: '100%', maxWidth: { sm: '300px' } }}> {/* Responsive width for income input */}
+          {/* Income Input Section - Child 2 of formSection */}
+          <Box sx={{ 
+            width: { xs: '100%', sm: 'auto' }, // Full width on xs, auto on sm+ for flex control
+            minWidth: { sm: '180px' },         // Reduced minimum width on sm+
+            maxWidth: { sm: '200px' }          // Reduced maximum width on sm+
+          }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              {inputs.isEmploymentIncome ? 'Gross Employment Income' : 'Net Income (Business income, etc.)'}
+              {inputs.isEmploymentIncome ? 'Gross Employment Income' : 'Net Income (Business etc.)'}
             </Typography>
             <TextField
               id="annualIncome"
@@ -375,20 +362,13 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         </Box>
 
         {/* Age Section */}
-        <Box sx={{ mt: 4, mb: 1, width: { xs: '100%', sm: 'auto' } }}> {/* Added mt: 4 for spacing */}
+        <Box sx={styles.ageToggleOuter}>
           <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
             Age
             <InfoTooltip title="Your obligation to pay nursing insurance premiums depends on your age." />
           </Typography>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: 1.5,
-            bgcolor: 'action.hover',
-            borderRadius: 2,
-            p: 1,
-            width: 'fit-content' // Ensures the box only takes necessary width
-          }}>
+          {/* Apply the shared style here for consistency */}
+          <Box sx={styles.sharedSwitchControlBox}>
             <Typography 
               variant="body2" 
               color={!inputs.isOver40 ? 'primary' : 'text.secondary'}
