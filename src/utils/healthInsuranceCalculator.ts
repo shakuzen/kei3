@@ -1,129 +1,104 @@
-import { calculateResidenceTaxBasicDeduction } from "./taxCalculations";
+import type { EmployeesHealthInsurancePremiumTableRow, ProviderRegion, NationalHealthInsuranceRegionParams, HealthInsuranceProviderId } from '../types/healthInsurance';
+import { getHealthInsurancePremiumTable } from '../data/employeesHealthInsurance';
+import { getNationalHealthInsuranceParams } from '../data/nationalHealthInsurance';
+import { DEFAULT_PROVIDER_REGION, HealthInsuranceProvider } from '../types/healthInsurance';
 
 /**
- * Interface for a row in the health insurance premium table.
- * - minIncomeInclusive: Minimum monthly income for this bracket (inclusive).
- * - maxIncomeExclusive: Maximum monthly income for this bracket (exclusive).
- * - halfPremiumNoLTC: Half of the health insurance premium if not applicable for Long-Term Care (LTC) insurance.
- * - halfPremiumWithLTC: Half of the health insurance premium if applicable for Long-Term Care (LTC) insurance.
- */
-interface HealthInsurancePremiumTableRow {
-    minIncomeInclusive: number;
-    maxIncomeExclusive: number;
-    halfPremiumNoLTC: number; // 折半額, 介護保険第2号被保険者に該当しない場合
-    halfPremiumWithLTC: number; // 折半額, 介護保険第2号被保険者に該当する場合
-}
-
-// Health Insurance Premium Table for Tokyo Branch (effective March 2025 - Reiwa 7)
-const KYOKAI_KENPO_TOKYO: HealthInsurancePremiumTableRow[] = [
-    // Min Income (inclusive) | Max Income (exclusive) | Half Premium (No LTC) | Half Premium (With LTC)
-    { minIncomeInclusive: 0, maxIncomeExclusive: 63000, halfPremiumNoLTC: 2873.9, halfPremiumWithLTC: 3335.0 },
-    { minIncomeInclusive: 63000, maxIncomeExclusive: 73000, halfPremiumNoLTC: 3369.4, halfPremiumWithLTC: 3910.0 },
-    { minIncomeInclusive: 73000, maxIncomeExclusive: 83000, halfPremiumNoLTC: 3864.9, halfPremiumWithLTC: 4485.0 },
-    { minIncomeInclusive: 83000, maxIncomeExclusive: 93000, halfPremiumNoLTC: 4360.4, halfPremiumWithLTC: 5060.0 },
-    { minIncomeInclusive: 93000, maxIncomeExclusive: 101000, halfPremiumNoLTC: 4855.9, halfPremiumWithLTC: 5635.0 },
-    { minIncomeInclusive: 101000, maxIncomeExclusive: 107000, halfPremiumNoLTC: 5153.2, halfPremiumWithLTC: 5980.0 },
-    { minIncomeInclusive: 107000, maxIncomeExclusive: 114000, halfPremiumNoLTC: 5450.5, halfPremiumWithLTC: 6325.0 },
-    { minIncomeInclusive: 114000, maxIncomeExclusive: 122000, halfPremiumNoLTC: 5846.9, halfPremiumWithLTC: 6785.0 },
-    { minIncomeInclusive: 122000, maxIncomeExclusive: 130000, halfPremiumNoLTC: 6243.3, halfPremiumWithLTC: 7245.0 },
-    { minIncomeInclusive: 130000, maxIncomeExclusive: 138000, halfPremiumNoLTC: 6639.7, halfPremiumWithLTC: 7705.0 },
-    { minIncomeInclusive: 138000, maxIncomeExclusive: 146000, halfPremiumNoLTC: 7036.1, halfPremiumWithLTC: 8165.0 },
-    { minIncomeInclusive: 146000, maxIncomeExclusive: 155000, halfPremiumNoLTC: 7432.5, halfPremiumWithLTC: 8625.0 },
-    { minIncomeInclusive: 155000, maxIncomeExclusive: 165000, halfPremiumNoLTC: 7928.0, halfPremiumWithLTC: 9200.0 },
-    { minIncomeInclusive: 165000, maxIncomeExclusive: 175000, halfPremiumNoLTC: 8423.5, halfPremiumWithLTC: 9775.0 },
-    { minIncomeInclusive: 175000, maxIncomeExclusive: 185000, halfPremiumNoLTC: 8919.0, halfPremiumWithLTC: 10350.0 },
-    { minIncomeInclusive: 185000, maxIncomeExclusive: 195000, halfPremiumNoLTC: 9414.5, halfPremiumWithLTC: 10925.0 },
-    { minIncomeInclusive: 195000, maxIncomeExclusive: 210000, halfPremiumNoLTC: 9910.0, halfPremiumWithLTC: 11500.0 },
-    { minIncomeInclusive: 210000, maxIncomeExclusive: 230000, halfPremiumNoLTC: 10901.0, halfPremiumWithLTC: 12650.0 },
-    { minIncomeInclusive: 230000, maxIncomeExclusive: 250000, halfPremiumNoLTC: 11892.0, halfPremiumWithLTC: 13800.0 },
-    { minIncomeInclusive: 250000, maxIncomeExclusive: 270000, halfPremiumNoLTC: 12883.0, halfPremiumWithLTC: 14950.0 },
-    { minIncomeInclusive: 270000, maxIncomeExclusive: 290000, halfPremiumNoLTC: 13874.0, halfPremiumWithLTC: 16100.0 },
-    { minIncomeInclusive: 290000, maxIncomeExclusive: 310000, halfPremiumNoLTC: 14865.0, halfPremiumWithLTC: 17250.0 },
-    { minIncomeInclusive: 310000, maxIncomeExclusive: 330000, halfPremiumNoLTC: 15856.0, halfPremiumWithLTC: 18400.0 },
-    { minIncomeInclusive: 330000, maxIncomeExclusive: 350000, halfPremiumNoLTC: 16847.0, halfPremiumWithLTC: 19550.0 },
-    { minIncomeInclusive: 350000, maxIncomeExclusive: 370000, halfPremiumNoLTC: 17838.0, halfPremiumWithLTC: 20700.0 },
-    { minIncomeInclusive: 370000, maxIncomeExclusive: 395000, halfPremiumNoLTC: 18829.0, halfPremiumWithLTC: 21850.0 },
-    { minIncomeInclusive: 395000, maxIncomeExclusive: 425000, halfPremiumNoLTC: 20315.5, halfPremiumWithLTC: 23575.0 },
-    { minIncomeInclusive: 425000, maxIncomeExclusive: 455000, halfPremiumNoLTC: 21802.0, halfPremiumWithLTC: 25300.0 },
-    { minIncomeInclusive: 455000, maxIncomeExclusive: 485000, halfPremiumNoLTC: 23288.5, halfPremiumWithLTC: 27025.0 },
-    { minIncomeInclusive: 485000, maxIncomeExclusive: 515000, halfPremiumNoLTC: 24775.0, halfPremiumWithLTC: 28750.0 },
-    { minIncomeInclusive: 515000, maxIncomeExclusive: 545000, halfPremiumNoLTC: 26261.5, halfPremiumWithLTC: 30475.0 },
-    { minIncomeInclusive: 545000, maxIncomeExclusive: 575000, halfPremiumNoLTC: 27748.0, halfPremiumWithLTC: 32200.0 },
-    { minIncomeInclusive: 575000, maxIncomeExclusive: 605000, halfPremiumNoLTC: 29234.5, halfPremiumWithLTC: 33925.0 },
-    { minIncomeInclusive: 605000, maxIncomeExclusive: 635000, halfPremiumNoLTC: 30721.0, halfPremiumWithLTC: 35650.0 },
-    { minIncomeInclusive: 635000, maxIncomeExclusive: 665000, halfPremiumNoLTC: 32207.5, halfPremiumWithLTC: 37375.0 },
-    { minIncomeInclusive: 665000, maxIncomeExclusive: 695000, halfPremiumNoLTC: 33694.0, halfPremiumWithLTC: 39100.0 },
-    { minIncomeInclusive: 695000, maxIncomeExclusive: 730000, halfPremiumNoLTC: 35180.5, halfPremiumWithLTC: 40825.0 },
-    { minIncomeInclusive: 730000, maxIncomeExclusive: 770000, halfPremiumNoLTC: 37162.5, halfPremiumWithLTC: 43125.0 },
-    { minIncomeInclusive: 770000, maxIncomeExclusive: 810000, halfPremiumNoLTC: 39144.5, halfPremiumWithLTC: 45425.0 },
-    { minIncomeInclusive: 810000, maxIncomeExclusive: 855000, halfPremiumNoLTC: 41126.5, halfPremiumWithLTC: 47725.0 },
-    { minIncomeInclusive: 855000, maxIncomeExclusive: 905000, halfPremiumNoLTC: 43604.0, halfPremiumWithLTC: 50600.0 },
-    { minIncomeInclusive: 905000, maxIncomeExclusive: 955000, halfPremiumNoLTC: 46081.5, halfPremiumWithLTC: 53475.0 },
-    { minIncomeInclusive: 955000, maxIncomeExclusive: 1005000, halfPremiumNoLTC: 48559.0, halfPremiumWithLTC: 56350.0 },
-    { minIncomeInclusive: 1005000, maxIncomeExclusive: 1055000, halfPremiumNoLTC: 51036.5, halfPremiumWithLTC: 59225.0 },
-    { minIncomeInclusive: 1055000, maxIncomeExclusive: 1115000, halfPremiumNoLTC: 54009.5, halfPremiumWithLTC: 62675.0 },
-    { minIncomeInclusive: 1115000, maxIncomeExclusive: 1175000, halfPremiumNoLTC: 56982.5, halfPremiumWithLTC: 66125.0 },
-    { minIncomeInclusive: 1175000, maxIncomeExclusive: 1235000, halfPremiumNoLTC: 59955.5, halfPremiumWithLTC: 69575.0 },
-    { minIncomeInclusive: 1235000, maxIncomeExclusive: 1295000, halfPremiumNoLTC: 62928.5, halfPremiumWithLTC: 73025.0 },
-    { minIncomeInclusive: 1295000, maxIncomeExclusive: 1355000, halfPremiumNoLTC: 65901.5, halfPremiumWithLTC: 76475.0 },
-    { minIncomeInclusive: 1355000, maxIncomeExclusive: Infinity, halfPremiumNoLTC: 68874.5, halfPremiumWithLTC: 79925.0 },
-];
-
-/**
- * Calculates the monthly health insurance premium (half amount) based on monthly income
- * for Tokyo Branch, effective March 2025 (Reiwa 7).
+ * Calculates the annual health insurance premium.
  *
- * @param monthlyIncome The person's total monthly income (報酬月額).
+ * @param annualIncome The person's total annual income.
  * @param includeNursingCareInsurance True if the person is a Category 2 insured
  * for long-term care insurance (介護保険第２号被保険者).
+ * @param provider The health insurance provider.
+ * @param region The region for the provider.
+ *               For KyokaiKenpo, this is KyokaiKenpoRegion.
+ *               For National Health Insurance, this is a string (municipality identifier).
+ *               For providers with no regions, this is DEFAULT_PROVIDER_REGION.
  * @returns The annual health insurance premium.
  */
 export function calculateHealthInsurancePremium(
     annualIncome: number,
     includeNursingCareInsurance: boolean,
-    isEmployee: boolean = true,
+    provider: HealthInsuranceProviderId,
+    region: ProviderRegion = DEFAULT_PROVIDER_REGION
 ): number {
     if (annualIncome < 0) {
         throw new Error('Income cannot be negative.');
     }
 
-    if (!isEmployee) {
-        return calculateNationalHealthInsurancePremium(annualIncome, includeNursingCareInsurance);
+    if (provider === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+        // The 'region' parameter for NHI is expected to be a string (municipality key).
+        const nhiParams = getNationalHealthInsuranceParams(region as string);
+        if (!nhiParams) {
+            console.error(`National Health Insurance parameters not found for region: ${region}. Returning 0 premium.`);
+            return 0; // Or throw an error, depending on desired behavior
+        }
+        return calculateNationalHealthInsurancePremiumLogic(annualIncome, includeNursingCareInsurance, nhiParams);
     } else {
-        return calculateEmployeesHealthInsurancePremium(annualIncome / 12, includeNursingCareInsurance);
+        // For employee-based insurance providers (Kyokai Kenpo, other unions, etc.)
+        const premiumTable = getHealthInsurancePremiumTable(provider, region);
+        if (!premiumTable) {
+            console.error(`Premium table not found for provider ${provider} and region ${region}. Returning 0 premium.`);
+            return 0; // Or throw an error
+        }
+        return calculateEmployeesHealthInsurancePremium(annualIncome / 12, includeNursingCareInsurance, premiumTable);
     }
 }
 
-function calculateNationalHealthInsurancePremium(annualIncome: number, includeNursingCareInsurance: boolean): number {
-    const netIncome = Math.max(0, annualIncome - calculateResidenceTaxBasicDeduction(annualIncome));
-    // 基礎（医療）分
-    const basicPremium = Math.min(660_000, netIncome * 0.0771 + 47300);
-    // 後期高齢者支援金分
-    const elderSupportPremium = Math.min(260_000, netIncome * 0.0269 + 16800);
-    // 介護保険分
-    const longTermCarePremium = Math.min(170_000, includeNursingCareInsurance ? netIncome * 0.0225 + 16600 : 0);
-    const totalPremium = basicPremium + elderSupportPremium + longTermCarePremium;
+/**
+ * Calculates National Health Insurance premium based on regional parameters.
+ */
+function calculateNationalHealthInsurancePremiumLogic(
+    annualIncome: number,
+    includeNursingCareInsurance: boolean, // Person is 40-64 years old
+    params: NationalHealthInsuranceRegionParams
+): number {
+    // Calculate NHI taxable income (住民税算定基礎額等 - often previous year's income minus a standard deduction)
+    // For simplicity, using current annual income minus the NHI standard deduction.
+    // Real-world calculations might use prior year's certified income.
+    const nhiTaxableIncome = Math.max(0, annualIncome - params.nhiStandardDeduction);
+
+    // 1. Medical Portion (医療分)
+    const incomeBasedMedical = nhiTaxableIncome * params.medicalRate;
+    const perCapitaMedical = params.medicalPerCapita;
+    const totalMedicalPremium = Math.min(incomeBasedMedical + perCapitaMedical, params.medicalCap);
+
+    // 2. Elderly Support Portion (後期高齢者支援金分)
+    const incomeBasedSupport = nhiTaxableIncome * params.supportRate;
+    const perCapitaSupport = params.supportPerCapita;
+    const totalSupportPremium = Math.min(incomeBasedSupport + perCapitaSupport, params.supportCap);
+
+    // 3. Long-Term Care Portion (介護納付金分) - only for those aged 40-64
+    let totalLtcPremium = 0;
+    if (includeNursingCareInsurance && params.ltcRateForEligible && params.ltcPerCapitaForEligible && params.ltcCapForEligible) {
+        const incomeBasedLtc = nhiTaxableIncome * params.ltcRateForEligible;
+        const perCapitaLtc = params.ltcPerCapitaForEligible;
+        totalLtcPremium = Math.min(incomeBasedLtc + perCapitaLtc, params.ltcCapForEligible);
+    }
+
+    const totalPremium = totalMedicalPremium + totalSupportPremium + totalLtcPremium;
     return Math.round(totalPremium);
 }
 
-function calculateEmployeesHealthInsurancePremium(monthlyIncome: number, includeNursingCareInsurance: boolean): number {
-    if (KYOKAI_KENPO_TOKYO.length === 0) {
-        throw new Error('Premium table is empty. Please check the data.');
+function calculateEmployeesHealthInsurancePremium(
+    monthlyIncome: number,
+    includeNursingCareInsurance: boolean,
+    premiumTable: EmployeesHealthInsurancePremiumTableRow[]
+): number {
+    if (premiumTable.length === 0) {
+        throw new Error('Provided premium table is empty.');
     }
 
-    for (const row of KYOKAI_KENPO_TOKYO) {
+    for (const row of premiumTable) {
         if (monthlyIncome >= row.minIncomeInclusive && monthlyIncome < row.maxIncomeExclusive) {
-            return includeNursingCareInsurance ? Math.round(row.halfPremiumWithLTC) * 12 : Math.round(row.halfPremiumNoLTC) * 12;
+            // This function calculates and returns the employee's share of the premium.
+            const monthlyPremium = includeNursingCareInsurance ? row.employeePremiumWithLTC : row.employeePremiumNoLTC;
+            return Math.round(monthlyPremium) * 12;
         }
     }
 
-    // This handles the case for the last bracket where maxIncomeExclusive is Infinity.
-    // It's technically covered by the loop if monthlyIncome is very large,
-    // but this explicit check can be seen as a safeguard or for clarity.
-    const lastRow = KYOKAI_KENPO_TOKYO[KYOKAI_KENPO_TOKYO.length - 1];
-    if (monthlyIncome >= lastRow.minIncomeInclusive && lastRow.maxIncomeExclusive === Infinity) {
-        return includeNursingCareInsurance ? Math.round(lastRow.halfPremiumWithLTC) * 12 : Math.round(lastRow.halfPremiumNoLTC) * 12;
-    }
-
-    throw new Error(`Monthly income ${monthlyIncome.toLocaleString()} is outside the defined ranges in the premium table.`);
+    // This part is reached if no bracket matches.
+    // Given the last bracket usually has maxIncomeExclusive = Infinity,
+    // this should ideally not be reached for valid positive incomes if the table is comprehensive and correctly structured.
+    throw new Error(`Monthly income ${monthlyIncome.toLocaleString()} is outside the defined ranges in the provided premium table.`);
 }

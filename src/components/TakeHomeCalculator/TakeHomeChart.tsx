@@ -10,11 +10,12 @@ import { Chart as ChartJS,
   Legend,
   BarController,
   LineController } from 'chart.js';
-import type { ChartData, ChartOptions } from 'chart.js';
+import type { ChartData, ChartOptions } from 'chart.js'; // Added TooltipItem
 import { Box, Paper, Slider, Typography, useTheme, useMediaQuery } from '@mui/material';
 import type { ChartRange } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig';
+import type { HealthInsuranceProviderId } from '../../types/healthInsurance';
 
 // Register only the Chart.js components we need
 ChartJS.register(
@@ -34,6 +35,8 @@ interface TakeHomeChartProps {
   currentIncome: number;
   isEmploymentIncome: boolean;
   isOver40: boolean;
+  healthInsuranceProvider: HealthInsuranceProviderId; // Added
+  prefecture: string; // Added
   className?: string;
   style?: React.CSSProperties;
 }
@@ -73,6 +76,8 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
   currentIncome, 
   isEmploymentIncome,
   isOver40,
+  healthInsuranceProvider,
+  prefecture,
   className = '',
   style
 }) => {
@@ -92,8 +97,13 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
 
   // Generate chart data using the utility function
   const chartData = useMemo<ChartData<'bar' | 'line'>>(
-    () => generateChartData(chartRange, isEmploymentIncome, isOver40),
-    [chartRange, isEmploymentIncome, isOver40]
+    () => generateChartData(chartRange, { 
+      isEmploymentIncome, 
+      isOver40, 
+      healthInsuranceProvider, 
+      prefecture 
+    }),
+    [chartRange, isEmploymentIncome, isOver40, healthInsuranceProvider, prefecture]
   );
 
   // Get chart options using the utility function

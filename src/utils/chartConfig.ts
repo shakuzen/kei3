@@ -1,4 +1,4 @@
-import type { ChartRange } from '../types/tax'
+import type { ChartRange, TakeHomeInputs } from '../types/tax'
 import { formatJPY } from './formatters'
 import { calculateTaxes } from './taxCalculations'
 import type { ChartData, ChartOptions, Chart, TooltipItem, Scale, CoreScaleOptions, Plugin } from 'chart.js'
@@ -53,7 +53,17 @@ export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
   }
 };
 
-export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: boolean, isOver40: boolean): ChartData<'bar' | 'line'> => {
+export const generateChartData = (
+  chartRange: ChartRange,
+  currentInputs: Omit<TakeHomeInputs, 'annualIncome' | 'showDetailedInput' | 'numberOfDependents'> // Chart varies by income, other inputs are fixed for a given chart
+): ChartData<'bar' | 'line'> => {
+
+  const createTaxInputsForIncome = (income: number): TakeHomeInputs => ({
+    ...currentInputs,
+    annualIncome: income,
+    showDetailedInput: false, // Not relevant for chart calculation
+    numberOfDependents: 0, // Not relevant for chart calculation
+  });
   // Create income points based on the current range
   const step = 1000000 // 1 million yen
   const numPoints = Math.floor((chartRange.max - chartRange.min) / step) + 1
@@ -68,7 +78,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Income Tax',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).nationalIncomeTax
+        y: calculateTaxes(createTaxInputsForIncome(income)).nationalIncomeTax
       })),
       borderColor: 'rgb(255, 99, 132)',
       backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -80,7 +90,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Residence Tax',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).residenceTax
+        y: calculateTaxes(createTaxInputsForIncome(income)).residenceTax
       })),
       borderColor: 'rgb(54, 162, 235)',
       backgroundColor: 'rgba(54, 162, 235, 0.5)',
@@ -92,7 +102,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Health Insurance',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).healthInsurance
+        y: calculateTaxes(createTaxInputsForIncome(income)).healthInsurance
       })),
       borderColor: 'rgb(75, 192, 192)',
       backgroundColor: 'rgba(75, 192, 192, 0.5)',
@@ -104,7 +114,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Pension',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).pensionPayments
+        y: calculateTaxes(createTaxInputsForIncome(income)).pensionPayments
       })),
       borderColor: 'rgb(153, 102, 255)',
       backgroundColor: 'rgba(153, 102, 255, 0.5)',
@@ -112,11 +122,11 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       type: 'bar' as const,
       stack: 'stack0',
     },
-    ...(isEmploymentIncome ? [{
+    ...(currentInputs.isEmploymentIncome ? [{
       label: 'Employment Insurance',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).employmentInsurance
+        y: calculateTaxes(createTaxInputsForIncome(income)).employmentInsurance
       })),
       borderColor: 'rgb(255, 159, 64)',
       backgroundColor: 'rgba(255, 159, 64, 0.5)',
@@ -128,7 +138,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
       label: 'Take-Home Pay',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(income, isEmploymentIncome, isOver40).takeHomeIncome
+        y: calculateTaxes(createTaxInputsForIncome(income)).takeHomeIncome
       })),
       borderColor: 'rgb(34, 197, 94)',
       backgroundColor: 'rgba(34, 197, 94, 0.5)',
@@ -139,7 +149,7 @@ export const generateChartData = (chartRange: ChartRange, isEmploymentIncome: bo
     {
       label: 'Take-Home %',
       data: incomePoints.map(income => {
-        const result = calculateTaxes(income, isEmploymentIncome, isOver40)
+        const result = calculateTaxes(createTaxInputsForIncome(income));
         return {
           x: income,
           y: (result.takeHomeIncome / income) * 100

@@ -4,6 +4,9 @@ import ThemeToggle from './components/ThemeToggle'
 import { TakeHomeInputForm } from './components/TakeHomeCalculator/InputForm'
 import type { TakeHomeInputs, TakeHomeResults } from './types/tax'
 import { calculateTaxes } from './utils/taxCalculations'
+import { HealthInsuranceProvider, DEFAULT_PROVIDER_REGION } from './types/healthInsurance'
+import { NATIONAL_HEALTH_INSURANCE_REGIONS } from './data/nationalHealthInsurance'
+import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from './data/employeesHealthInsurance'
 
 // Lazy load components that aren't immediately needed
 const TakeHomeResultsDisplay = lazy(() => import('./components/TakeHomeCalculator/TakeHomeResults'))
@@ -20,9 +23,9 @@ function App({ mode, toggleColorMode }: AppProps) {
     annualIncome: 5000000, // 5 million yen
     isEmploymentIncome: true,
     isOver40: false,
-    prefecture: 'Tokyo',
+    prefecture: "Tokyo",
     showDetailedInput: false,
-    healthInsuranceProvider: 'Kyokai Kenpo',
+    healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
     numberOfDependents: 0
   }
 
@@ -35,8 +38,7 @@ function App({ mode, toggleColorMode }: AppProps) {
   // Debounce the tax calculation to prevent excessive updates from rapid slider changes
   useEffect(() => {
     const calculateAndSetResults = () => {
-      // console.log('Debounced: Calculating taxes with income:', inputs.annualIncome); // Optional: for debugging
-      const takeHomePayResults = calculateTaxes(inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40);
+      const takeHomePayResults = calculateTaxes(inputs);
       setResults(takeHomePayResults);
     };
 
@@ -48,42 +50,59 @@ function App({ mode, toggleColorMode }: AppProps) {
     return () => {
       clearTimeout(handler);
     };
-  }, [inputs.annualIncome, inputs.isEmploymentIncome, inputs.isOver40]);
+  }, [inputs]); // Depend on the entire inputs object
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type } = target;
     const isCheckbox = type === 'checkbox';
-    const isRadio = type === 'radio';
     const isNumber = type === 'number' || type === 'range';
 
     setInputs(prev => {
-      let newValue: string | number | boolean;
+      let processedInputValue: string | number | boolean;
       
       if (isCheckbox) {
-        newValue = target.checked;
-      } else if (isRadio) {
-        // For radio buttons, the value comes as a string 'true' or 'false'
-        newValue = value === 'true';
+        processedInputValue = target.checked;
       } else if (isNumber) {
-        newValue = parseFloat(value as string) || 0;
+        processedInputValue = parseFloat(value as string) || 0;
       } else {
-        newValue = value;
+        // For select and other text-based inputs
+        processedInputValue = value;
       }
 
       const newInputs = {
         ...prev,
-        [name]: newValue
+        [name]: processedInputValue
       };
 
-      // Update health insurance provider based on employment income status
+      // Cascading updates for health insurance provider and prefecture
       if (name === 'isEmploymentIncome') {
-        newInputs.healthInsuranceProvider = target.checked 
-          ? 'Kyokai Kenpo' 
-          : 'National Health Insurance';
+        const isNowEmploymentIncome = processedInputValue as boolean;
+        if (isNowEmploymentIncome) {
+          newInputs.healthInsuranceProvider = HealthInsuranceProvider.KYOKAI_KENPO.id;
+          const providerRegions = Object.keys(ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[newInputs.healthInsuranceProvider] || {});
+          newInputs.prefecture = providerRegions.length > 0 ? providerRegions[0] : DEFAULT_PROVIDER_REGION;
+        } else {
+          newInputs.healthInsuranceProvider = HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id;
+          newInputs.prefecture = NATIONAL_HEALTH_INSURANCE_REGIONS.length > 0 ? NATIONAL_HEALTH_INSURANCE_REGIONS[0] : DEFAULT_PROVIDER_REGION;
+        }
+      } else if (name === 'healthInsuranceProvider') {
+        const newProviderId = processedInputValue as string;
+        if (newProviderId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+          newInputs.prefecture = NATIONAL_HEALTH_INSURANCE_REGIONS.length > 0 ? NATIONAL_HEALTH_INSURANCE_REGIONS[0] : DEFAULT_PROVIDER_REGION;
+        } else {
+          // For employee providers (Kyokai Kenpo, ITS Kenpo, etc.)
+          const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[newProviderId];
+          if (providerData) {
+            const providerRegions = Object.keys(providerData);
+            newInputs.prefecture = providerRegions.length > 0 ? providerRegions[0] : DEFAULT_PROVIDER_REGION;
+          } else {
+            newInputs.prefecture = DEFAULT_PROVIDER_REGION;
+            console.warn(`Data for employee provider ${newProviderId} not found in ALL_EMPLOYEES_HEALTH_INSURANCE_DATA. Defaulting prefecture.`);
+          }
+        }
       }
-
       return newInputs;
     });
   }
@@ -165,6 +184,8 @@ function App({ mode, toggleColorMode }: AppProps) {
           currentIncome={inputs.annualIncome}
           isEmploymentIncome={inputs.isEmploymentIncome}
           isOver40={inputs.isOver40}
+          healthInsuranceProvider={inputs.healthInsuranceProvider}
+          prefecture={inputs.prefecture}
         />
       </Suspense>
 

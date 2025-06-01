@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calculateTaxes, getEmploymentIncomeDeduction, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
+import { HealthInsuranceProvider } from '../types/healthInsurance'
 
 describe('getEmploymentIncomeDeduction', () => {
   it('returns 650,000 yen for income up to 1,900,000 yen', () => {
@@ -28,7 +29,15 @@ describe('getEmploymentIncomeDeduction', () => {
 describe('calculateTaxes', () => {
   // Test cases for different income brackets
   it('calculates taxes correctly for income below 1,950,000 yen', () => {
-    const result = calculateTaxes(1_500_000, true, false)
+    const inputs = {
+      annualIncome: 1_500_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo", // Default for Kyokai Kenpo in tests
+      numberOfDependents: 0, showDetailedInput: false, // Added missing properties
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
     expect(result.residenceTax).toBe(24_700)
     expect(result.healthInsurance).toBe(74_916)
@@ -42,7 +51,15 @@ describe('calculateTaxes', () => {
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
-    const result = calculateTaxes(2_500_000, true, false)
+    const inputs = {
+      annualIncome: 2_500_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(22_300)
     expect(result.residenceTax).toBe(93_600)
     expect(result.healthInsurance).toBe(118_920)
@@ -56,7 +73,15 @@ describe('calculateTaxes', () => {
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
-    const result = calculateTaxes(5_000_000, true, false)
+    const inputs = {
+      annualIncome: 5_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(120_700)
     expect(result.residenceTax).toBe(245_700)
     expect(result.healthInsurance).toBe(243_792)
@@ -71,7 +96,15 @@ describe('calculateTaxes', () => {
 
   // Test cases for high income brackets
   it('calculates taxes correctly for income above 40,000,000 yen', () => {
-    const result = calculateTaxes(50_000_000, true, false)
+    const inputs = {
+      annualIncome: 50_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(16_345_400) // 50M - 1.95M (employment deduction) - 1.815194M (social insurance) - 0 (basic deduction) = 46.234806M, rounded to 46.234M, then 45% - 4.796M = 16.0093M, + 2.1% = 16.345495M, rounded down to 16.3454M
     expect(result.residenceTax).toBe(4_628_300) // (50M - 1.95M - 1.815194M - 0) = 46.234806M, rounded to 46.234M, then 6% city tax (2.774M) + 4% prefectural tax (1.8493M) + 5K 均等割
     expect(result.healthInsurance).toBe(826_500) // Capped at 68,874.5 * 12
@@ -86,7 +119,15 @@ describe('calculateTaxes', () => {
 
   // Test edge cases
   it('handles zero income correctly', () => {
-    const result = calculateTaxes(0, true, false)
+    const inputs = {
+      annualIncome: 0,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
     expect(result.residenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
@@ -97,7 +138,15 @@ describe('calculateTaxes', () => {
   })
 
   it('handles negative income correctly', () => {
-    const result = calculateTaxes(-1_000_000, true, false)
+    const inputs = {
+      annualIncome: -1_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
     expect(result.residenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
@@ -108,7 +157,15 @@ describe('calculateTaxes', () => {
   })
 
   it('calculates taxes correctly for non-employment income', () => {
-    const result = calculateTaxes(5_000_000, false, false)
+    const inputs = {
+      annualIncome: 5_000_000,
+      isEmploymentIncome: false,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id,
+      prefecture: "Tokyo", // For NHI
+      numberOfDependents: 0, showDetailedInput: false,
+    };
+    const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(302_700)
     expect(result.residenceTax).toBe(387_000)
     expect(result.healthInsurance).toBe(539_380)

@@ -1,7 +1,6 @@
-import type { TakeHomeResults } from '../types/tax'
+import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
 import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
-
 /**
  * Calculates the employment income deduction based on the 2025 tax rules
  * Source: https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm
@@ -172,8 +171,8 @@ export const calculateResidenceTax = (
     return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
 }
 
-export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean, isOver40: boolean): TakeHomeResults => {
-    if (annualIncome <= 0) {
+export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
+    if (inputs.annualIncome <= 0) {
         return {
             nationalIncomeTax: 0,
             residenceTax: 0,
@@ -182,21 +181,25 @@ export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean
             employmentInsurance: 0,
             totalTax: 0,
             takeHomeIncome: 0
-        }
+        };
     }
-    const netIncome = isEmploymentIncome ? annualIncome - getEmploymentIncomeDeduction(annualIncome) : annualIncome;
+    const netIncome = inputs.isEmploymentIncome ? inputs.annualIncome - getEmploymentIncomeDeduction(inputs.annualIncome) : inputs.annualIncome;
 
-    const healthInsurance = calculateHealthInsurancePremium(annualIncome, isOver40, isEmploymentIncome);
+    const healthInsurance = calculateHealthInsurancePremium(
+        inputs.annualIncome,
+        inputs.isOver40,
+        inputs.healthInsuranceProvider,
+        inputs.prefecture
+    );
 
-    const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
+    const pensionPayments = calculatePensionPremium(inputs.isEmploymentIncome, inputs.annualIncome / 12);
 
-    const employmentInsurance = calculateEmploymentInsurance(annualIncome, isEmploymentIncome);
+    const employmentInsurance = calculateEmploymentInsurance(inputs.annualIncome, inputs.isEmploymentIncome);
 
     const socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
 
     const nationalIncomeTaxBasicDeduction = calculateNationalIncomeTaxBasicDeduction(netIncome);
 
-    // Round down taxable income to the nearest thousand yen
     const taxableIncomeForNationalIncomeTax = Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000;
 
     const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
@@ -204,8 +207,8 @@ export const calculateTaxes = (annualIncome: number, isEmploymentIncome: boolean
     const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
     // Calculate totals
-    const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance
-    const takeHomeIncome = annualIncome - totalTax
+    const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
+    const takeHomeIncome = inputs.annualIncome - totalTax;
 
     return {
         nationalIncomeTax,

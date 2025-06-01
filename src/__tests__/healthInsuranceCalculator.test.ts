@@ -1,58 +1,98 @@
 import { describe, it, expect } from 'vitest'
 import { calculateHealthInsurancePremium } from '../utils/healthInsuranceCalculator'
+import { HealthInsuranceProvider, DEFAULT_PROVIDER_REGION } from '../types/healthInsurance'
+
+const KYOKAI_KENPO_PROVIDER_ID = HealthInsuranceProvider.KYOKAI_KENPO.id;
+const ITS_KENPO_PROVIDER_ID = HealthInsuranceProvider.ITS_KENPO.id;
 
 describe('calculateHealthInsurancePremium for employees', () => {
-    it('calculates employees health insurance premium for people under 40', () => {
-      expect(calculateHealthInsurancePremium(5_000_000, false)).toBe(243_792)
-    })
+  describe('Kyokai Kenpo (Tokyo)', () => {
+      it('calculates premium for people under 40', () => {
+        expect(calculateHealthInsurancePremium(5_000_000, false, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(243_792)
+      })
 
-    it('calculates employees health insurance premium for people under 40 with cap', () => {
-      expect(calculateHealthInsurancePremium(20_000_000, false)).toBe(826_500)
-    })
-  
-    it('calculates employees health insurance premium with nursing care for people over 40', () => {
-      expect(calculateHealthInsurancePremium(5_000_000, true)).toBe(282_900)
-    })
-  
-    it('calculates employees health insurance premium with nursing care for people over 40 with cap', () => {
-      expect(calculateHealthInsurancePremium(20_000_000, true)).toBe(959_100)
-    })
-  
+      it('calculates employees health insurance premium for people under 40 with cap', () => {
+        expect(calculateHealthInsurancePremium(20_000_000, false, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(826_500)
+      })
+    
+      it('calculates employees health insurance premium with nursing care for people over 40', () => {
+        expect(calculateHealthInsurancePremium(5_000_000, true, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(282_900)
+      })
+    
+      it('calculates employees health insurance premium with nursing care for people over 40 with cap', () => {
+        expect(calculateHealthInsurancePremium(20_000_000, true, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(959_100)
+      })
+    
+      it('handles zero income correctly', () => {
+        expect(calculateHealthInsurancePremium(0, false, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(34_488)
+        expect(calculateHealthInsurancePremium(0, true, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toBe(40_020)
+      })
+    
+      it('handles negative income correctly', () => {
+        expect(() => calculateHealthInsurancePremium(-1_000_000, false, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toThrowError('Income cannot be negative.')
+        expect(() => calculateHealthInsurancePremium(-1_000_000, true, KYOKAI_KENPO_PROVIDER_ID, "Tokyo")).toThrowError('Income cannot be negative.')
+      })
+  });
+
+  describe('ITS Kenpo (Default Region)', () => {
+    // Annual income 5,000,000 / 12 = 416,666.67. SMR: 410,000円
+    // Employee No LTC: 19,475. Employee With LTC: 19,475 + 3,690 (LTC for 410k) = 23,165
+    it('calculates premium for people under 40', () => {
+      expect(calculateHealthInsurancePremium(5_000_000, false, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(19475 * 12); // 233_700
+    });
+
+    // Annual income 20,000,000 / 12 = 1,666,666.67. SMR: 1,390,000円 (Max)
+    // Employee No LTC: 66,025. Employee With LTC: 66,025 + 12,510 (LTC for 1.39M) = 78,535
+    it('calculates premium for people under 40 with cap', () => {
+      expect(calculateHealthInsurancePremium(20_000_000, false, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(66025 * 12); // 792_300
+    });
+
+    it('calculates premium with nursing care for people over 40', () => {
+      expect(calculateHealthInsurancePremium(5_000_000, true, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(23165 * 12); // 277_980
+    });
+
+    it('calculates premium with nursing care for people over 40 with cap', () => {
+      expect(calculateHealthInsurancePremium(20_000_000, true, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(78535 * 12); // 942_420
+    });
+
+    // Annual income 0 / 12 = 0. SMR: 58,000円
+    // Employee No LTC: 2,755. Employee With LTC: 2,755 + 522 (LTC for 58k) = 3,277
     it('handles zero income correctly', () => {
-      expect(calculateHealthInsurancePremium(0, false)).toBe(34_488)
-      expect(calculateHealthInsurancePremium(0, true)).toBe(40_020)
-    })
-  
+      expect(calculateHealthInsurancePremium(0, false, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(2755 * 12); // 33_060
+      expect(calculateHealthInsurancePremium(0, true, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toBe(3277 * 12); // 39_324
+    });
+
     it('handles negative income correctly', () => {
-      expect(() => calculateHealthInsurancePremium(-1_000_000, false)).toThrowError('Income cannot be negative.')
-      expect(() => calculateHealthInsurancePremium(-1_000_000, true)).toThrowError('Income cannot be negative.')
-    })
-  })
+      expect(() => calculateHealthInsurancePremium(-1_000_000, false, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toThrowError('Income cannot be negative.');
+      expect(() => calculateHealthInsurancePremium(-1_000_000, true, ITS_KENPO_PROVIDER_ID, DEFAULT_PROVIDER_REGION)).toThrowError('Income cannot be negative.');
+    });
+  });
+})
 
   describe('calculateHealthInsurancePremium for non-employees', () => {
     it('calculates NHI premium', () => {
-      expect(calculateHealthInsurancePremium(5_000_000, false, false)).toBe(539_380)
+      expect(calculateHealthInsurancePremium(5_000_000, false, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(539_380)
     })
 
     it('calculates NHI premium with cap', () => {
-      expect(calculateHealthInsurancePremium(20_000_000, false, false)).toBe(920_000)
+      expect(calculateHealthInsurancePremium(20_000_000, false, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(920_000)
     })
 
     it('calculates NHI premium with nursing care', () => {
-      expect(calculateHealthInsurancePremium(5_000_000, true, false)).toBe(658_805)
+      expect(calculateHealthInsurancePremium(5_000_000, true, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(658_805)
     })
 
     it('calculates NHI premium with nursing care and cap', () => {
-      expect(calculateHealthInsurancePremium(20_000_000, true, false)).toBe(1_090_000)
+      expect(calculateHealthInsurancePremium(20_000_000, true, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(1_090_000)
     })
 
     it('handles zero income correctly', () => {
-      expect(calculateHealthInsurancePremium(0, false, false)).toBe(64_100)
-      expect(calculateHealthInsurancePremium(0, true, false)).toBe(80_700)
+      expect(calculateHealthInsurancePremium(0, false, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(64_100)
+      expect(calculateHealthInsurancePremium(0, true, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toBe(80_700)
     })
 
     it('handles negative income correctly', () => {
-      expect(() => calculateHealthInsurancePremium(-1_000_000, false, false)).toThrowError('Income cannot be negative.')
-      expect(() => calculateHealthInsurancePremium(-1_000_000, true, false)).toThrowError('Income cannot be negative.')
+      expect(() => calculateHealthInsurancePremium(-1_000_000, false, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toThrowError('Income cannot be negative.')
+      expect(() => calculateHealthInsurancePremium(-1_000_000, true, HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id, 'Tokyo')).toThrowError('Income cannot be negative.')
     })
   })

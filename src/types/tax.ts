@@ -1,10 +1,11 @@
+import type { HealthInsuranceProviderId } from "./healthInsurance";
 export interface TakeHomeInputs {
   annualIncome: number
   isEmploymentIncome: boolean
   isOver40: boolean
   prefecture: string
   showDetailedInput: boolean
-  healthInsuranceProvider: string
+  healthInsuranceProvider: HealthInsuranceProviderId;
   numberOfDependents: number
 }
 

@@ -17,8 +17,13 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { InfoTooltip } from '../ui/InfoTooltip';
 
-import type { TakeHomeInputs } from '../../types/tax';
-
+import type { TakeHomeInputs } from '../../types/tax'; // Assuming HealthInsuranceProviderId is used in TakeHomeInputs
+import {
+  HealthInsuranceProvider,
+  DEFAULT_PROVIDER_REGION, // Import DEFAULT_PROVIDER_REGION
+} from '../../types/healthInsurance';
+import { NATIONAL_HEALTH_INSURANCE_REGIONS } from '../../data/nationalHealthInsurance';
+import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from '../../data/employeesHealthInsurance'; // Import data source
 interface TaxInputFormProps {
   inputs: TakeHomeInputs;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => void;
@@ -164,14 +169,84 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     onInputChange(event);
   };
 
+  // Determine available health insurance providers based on income type
+  const availableProviders = React.useMemo(() => {
+    if (inputs.isEmploymentIncome) {
+      // Filter out National Health Insurance for employment income
+      return Object.values(HealthInsuranceProvider).filter(
+        provider => provider.id !== HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id
+      );
+    } else {
+      // Only National Health Insurance for non-employment income
+      return [HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE];
+    }
+  }, [inputs.isEmploymentIncome]);
+
+  const isHealthInsuranceProviderDropdownDisabled = availableProviders.length <= 1;
+
+  // Derive regions for the currently selected health insurance provider
+  const derivedProviderRegions = React.useMemo(() => {
+    const providerId = inputs.healthInsuranceProvider;
+    if (!providerId) return [];
+
+    let regionKeys: string[] = [];
+
+    if (providerId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+      regionKeys = NATIONAL_HEALTH_INSURANCE_REGIONS;
+    } else {
+      // Employee health insurance provider
+      const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[providerId];
+      if (providerData) {
+        regionKeys = Object.keys(providerData);
+      }
+    }
+    
+    return regionKeys;
+  }, [inputs.healthInsuranceProvider]);
+
+  // True if the only derived region is the DEFAULT_PROVIDER_REGION
+  const isEffectivelySingleDefaultRegion = 
+    derivedProviderRegions.length === 1 && derivedProviderRegions[0] === DEFAULT_PROVIDER_REGION;
+
+  // Prefecture dropdown is disabled if:
+  // 1. No health insurance providers are available at all.
+  // 2. The selected provider has no regions listed in its data.
+  // 3. The selected provider has only one region (this includes the case where it's DEFAULT_PROVIDER_REGION).
+  const isPrefectureDropdownEffectivelyDisabled = 
+    availableProviders.length === 0 ||
+    derivedProviderRegions.length === 0 || // Covers case where provider has no regions in data
+    derivedProviderRegions.length === 1;   // Covers case where provider has only one region (e.g., only Tokyo, or only DEFAULT)
+
+  // Determine the value to pass to the Select component's value prop for UI display.
+  const prefectureSelectValueForUI = React.useMemo(() => {
+    // If the situation is a single default region (like Kanto ITS Kenpo)
+    // AND the actual input value for prefecture IS that default region,
+    // then the UI Select component should receive an empty string to appear blank and satisfy MUI.
+    if (isEffectivelySingleDefaultRegion && inputs.prefecture === DEFAULT_PROVIDER_REGION) {
+      return '';
+    }
+    // Otherwise, use the actual prefecture value from the inputs state.
+    return inputs.prefecture;
+  }, [inputs.prefecture, isEffectivelySingleDefaultRegion]);
+
+  // Menu items to display in the prefecture dropdown.
+  const prefectureMenuItemsToDisplay = React.useMemo(() => {
+    if (isEffectivelySingleDefaultRegion) {
+      return []; // Don't show "DEFAULT" as a selectable option if it's the only one
+    }
+    return derivedProviderRegions; // This is an array of strings (region IDs)
+  }, [derivedProviderRegions, isEffectivelySingleDefaultRegion]);
+
   const handleSelectChange = (e: { target: { name: string; value: unknown } }) => {
-    onInputChange({
-      ...e,
+    // The parent component's onInputChange handler is responsible for
+    // managing cascading state updates (e.g., setting a default prefecture).
+    const event = {
       target: {
         ...e.target,
         type: 'select'
       }
-    } as React.ChangeEvent<HTMLInputElement>);
+    } as React.ChangeEvent<HTMLInputElement>;
+    onInputChange(event);
   };
 
   return (
@@ -369,51 +444,60 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
             <Typography variant="subtitle2">Advanced Options</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <FormControl fullWidth sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                Prefecture
-                <InfoTooltip title="Select your prefecture for local tax calculations" />
-              </Typography>
-              <Select
-                id="prefecture"
-                name="prefecture"
-                value={inputs.prefecture}
-                onChange={handleSelectChange}
-                disabled={true}
-                fullWidth
-              >
-                <MenuItem value="Tokyo">Tokyo</MenuItem>
-                <MenuItem value="Osaka">Osaka</MenuItem>
-                <MenuItem value="Kyoto">Kyoto</MenuItem>
-                <MenuItem value="Hokkaido">Hokkaido</MenuItem>
-                <MenuItem value="Fukuoka">Fukuoka</MenuItem>
-              </Select>
-            </FormControl>
+            {/* Group Health Insurance Provider and Prefecture */}
+            <Box sx={styles.formSection}>
+              <FormControl fullWidth>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  Health Insurance Provider
+                  <InfoTooltip title="Your health insurance provider affects your premium calculations" />
+                </Typography>
+                <Select
+                  id="healthInsuranceProvider"
+                  name="healthInsuranceProvider"
+                  value={inputs.healthInsuranceProvider}
+                  onChange={handleSelectChange}
+                  disabled={isHealthInsuranceProviderDropdownDisabled}
+                  fullWidth
+                >
+                  {availableProviders.map((provider) => (
+                    <MenuItem key={provider.id} value={provider.id}>
+                      {provider.displayName}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {isHealthInsuranceProviderDropdownDisabled && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {inputs.isEmploymentIncome
+                      ? availableProviders.length > 0 ? `Automatically set to ${availableProviders[0].displayName} for employment income.` : 'No employee health insurance providers available.'
+                      : `Automatically set to ${HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.displayName} for non-employment income.`
+                    }
+                  </Typography>
+                )}
+              </FormControl>
 
-            <FormControl fullWidth sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                Health Insurance Provider
-                <InfoTooltip title="Your health insurance provider affects your premium calculations" />
-              </Typography>
-              <Select
-                id="healthInsuranceProvider"
-                name="healthInsuranceProvider"
-                value={inputs.healthInsuranceProvider}
-                onChange={handleSelectChange}
-                disabled={true}
-                fullWidth
-              >
-                <MenuItem value="Kyokai Kenpo">Kyokai Kenpo (Employment Income)</MenuItem>
-                <MenuItem value="National Health Insurance">National Health Insurance (Self-employed)</MenuItem>
-              </Select>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {inputs.isEmploymentIncome 
-                  ? 'Automatically set to Kyokai Kenpo for employment income'
-                  : 'Automatically set to National Health Insurance for non-employment income'}
-              </Typography>
-            </FormControl>
-
-            <FormControl fullWidth>
+              <FormControl fullWidth>
+                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+                  Prefecture
+                  <InfoTooltip title="Select your prefecture for local tax calculations" />
+                </Typography>
+                <Select
+                  id="prefecture"
+                  name="prefecture"
+                  value={prefectureSelectValueForUI}
+                  onChange={handleSelectChange}
+                  disabled={isPrefectureDropdownEffectivelyDisabled}
+                  fullWidth
+                >
+                  {prefectureMenuItemsToDisplay.map((region) => (
+                      <MenuItem key={region} value={region}>
+                        {region}
+                      </MenuItem>
+                    ))}
+                </Select>
+                {/* You might want to add helper text here if the list is empty or provider not set */}
+              </FormControl>
+            </Box>
+            <FormControl fullWidth sx={{ mt: 0 }}> {/* Ensure this FormControl for dependents has the correct top margin */}
               <TextField
                 id="numberOfDependents"
                 name="numberOfDependents"
