@@ -134,21 +134,31 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
       elevation={0}
       className={className}
       sx={{
-        p: 3,
-        mt: 3,
+        p: { xs: 1.2, sm: 3 },
+        mt: { xs: 2, sm: 3 },
         bgcolor: 'background.paper',
+        borderRadius: 3,
         border: '1px solid',
         borderColor: 'divider',
+        boxShadow: 2,
         ...style
       }}
     >
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      <Box sx={{ mb: { xs: 1, sm: 2 } }}>
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            fontSize: { xs: '1.08rem', sm: '1.3rem' },
+            fontWeight: 700,
+            mb: 0,
+          }}
+        >
           Take-Home Pay Chart
         </Typography>
       </Box>
       
-      <Box className="chart-container">
+      <Box className="chart-container" sx={{ mb: { xs: 1.2, sm: 2 } }}>
         <Chart 
           ref={chartRef}
           type="bar" 
@@ -159,68 +169,149 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
       </Box>
 
       {/* Custom Legend for Income Lines */}
-      <Box className="chart-legend">
+      <Box
+        className="chart-legend"
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: { xs: 0.7, sm: 2 },
+          mb: { xs: 1.2, sm: 2 },
+          mt: 0,
+        }}
+      >
         {currentIncome > 0 && (
-          <div 
+          <Box 
             className="legend-item" 
-            style={{ opacity: yourIncomeIsVisibleInChart ? 1 : 0.5 }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              opacity: yourIncomeIsVisibleInChart ? 1 : 0.5,
+              gap: 1,
+            }}
           >
-            <span 
-              className="legend-marker" 
-              style={{ backgroundColor: YOUR_INCOME_COLOR }}
+            <Box
+              className="legend-marker"
+              sx={{
+                width: 2,           // vertical line: narrow width
+                height: 24,         // vertical line: tall height
+                borderRadius: 1,
+                backgroundColor: YOUR_INCOME_COLOR,
+                display: 'inline-block',
+                mr: 1,
+              }}
             />
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                fontSize: { xs: '0.97rem', sm: '1rem' },
+                fontWeight: 500,
+              }}
+            >
               Your Income: {formatJPY(currentIncome)}
             </Typography>
-          </div>
+          </Box>
         )}
-        <div 
+        <Box
           className="legend-item"
-          style={{ opacity: medianIncomeIsVisibleInChart ? 1 : 0.5 }}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            opacity: medianIncomeIsVisibleInChart ? 1 : 0.5,
+            gap: 1,
+          }}
         >
-          <span 
-            className="legend-marker" 
-            style={{ backgroundColor: MEDIAN_INCOME_COLOR }}
+          <Box
+            className="legend-marker"
+            sx={{
+              width: 2,           // vertical line: narrow width
+              height: 24,         // vertical line: tall height
+              borderRadius: 1,
+              backgroundColor: MEDIAN_INCOME_COLOR,
+              display: 'inline-block',
+              mr: 1,
+            }}
           />
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.97rem', sm: '1rem' },
+              fontWeight: 500,
+            }}
+          >
             Median Income: {formatJPY(MEDIAN_INCOME_VALUE)}
           </Typography>
-        </div>
+        </Box>
       </Box>
 
-      
       <Paper 
         elevation={0}
         sx={{
-          mt: 3,
-          p: 3,
+          mt: { xs: 1.2, sm: 2 },
+          p: { xs: 1.2, sm: 2 },
           bgcolor: 'action.hover',
-          borderRadius: 1,
+          borderRadius: 2,
           position: 'relative',
-          overflow: 'visible',
+          overflow: 'hidden', // keep for rounded corners
           width: '100%',
-          maxWidth: '100%',
+          boxShadow: 'none',
         }}
       >
-        <Box sx={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '100%', overflow: 'visible' }}>
-          <Typography id="range-slider" variant="subtitle2" gutterBottom>
+        <Box sx={{ 
+          position: 'relative', 
+          zIndex: 1, 
+          width: '100%', 
+          pb: 3,
+        }}>
+          <Typography
+            id="range-slider"
+            variant="subtitle2"
+            gutterBottom
+            sx={{
+              fontSize: { xs: '1rem', sm: '1.1rem' },
+              fontWeight: 600,
+              mb: { xs: 0.5, sm: 1 },
+            }}
+          >
             Chart Income Range: {formatJPY(chartRange.min)} - {formatJPY(chartRange.max)}
           </Typography>
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: { xs: 'calc(100% - 32px)', sm: 'calc(100% - 48px)' }, // leave space for labels
+              mx: 'auto',
+            }}
+          >
+            <Slider
+              value={[chartRange.min, chartRange.max]}
+              onChange={handleRangeChange}
+              valueLabelDisplay="off"
+              min={0}
+              max={100000000}
+              step={STEP_SIZE}
+              marks={visibleMarks}
+              valueLabelFormat={(value) => `¥${value.toLocaleString()}`}
+              aria-labelledby="range-slider"
+              className="range-slider"
+              sx={{
+                mt: 0,
+                mb: 0,
+                '& .MuiSlider-thumb': {
+                  width: 18,
+                  height: 18,
+                },
+                '& .MuiSlider-markLabel': {
+                  fontSize: { xs: '0.92rem', sm: '1rem' },
+                  whiteSpace: 'nowrap',
+                },
+              }}
+            />
+          </Box>
         </Box>
-          <Slider
-            value={[chartRange.min, chartRange.max]}
-            onChange={handleRangeChange}
-            valueLabelDisplay="auto"
-            min={0}
-            max={100000000}
-            step={STEP_SIZE}
-            marks={visibleMarks}
-            valueLabelFormat={(value) => `¥${value.toLocaleString()}`}
-            aria-labelledby="range-slider"
-            className="range-slider"
-          />
-        </Paper>
       </Paper>
+    </Paper>
   );
 };
 
