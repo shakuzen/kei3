@@ -16,22 +16,133 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { InfoTooltip } from '../ui/InfoTooltip';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
-import type { TakeHomeInputs } from '../../types/tax'; // Assuming HealthInsuranceProviderId is used in TakeHomeInputs
+import type { TakeHomeInputs } from '../../types/tax';
 import {
   HealthInsuranceProvider,
   DEFAULT_PROVIDER_REGION, // Import DEFAULT_PROVIDER_REGION
 } from '../../types/healthInsurance';
 import { NATIONAL_HEALTH_INSURANCE_REGIONS } from '../../data/nationalHealthInsurance';
 import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from '../../data/employeesHealthInsurance'; // Import data source
+
 interface TaxInputFormProps {
   inputs: TakeHomeInputs;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => void;
 }
 
+type HealthInsuranceProviderType = (typeof HealthInsuranceProvider)[keyof typeof HealthInsuranceProvider];
+
+interface AdvancedOptionsFieldsProps {
+  availableProviders: HealthInsuranceProviderType[];
+  isHealthInsuranceProviderDropdownDisabled: boolean;
+  inputs: TakeHomeInputs;
+  handleSelectChange: (e: { target: { name: string; value: unknown } }) => void;
+  sharedInputSx: object;
+  HealthInsuranceProvider: typeof HealthInsuranceProvider;
+  prefectureSelectValueForUI: string;
+  isPrefectureDropdownEffectivelyDisabled: boolean;
+  prefectureMenuItemsToDisplay: string[];
+  InfoTooltip: typeof InfoTooltip;
+}
+
+function AdvancedOptionsFields({
+  availableProviders,
+  isHealthInsuranceProviderDropdownDisabled,
+  inputs,
+  handleSelectChange,
+  sharedInputSx,
+  HealthInsuranceProvider,
+  prefectureSelectValueForUI,
+  isPrefectureDropdownEffectivelyDisabled,
+  prefectureMenuItemsToDisplay,
+  InfoTooltip,
+}: AdvancedOptionsFieldsProps) {
+  return (
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: { xs: 1, sm: 1.5 },
+      width: '100%',
+    }}>
+      <FormControl fullWidth>
+        <Typography
+          gutterBottom
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '0.97rem',
+            fontWeight: 500,
+            mb: 0.2,
+            color: 'text.primary',
+          }}
+        >
+          Health Insurance Provider
+          <InfoTooltip title="Your health insurance provider affects your premium calculations" />
+        </Typography>
+        <Select
+          id="healthInsuranceProvider"
+          name="healthInsuranceProvider"
+          value={inputs.healthInsuranceProvider}
+          onChange={handleSelectChange}
+          disabled={isHealthInsuranceProviderDropdownDisabled}
+          fullWidth
+          sx={sharedInputSx}
+        >
+          {availableProviders.map((provider) => (
+            <MenuItem key={provider.id} value={provider.id}>
+              {provider.displayName}
+            </MenuItem>
+          ))}
+        </Select>
+        {isHealthInsuranceProviderDropdownDisabled && (
+          <Typography color="text.secondary" sx={{ mt: 0.2, fontSize: '0.95rem' }}>
+            {inputs.isEmploymentIncome
+              ? availableProviders.length > 0 ? `Automatically set to ${availableProviders[0].displayName} for employment income.` : 'No employee health insurance providers available.'
+              : `Automatically set to ${HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.displayName} for non-employment income.`
+            }
+          </Typography>
+        )}
+      </FormControl>
+      <FormControl fullWidth>
+        <Typography
+          gutterBottom
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '0.97rem',
+            fontWeight: 500,
+            mb: 0.2,
+            color: 'text.primary',
+          }}
+        >
+          Prefecture
+          <InfoTooltip title="Prefecture selection may be used in future features." />
+        </Typography>
+        <Select
+          id="prefecture"
+          name="prefecture"
+          value={prefectureSelectValueForUI}
+          onChange={handleSelectChange}
+          disabled={isPrefectureDropdownEffectivelyDisabled}
+          fullWidth
+          sx={sharedInputSx}
+        >
+          {prefectureMenuItemsToDisplay.map((region: string) => (
+            <MenuItem key={region} value={region}>
+              {region}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
+  );
+}
+
 export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInputChange }) => {
   const theme = useTheme();
-  
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   // Component-specific styles that can't be in the global CSS
   const styles = {
     slider: {
@@ -52,78 +163,91 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     formSection: {
       display: 'flex',
       flexDirection: { xs: 'column', sm: 'row' },
-      flexWrap: 'wrap',
-      gap: { xs: 2, sm: 3 },
+      gap: { xs: 1, sm: 1.5 },
       alignItems: { xs: 'stretch', sm: 'flex-start' },
-      mb: 3,
+      mb: { xs: 0.7, sm: 1.2 }, // reduced margin bottom
       width: '100%',
       '& > *': {
         flex: '1 1 auto',
-        minWidth: 0, // Prevent overflow
+        minWidth: 0,
       }
     },
     incomeTypeToggle: {
-      maxWidth: { sm: '280px' },
+      maxWidth: { sm: '220px' }, // slightly reduced
     },
     incomeInput: {
       width: '100%',
       '& .MuiInputBase-root': {
-        fontSize: { xs: '1rem', sm: '1.1rem' },
-      },
-      '& .MuiInputAdornment-positionStart': {
-        mt: '0 !important'
+        fontSize: { xs: '0.97rem', sm: '1.05rem' },
+        py: { xs: 0.2, sm: 0.4 }, // reduced vertical padding
       },
       '& .MuiInputBase-input': {
         fontSize: { xs: '0.95rem', sm: '1rem' },
+        py: { xs: 0.2, sm: 0.4 },
       }
     },
     // Common style for the Box containing a Switch and its labels
     sharedSwitchControlBox: {
       display: 'flex',
       alignItems: 'center',
-      gap: 1,
+      gap: 0.5,
       bgcolor: 'action.hover',
       borderRadius: 2,
-      p: 1,
+      p: 0.5,
       width: 'fit-content'
     },
-    ageToggleOuter: {
-      mt: 4,
-      mb: 1,
-      width: { xs: '100%', sm: 'auto' }
+    ageDependentsRow: {
+      display: 'flex',
+      flexDirection: 'row', // always row
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: { xs: 2, sm: 3 },
+      mt: { xs: 0.5, sm: 1 },
+      mb: { xs: 0.5, sm: 1 },
+      width: '100%',
+      flexWrap: 'wrap', // allow wrapping if truly needed
+    },
+    dependentsInput: {
+      width: 80,
+      '& .MuiInputBase-root': {
+        fontSize: { xs: '0.97rem', sm: '1.05rem' },
+        py: { xs: 0.2, sm: 0.4 },
+      },
+      '& .MuiInputBase-input': {
+        fontSize: { xs: '0.95rem', sm: '1rem' },
+        py: { xs: 0.2, sm: 0.4 },
+        textAlign: 'right',
+      }
     },
     accordion: {
-      mt: 3,
+      mt: { xs: 1, sm: 2 },
       bgcolor: 'background.paper',
       boxShadow: 'none',
-      '&:before': {
-        display: 'none',
-      },
-      '&.Mui-expanded': {
-        margin: 0,
-        marginTop: 3,
-      },
-    },
-    accordionSummary: {
-      bgcolor: 'action.hover',
+      '&:before': { display: 'none' },
+      border: '1px solid',
+      borderColor: 'divider',
       borderRadius: 1,
-      minHeight: '48px !important',
-      '&.Mui-expanded': {
-        minHeight: '48px !important',
-      },
-      '& .MuiAccordionSummary-content': {
-        margin: '12px 0',
-        '&.Mui-expanded': {
-          margin: '12px 0',
-        },
-      },
+      overflow: 'hidden',
+      display: isMobile ? 'block' : 'none', // Hide on desktop
     },
     accordionDetails: {
-      p: 2,
-      pt: 3,
+      p: { xs: 1, sm: 1.5 },
+      pt: { xs: 1, sm: 2 },
       display: 'flex',
       flexDirection: 'column',
-      gap: 2,
+      gap: { xs: 1, sm: 1.5 },
+    },
+    advancedOptionsDesktop: {
+      display: isMobile ? 'none' : 'block', // Show only on desktop
+      mt: { xs: 1, sm: 2 },
+    },
+    advancedOptionsSection: {
+      display: 'flex',
+      flexDirection: 'column', // stack inputs vertically
+      gap: { xs: 1, sm: 1.5 },
+      mt: { xs: 1, sm: 2 },
+      mb: { xs: 0, sm: 0 },
+      width: '100%',
     },
   };
   const handleSliderChange = (_: Event, value: number | number[]) => {
@@ -236,30 +360,59 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     onInputChange(event);
   };
 
+  const sharedInputSx = {
+    '& .MuiInputBase-root': {
+      fontSize: { xs: '1rem', sm: '1.05rem' },
+      py: { xs: 0.3, sm: 0.5 },
+      minHeight: 36, // consistent height
+    },
+    '& .MuiInputBase-input': {
+      fontSize: { xs: '0.97rem', sm: '1rem' },
+      py: { xs: 0.3, sm: 0.5 },
+    }
+  };
+
   return (
-    <Box className="form-container">
-      <Typography variant="h5" component="h2" gutterBottom>
+    <Box className="form-container" sx={{ p: { xs: 1.2, sm: 2 }, bgcolor: 'background.paper', borderRadius: 3, boxShadow: 2 }}>
+      <Typography
+        variant="h5"
+        component="h2"
+        gutterBottom
+        sx={{
+          fontSize: { xs: '1.08rem', sm: '1.3rem' },
+          mb: { xs: 0.7, sm: 1.2 },
+          fontWeight: 700,
+        }}
+      >
         Your Information
       </Typography>
       <Box className="form-group">
-        {/* Combined Employment Income Switch and Annual Income TextField Section */}
+        {/* Income Type + Annual Income Row */}
         <Box sx={styles.formSection}>
-          {/* Employment Income Switch Section - Child 1 of formSection */}
+          {/* Income Type Switch */}
           <Box sx={{
-            ...styles.incomeTypeToggle, // Provides maxWidth
-            flexGrow: { sm: 0 },       // Prevent growing on sm+ screens
-            flexShrink: { sm: 0 },     // Prevent shrinking on sm+ screens
+            ...styles.incomeTypeToggle,
+            flex: 1,
+            minWidth: 0,
           }}>
-            <Typography variant="subtitle2" className="form-label" sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '0.97rem',
+                fontWeight: 500,
+                mb: 1,
+                color: 'text.primary',
+              }}
+            >
               Income Type
               <InfoTooltip title="Select if your income is from employment or other sources (e.g., business, miscellaneous)" />
             </Typography>
             <Box sx={styles.sharedSwitchControlBox}>
-              <Typography 
-                variant="body2" 
+              <Typography
                 color={!inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
                 fontWeight={!inputs.isEmploymentIncome ? 600 : 400}
-                sx={{ minWidth: 60, textAlign: 'center' }}
+                sx={{ minWidth: 45, textAlign: 'center', fontSize: '0.95rem' }}
               >
                 Other
               </Typography>
@@ -269,25 +422,35 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 checked={inputs.isEmploymentIncome}
                 onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
                 color="primary"
+                size="small"
+                sx={{ mx: 0.5 }}
               />
-              <Typography 
-                variant="body2" 
+              <Typography
                 color={inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
                 fontWeight={inputs.isEmploymentIncome ? 600 : 400}
-                sx={{ minWidth: 70, textAlign: 'center' }} // Reduced minWidth
+                sx={{ minWidth: 70, textAlign: 'center', fontSize: '0.95rem' }}
               >
                 Employment
               </Typography>
             </Box>
           </Box>
-
-          {/* Income Input Section - Child 2 of formSection */}
-          <Box sx={{ 
-            width: { xs: '100%', sm: 'auto' }, // Full width on xs, auto on sm+ for flex control
-            minWidth: { sm: '180px' },         // Reduced minimum width on sm+
-            maxWidth: { sm: '200px' }          // Reduced maximum width on sm+
+          {/* Income Input */}
+          <Box sx={{
+            flex: 1,
+            minWidth: 0,
+            ml: { sm: 2 },
           }}>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            <Typography
+              sx={{
+                mb: 1,
+                fontSize: '0.97rem',
+                fontWeight: 500,
+                color: 'text.primary',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {inputs.isEmploymentIncome ? 'Gross Employment Income' : 'Net Income (Business etc.)'}
             </Typography>
             <TextField
@@ -298,15 +461,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
               label="Annual Income"
               helperText={inputs.annualIncome > 0 ? `¥${inputs.annualIncome.toLocaleString()}` : 'Enter your annual income'}
-              sx={{
-                width: '100%', // TextField takes full width of its parent Box
-                '& .MuiInputBase-root': {
-                  fontSize: '1.1rem',
-                },
-                '& .MuiInputAdornment-positionStart': {
-                  mt: '0 !important'
-                }
-              }}
+              sx={sharedInputSx}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -323,7 +478,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                   ),
                   inputProps: {
                     min: 0,
-                    max: 1000000000, // Cap at 1 billion yen
+                    max: 1000000000,
                     step: 10000,
                     inputMode: 'numeric',
                     pattern: '[0-9]*',
@@ -332,7 +487,6 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                     size: 10
                   }
                 },
-
                 inputLabel: {
                   shrink: true,
                 }
@@ -341,7 +495,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
         </Box>
 
         {/* Annual Income Slider */}
-        <Box sx={{ px: 1 }}>
+        <Box sx={{ px: 1, mb: { xs: 0.3, sm: 0.5 }, mt: 0 }}>
           <Slider
             className="income-slider"
             value={inputs.annualIncome}
@@ -358,160 +512,187 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               { value: 15000000, label: '¥15M' },
               { value: 20000000, label: '¥20M' },
             ]}
+            sx={{
+              mt: 0, // <-- This is the key change!
+              mb: { xs: 0.3, sm: 0.7 },
+            }}
           />
         </Box>
 
-        {/* Age Section */}
-        <Box sx={styles.ageToggleOuter}>
-          <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
-            Age
-            <InfoTooltip title="Your obligation to pay nursing insurance premiums depends on your age." />
-          </Typography>
-          {/* Apply the shared style here for consistency */}
-          <Box sx={styles.sharedSwitchControlBox}>
-            <Typography 
-              variant="body2" 
-              color={!inputs.isOver40 ? 'primary' : 'text.secondary'}
-              fontWeight={!inputs.isOver40 ? 600 : 400}
-              sx={{ minWidth: 60, textAlign: 'center' }}
+        {/* Age + Dependents Row */}
+        <Box sx={styles.ageDependentsRow}>
+          {/* Age Switch */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              justifyContent: 'center',
+              minWidth: 0,
+              pr: { sm: 2 },
+              mb: { xs: 1, sm: 0 },
+            }}
+          >
+            <Typography
+              sx={{
+                mb: 0.2,
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '0.97rem',
+                fontWeight: 500,
+                color: 'text.primary',
+              }}
             >
-              &lt;40
+              Age
+              <InfoTooltip title="Your obligation to pay nursing insurance premiums depends on your age." />
             </Typography>
-            <Switch
-              checked={inputs.isOver40}
-              onChange={(e) => onInputChange({
-                target: {
-                  name: 'isOver40',
-                  checked: e.target.checked,
-                  type: 'checkbox'
-                }
-              } as React.ChangeEvent<HTMLInputElement>)}
-              color="primary"
+            <Box sx={styles.sharedSwitchControlBox}>
+              <Typography
+                color={!inputs.isOver40 ? 'primary' : 'text.secondary'}
+                fontWeight={!inputs.isOver40 ? 600 : 400}
+                sx={{ minWidth: 36, textAlign: 'center', fontSize: '0.95rem' }}
+              >
+                &lt;40
+              </Typography>
+              <Switch
+                checked={inputs.isOver40}
+                onChange={(e) => onInputChange({
+                  target: {
+                    name: 'isOver40',
+                    checked: e.target.checked,
+                    type: 'checkbox'
+                  }
+                } as React.ChangeEvent<HTMLInputElement>)}
+                color="primary"
+                size="small"
+                sx={{ mx: 0.5 }}
+              />
+              <Typography
+                color={inputs.isOver40 ? 'primary' : 'text.secondary'}
+                fontWeight={inputs.isOver40 ? 600 : 400}
+                sx={{ minWidth: 36, textAlign: 'center', fontSize: '0.95rem' }}
+              >
+                40+
+              </Typography>
+            </Box>
+          </Box>
+          {/* Dependents Input */}
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: 0,
+              maxWidth: 180, // optional: prevents them from getting too wide
+            }}
+          >
+            <Typography
+              sx={{
+                mb: 0.2,
+                fontSize: '0.97rem',
+                fontWeight: 500,
+                color: 'text.primary',
+              }}
+            >
+              Dependents
+            </Typography>
+            <TextField
+              disabled
+              title="Dependents input is disabled because it is not yet implemented."
+              id="numberOfDependents"
+              name="numberOfDependents"
+              label=""
+              value={inputs.numberOfDependents}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = parseInt(e.target.value) || 0;
+                onInputChange({
+                  target: {
+                    name: 'numberOfDependents',
+                    value: value,
+                    type: 'number'
+                  }
+                } as unknown as React.ChangeEvent<HTMLInputElement>);
+              }}
+              type="number"
+              sx={{
+                ...styles.dependentsInput,
+                ...sharedInputSx
+              }}
+              inputProps={{
+                min: 0,
+                'aria-label': 'Number of dependents'
+              }}
             />
-            <Typography 
-              variant="body2" 
-              color={inputs.isOver40 ? 'primary' : 'text.secondary'}
-              fontWeight={inputs.isOver40 ? 600 : 400}
-              sx={{ minWidth: 60, textAlign: 'center' }}
-            >
-              40+
-            </Typography>
           </Box>
         </Box>
 
-        <Accordion 
-          elevation={0}
-          sx={{
-            mt: 4, // Margin to separate from Age Group or Slider above
-            '&:before': {
-              display: 'none',
-            },
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 1,
-            overflow: 'hidden',
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="advanced-options-content"
-            id="advanced-options-header"
-            sx={{
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              },
-            }}
+        {/* Advanced Options */}
+        {isMobile ? (
+          <Accordion
+            elevation={0}
+            sx={styles.accordion}
+            defaultExpanded={false}
           >
-            <Typography variant="subtitle2">Advanced Options</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {/* Group Health Insurance Provider and Prefecture */}
-            <Box sx={styles.formSection}>
-              <FormControl fullWidth>
-                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                  Health Insurance Provider
-                  <InfoTooltip title="Your health insurance provider affects your premium calculations" />
-                </Typography>
-                <Select
-                  id="healthInsuranceProvider"
-                  name="healthInsuranceProvider"
-                  value={inputs.healthInsuranceProvider}
-                  onChange={handleSelectChange}
-                  disabled={isHealthInsuranceProviderDropdownDisabled}
-                  fullWidth
-                >
-                  {availableProviders.map((provider) => (
-                    <MenuItem key={provider.id} value={provider.id}>
-                      {provider.displayName}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {isHealthInsuranceProviderDropdownDisabled && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {inputs.isEmploymentIncome
-                      ? availableProviders.length > 0 ? `Automatically set to ${availableProviders[0].displayName} for employment income.` : 'No employee health insurance providers available.'
-                      : `Automatically set to ${HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.displayName} for non-employment income.`
-                    }
-                  </Typography>
-                )}
-              </FormControl>
-
-              <FormControl fullWidth>
-                <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                  Prefecture
-                  <InfoTooltip title="Select your prefecture for local tax calculations" />
-                </Typography>
-                <Select
-                  id="prefecture"
-                  name="prefecture"
-                  value={prefectureSelectValueForUI}
-                  onChange={handleSelectChange}
-                  disabled={isPrefectureDropdownEffectivelyDisabled}
-                  fullWidth
-                >
-                  {prefectureMenuItemsToDisplay.map((region) => (
-                      <MenuItem key={region} value={region}>
-                        {region}
-                      </MenuItem>
-                    ))}
-                </Select>
-                {/* You might want to add helper text here if the list is empty or provider not set */}
-              </FormControl>
-            </Box>
-            <FormControl fullWidth sx={{ mt: 0 }}> {/* Ensure this FormControl for dependents has the correct top margin */}
-              <TextField
-                id="numberOfDependents"
-                name="numberOfDependents"
-                label="Number of Dependents"
-                disabled={true}
-                value={inputs.numberOfDependents}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const value = parseInt(e.target.value) || 0;
-                  onInputChange({
-                    target: {
-                      name: 'numberOfDependents',
-                      value: value,
-                      type: 'number'
-                    }
-                  } as unknown as React.ChangeEvent<HTMLInputElement>);
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="advanced-options-content"
+              id="advanced-options-header"
+            >
+              <Typography
+                sx={{
+                  fontSize: '1.08rem',
+                  fontWeight: 700,
+                  color: 'text.primary',
                 }}
-                type="number"
-                fullWidth
-                slotProps={{
-                  htmlInput: {
-                    min: 0,
-                    'aria-label': 'Number of dependents'
-                  },
-
-                  inputLabel: { shrink: true }
-                }} />
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Dependent calculations will be implemented in a future update
+              >
+                Advanced Options
               </Typography>
-            </FormControl>
-          </AccordionDetails>
-        </Accordion>
+            </AccordionSummary>
+            <AccordionDetails sx={styles.accordionDetails}>
+              <AdvancedOptionsFields
+                availableProviders={availableProviders}
+                isHealthInsuranceProviderDropdownDisabled={isHealthInsuranceProviderDropdownDisabled}
+                inputs={inputs}
+                handleSelectChange={handleSelectChange}
+                sharedInputSx={sharedInputSx}
+                HealthInsuranceProvider={HealthInsuranceProvider}
+                prefectureSelectValueForUI={prefectureSelectValueForUI}
+                isPrefectureDropdownEffectivelyDisabled={isPrefectureDropdownEffectivelyDisabled}
+                prefectureMenuItemsToDisplay={prefectureMenuItemsToDisplay}
+                InfoTooltip={InfoTooltip}
+              />
+            </AccordionDetails>
+          </Accordion>
+        ) : (
+          <Box sx={styles.advancedOptionsDesktop}>
+            <Typography
+              sx={{
+                fontSize: { xs: '1.08rem', sm: '1.15rem' },
+                fontWeight: 700,
+                color: 'text.primary',
+                mb: 1,
+              }}
+            >
+              Advanced Options
+            </Typography>
+            <AdvancedOptionsFields
+              availableProviders={availableProviders}
+              isHealthInsuranceProviderDropdownDisabled={isHealthInsuranceProviderDropdownDisabled}
+              inputs={inputs}
+              handleSelectChange={handleSelectChange}
+              sharedInputSx={sharedInputSx}
+              HealthInsuranceProvider={HealthInsuranceProvider}
+              prefectureSelectValueForUI={prefectureSelectValueForUI}
+              isPrefectureDropdownEffectivelyDisabled={isPrefectureDropdownEffectivelyDisabled}
+              prefectureMenuItemsToDisplay={prefectureMenuItemsToDisplay}
+              InfoTooltip={InfoTooltip}
+            />
+          </Box>
+        )}
       </Box>
     </Box>
   );
-} 
+}
