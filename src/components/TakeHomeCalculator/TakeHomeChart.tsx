@@ -93,6 +93,8 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
   };
   
   const theme = useTheme();
+  const useCompactLabelFormat = useMediaQuery(theme.breakpoints.down('md'));
+
   const chartRef = useRef<ChartJS<'bar' | 'line'>>(null);
 
   // Generate chart data using the utility function
@@ -108,8 +110,8 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
 
   // Get chart options using the utility function
   const chartOptions = useMemo<ChartOptions<'bar' | 'line'>>(
-    () => getChartOptions(chartRange, currentIncome),
-    [chartRange, currentIncome]
+    () => getChartOptions(chartRange, currentIncome, useCompactLabelFormat),
+    [chartRange, currentIncome, useCompactLabelFormat]
   );
 
   // Use media query to determine if we should show minor marks

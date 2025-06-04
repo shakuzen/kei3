@@ -169,9 +169,17 @@ export const generateChartData = (
   }
 }
 
+function formatYenCompact(value: number): string {
+  if (value === 0) return '¥0';
+  if (value >= 1_000_000) return `¥${value / 1_000_000}M`;
+  if (value >= 1_000) return `¥${value / 1_000}k`;
+  return `¥${value}`;
+}
+
 export const getChartOptions = (
   chartRange: ChartRange,
-  currentIncome: number
+  currentIncome: number,
+  useCompactLabelFormat: boolean = false
 ): ChartOptions<'bar' | 'line'> => {
   const maxIncome = chartRange.max
   const minIncome = chartRange.min
@@ -232,7 +240,9 @@ export const getChartOptions = (
           align: 'center',
           callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
             const value = Number(tickValue);
-            return `¥${(value / 10000).toFixed(0)}万`;
+            return useCompactLabelFormat
+              ? formatYenCompact(value)
+              : formatJPY(value);
           }
         },
         min: chartRange.min,
@@ -246,7 +256,9 @@ export const getChartOptions = (
         ticks: {
           callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
             const value = Number(tickValue);
-            return formatJPY(value);
+            return useCompactLabelFormat
+              ? formatYenCompact(value)
+              : formatJPY(value);
           }
         }
       },
@@ -260,7 +272,7 @@ export const getChartOptions = (
         ticks: {
           callback: function(this: Scale<CoreScaleOptions>, tickValue: number | string) {
             const value = Number(tickValue);
-            return value.toFixed(1) + '%';
+            return value.toFixed(0) + '%';
           }
         }
       }
@@ -274,4 +286,4 @@ export const getChartOptions = (
       }
     }
   }
-} 
+}
