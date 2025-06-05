@@ -520,7 +520,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: { xs: 'flex-start', sm: 'center' },
+              alignItems: 'center',
               justifyContent: 'center',
               minWidth: 0,
               pr: { sm: 2 },
@@ -588,9 +588,13 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 fontSize: '0.97rem',
                 fontWeight: 500,
                 color: 'text.primary',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
               }}
             >
               Dependents
+              <InfoTooltip title="This input is disabled because dependents are not yet supported in the calculator. Future updates will allow you to enter dependents." />
             </Typography>
             <TextField
               disabled
