@@ -180,8 +180,11 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     },
     incomeInput: {
       flex: '1 1 0',
-      minWidth: 0,
       width: '100%',
+      minWidth: 180, // Prevents shrinking too much
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       '& .MuiInputBase-root': {
         fontSize: { xs: '0.97rem', sm: '1.05rem' },
         py: { xs: 0.2, sm: 0.4 },
@@ -422,7 +425,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                   textAlign: 'center',
                   width: '100%',             // Ensures centering when wrapped
                 }}>
-                  <span style={{ whiteSpace: 'nowrap' }}>Employment income</span>
+                  Employment Income
                   <InfoTooltip title="Check this box if your income is from employment (salary, wages). Uncheck for business income, miscellaneous income, etc." />
                 </Box>
               }
