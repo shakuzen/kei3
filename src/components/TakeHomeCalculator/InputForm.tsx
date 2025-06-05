@@ -118,8 +118,8 @@ function AdvancedOptionsFields({
             color: 'text.primary',
           }}
         >
-          Prefecture
-          <InfoTooltip title="Prefecture selection may be used in future features." />
+          Local Region (Prefecture)
+          <InfoTooltip title="Region selection may be used in future features." />
         </Typography>
         <Select
           id="prefecture"
@@ -503,7 +503,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               { value: 20000000, label: '¥20M' },
             ]}
             sx={{
-              mt: 0, // <-- This is the key change!
+              mt: 0,
               mb: { xs: 0.3, sm: 0.7 },
             }}
           />
@@ -611,9 +611,11 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 ...styles.dependentsInput,
                 ...sharedInputSx
               }}
-              inputProps={{
-                min: 0,
-                'aria-label': 'Number of dependents'
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  'aria-label': 'Number of dependents'
+                }
               }}
             />
           </Box>

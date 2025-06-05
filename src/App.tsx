@@ -123,20 +123,28 @@ function App({ mode, toggleColorMode }: AppProps) {
         justifyContent: 'space-between',
         alignItems: 'center',
         mb: { xs: 4, sm: 6, md: 8 },
-        flexDirection: { xs: 'column', sm: 'row' },
-        gap: 2,
+        flexDirection: 'row',
+        gap: { xs: 1, sm: 2 },
         '& h1': {
           fontSize: { xs: '1.75rem', sm: '2rem' },
           lineHeight: 1.2
         }
       }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 'bold', 
-          textAlign: { xs: 'center', sm: 'left' },
-        }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{
+            fontWeight: 'bold',
+            textAlign: { xs: 'center', sm: 'left' },
+            flex: 1,
+            maxWidth: { xs: '80vw', sm: 'none' },
+          }}
+        >
           Japan Take-Home Pay Calculator
         </Typography>
-        <ThemeToggle mode={mode} toggleColorMode={toggleColorMode} />
+        <Box sx={{ flexShrink: 0, ml: { xs: 1, sm: 2 } }}>
+          <ThemeToggle mode={mode} toggleColorMode={toggleColorMode} />
+        </Box>
       </Box>
 
       <Box sx={{

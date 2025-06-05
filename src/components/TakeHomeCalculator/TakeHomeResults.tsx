@@ -70,7 +70,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
       py: isMobile ? 0.15 : 0.6, // reduced vertical padding for mobile
       bgcolor: type === 'final' ? 'rgba(76, 175, 80, 0.07)' : undefined,
       borderRadius: type === 'final' ? 2 : undefined,
-      my: type === 'final' ? (isMobile ? 0.5 : 1) : undefined, // less margin on mobile
+      mt: type === 'final' ? (isMobile ? 0.5 : 1) : undefined, // less margin on mobile
     };
 
     switch (type) {
@@ -318,11 +318,11 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
       </Box>
       
       {/* Total Deductions */}
-      <Box sx={{ mt: { xs: 1, sm: 1.5 } }}>
+      <Box>
          <ResultRow label="Total Deductions" value={formatJPY(totalDeductions)} type="total" valuePrefix="- " />
       </Box>
       
-      <Divider sx={{ my: { xs: 1, sm: 1.5 } }} />
+      <Divider sx={{ borderBottomWidth: 2 }} />
 
       {/* Net Take-Home Pay */}
       <ResultRow
