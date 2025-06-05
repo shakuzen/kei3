@@ -33,7 +33,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
   const handleClose = () => setOpen(false);
 
   const tooltipContent = (
-    <Box sx={{ maxWidth: 300, p: 1 }}>
+    <Box sx={{ maxWidth: 300, p: 1, fontSize: isMobile ? '0.85rem' : '1rem' }}>
       {children || title}
     </Box>
   );

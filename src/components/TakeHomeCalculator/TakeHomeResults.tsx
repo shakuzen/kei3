@@ -7,7 +7,6 @@ import {
   useTheme,
   Switch,
   FormControlLabel,
-  Tooltip,
   Fade,
   useMediaQuery,
   type SxProps, type Theme
@@ -16,7 +15,7 @@ import type { TakeHomeResults } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoTooltip from '../ui/InfoTooltip';
 
 // Extend the results type for the detailed view
 interface DetailedTaxResultsProps {
@@ -176,9 +175,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         {iconMap[label] || null}
         {label}
         {labelTooltips[label] && (
-          <Tooltip title={labelTooltips[label]} arrow>
-            <InfoOutlinedIcon sx={{ fontSize: 16, color: 'action.active', ml: 0.5 }} />
-          </Tooltip>
+          <InfoTooltip title={labelTooltips[label]} />
         )}
       </Box>
     );
