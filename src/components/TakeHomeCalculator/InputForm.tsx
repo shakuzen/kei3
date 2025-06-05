@@ -12,7 +12,9 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  useTheme
+  useTheme,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { InfoTooltip } from '../ui/InfoTooltip';
@@ -162,24 +164,27 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
     },
     formSection: {
       display: 'flex',
-      flexDirection: { xs: 'column', sm: 'row' },
+      flexDirection: 'row', // Force row always
       gap: { xs: 1, sm: 1.5 },
-      alignItems: { xs: 'stretch', sm: 'flex-start' },
+      alignItems: 'center', // Center vertically
       mb: 0,
       width: '100%',
       '& > *': {
-        flex: '1 1 auto',
+        flex: '1 1 0',
         minWidth: 0,
       }
     },
     incomeTypeToggle: {
-      maxWidth: { sm: '220px' }, // slightly reduced
+      flex: '1 1 0',
+      minWidth: 0,
     },
     incomeInput: {
+      flex: '1 1 0',
+      minWidth: 0,
       width: '100%',
       '& .MuiInputBase-root': {
         fontSize: { xs: '0.97rem', sm: '1.05rem' },
-        py: { xs: 0.2, sm: 0.4 }, // reduced vertical padding
+        py: { xs: 0.2, sm: 0.4 },
       },
       '& .MuiInputBase-input': {
         fontSize: { xs: '0.95rem', sm: '1rem' },
@@ -389,57 +394,42 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       <Box className="form-group">
         {/* Income Type + Annual Income Row */}
         <Box sx={styles.formSection}>
-          {/* Income Type Switch */}
-          <Box sx={{
-            ...styles.incomeTypeToggle,
-            flex: 1,
-            minWidth: 0,
-          }}>
-            <Typography
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: '0.97rem',
-                fontWeight: 500,
-                mb: 1,
-                color: 'text.primary',
-              }}
-            >
-              Income Type
-              <InfoTooltip title="Select if your income is from employment or other sources (e.g., business, miscellaneous)" />
-            </Typography>
-            <Box sx={styles.sharedSwitchControlBox}>
-              <Typography
-                color={!inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
-                fontWeight={!inputs.isEmploymentIncome ? 600 : 400}
-                sx={{ minWidth: 45, textAlign: 'center', fontSize: '0.95rem' }}
-              >
-                Other
-              </Typography>
-              <Switch
-                id="isEmploymentIncome"
-                name="isEmploymentIncome"
-                checked={inputs.isEmploymentIncome}
-                onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
-                color="primary"
-                size="small"
-                sx={{ mx: 0.5 }}
-              />
-              <Typography
-                color={inputs.isEmploymentIncome ? 'primary' : 'text.secondary'}
-                fontWeight={inputs.isEmploymentIncome ? 600 : 400}
-                sx={{ minWidth: 70, textAlign: 'center', fontSize: '0.95rem' }}
-              >
-                Employment
-              </Typography>
-            </Box>
+          {/* Income Type Checkbox */}
+          <Box sx={styles.incomeTypeToggle}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id="isEmploymentIncome"
+                  name="isEmploymentIncome"
+                  checked={inputs.isEmploymentIncome}
+                  onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'row',      // Row for inline, allows wrapping
+                  alignItems: 'center',
+                  justifyContent: 'center',  // Center contents when wrapped
+                  flexWrap: 'wrap',          // Allow wrapping
+                  fontSize: '0.95rem',
+                  fontWeight: 500,
+                  color: 'text.primary',
+                  gap: 0.1,                  // Space between label and tooltip
+                  lineHeight: 1.2,
+                  textAlign: 'center',
+                  width: '100%',             // Ensures centering when wrapped
+                }}>
+                  <span style={{ whiteSpace: 'nowrap' }}>Employment income</span>
+                  <InfoTooltip title="Check this box if your income is from employment (salary, wages). Uncheck for business income, miscellaneous income, etc." />
+                </Box>
+              }
+            />
           </Box>
           {/* Income Input */}
-          <Box sx={{
-            flex: 1,
-            minWidth: 0,
-            ml: { sm: 2 },
-          }}>
+          <Box sx={styles.incomeInput}>
             <Typography
               sx={{
                 mb: 1,
