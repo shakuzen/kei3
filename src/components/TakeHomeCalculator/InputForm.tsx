@@ -165,7 +165,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
       flexDirection: { xs: 'column', sm: 'row' },
       gap: { xs: 1, sm: 1.5 },
       alignItems: { xs: 'stretch', sm: 'flex-start' },
-      mb: { xs: 0.7, sm: 1.2 }, // reduced margin bottom
+      mb: 0,
       width: '100%',
       '& > *': {
         flex: '1 1 auto',
