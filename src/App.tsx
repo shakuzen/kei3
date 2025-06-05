@@ -163,9 +163,7 @@ function App({ mode, toggleColorMode }: AppProps) {
             }} />
           }>
             <TakeHomeResultsDisplay 
-              results={results} 
-              annualIncome={inputs.annualIncome} 
-              isEmploymentIncome={inputs.isEmploymentIncome}
+              results={results}
             />
           </Suspense>
         )}

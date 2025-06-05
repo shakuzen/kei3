@@ -171,19 +171,25 @@ export const calculateResidenceTax = (
     return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
 }
 
+const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
+    annualIncome: 0,
+    isEmploymentIncome: true,
+    nationalIncomeTax: 0,
+    residenceTax: 0,
+    healthInsurance: 0,
+    pensionPayments: 0,
+    employmentInsurance: 0,
+    totalTax: 0,
+    takeHomeIncome: 0
+};
+
 export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     if (inputs.annualIncome <= 0) {
-        return {
-            nationalIncomeTax: 0,
-            residenceTax: 0,
-            healthInsurance: 0,
-            pensionPayments: 0,
-            employmentInsurance: 0,
-            totalTax: 0,
-            takeHomeIncome: 0
-        };
+        return DEFAULT_TAKE_HOME_RESULTS;
     }
-    const netIncome = inputs.isEmploymentIncome ? inputs.annualIncome - getEmploymentIncomeDeduction(inputs.annualIncome) : inputs.annualIncome;
+    const annualIncome = inputs.annualIncome;
+    const isEmploymentIncome = inputs.isEmploymentIncome;
+    const netIncome = isEmploymentIncome ? annualIncome - getEmploymentIncomeDeduction(annualIncome) : annualIncome;
 
     const healthInsurance = calculateHealthInsurancePremium(
         inputs.annualIncome,
@@ -192,9 +198,9 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         inputs.prefecture
     );
 
-    const pensionPayments = calculatePensionPremium(inputs.isEmploymentIncome, inputs.annualIncome / 12);
+    const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
-    const employmentInsurance = calculateEmploymentInsurance(inputs.annualIncome, inputs.isEmploymentIncome);
+    const employmentInsurance = calculateEmploymentInsurance(annualIncome, isEmploymentIncome);
 
     const socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
 
@@ -208,9 +214,11 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     // Calculate totals
     const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
-    const takeHomeIncome = inputs.annualIncome - totalTax;
+    const takeHomeIncome = annualIncome - totalTax;
 
     return {
+        annualIncome,
+        isEmploymentIncome,
         nationalIncomeTax,
         residenceTax,
         healthInsurance,

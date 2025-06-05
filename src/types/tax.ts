@@ -10,11 +10,13 @@ export interface TakeHomeInputs {
 }
 
 export interface TakeHomeResults {
+  annualIncome: number
+  isEmploymentIncome: boolean
   nationalIncomeTax: number
   residenceTax: number
   healthInsurance: number
   pensionPayments: number
-  employmentInsurance: number
+  employmentInsurance?: number
   totalTax: number
   takeHomeIncome: number
 }

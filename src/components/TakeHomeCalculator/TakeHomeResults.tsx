@@ -12,21 +12,15 @@ import {
   useMediaQuery,
   type SxProps, type Theme
 } from '@mui/material';
-import type { TakeHomeResults as TaxResultsType } from '../../types/tax';
+import type { TakeHomeResults } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
-interface TaxResultsProps {
-  results: TaxResultsType;
-  annualIncome: number;
-  isEmploymentIncome: boolean;
-}
-
 // Extend the results type for the detailed view
-interface DetailedTaxResultsProps extends TaxResultsProps {
-  results: TaxResultsType & {
+interface DetailedTaxResultsProps {
+  results: TakeHomeResults & {
     employmentIncomeDeduction?: number;
     taxableIncomeForNationalTax?: number;
     taxableIncomeForResidenceTax?: number;
@@ -50,7 +44,7 @@ const iconMap: Record<string, React.ReactNode> = {
   // 'Residence Tax': <AccountBalanceIcon fontSize="small" sx={{ color: 'success.light', mr: 0.5 }} />,
 };
 
-const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results, annualIncome, isEmploymentIncome }) => {
+const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -207,12 +201,12 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results, an
     setShowDetails(event.target.checked);
   };
 
-  const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (isEmploymentIncome ? results.employmentInsurance : 0);
+  const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (results.employmentInsurance ?? 0);
   const totalIncomeTaxes = results.nationalIncomeTax + results.residenceTax;
   const totalDeductions = results.totalTax; // results.totalTax is the sum of all taxes and social insurance payments
-  const takeHomePercentage = annualIncome > 0 ? `${((results.takeHomeIncome / annualIncome) * 100).toFixed(1)}%` : '100%';
+  const takeHomePercentage = results.annualIncome > 0 ? `${((results.takeHomeIncome / results.annualIncome) * 100).toFixed(1)}%` : '100%';
 
-  const incomeAfterEmploymentDeduction = annualIncome - (isEmploymentIncome && results.employmentIncomeDeduction !== undefined ? results.employmentIncomeDeduction : 0);
+  const incomeAfterEmploymentDeduction = results.annualIncome - (results.employmentIncomeDeduction ?? 0);
   const incomeBaseForTaxCalc = incomeAfterEmploymentDeduction - totalSocialInsurance;
 
   return (
@@ -241,13 +235,13 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results, an
         title="Detailed breakdown coming soon!"
       />
 
-      <ResultRow label="Annual Income" value={formatJPY(annualIncome)} type="header" />
+      <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
       <Divider sx={{ my: { xs: 1, sm: 1.5 } }} />
 
       {/* Details Section */}
       <Fade in={showDetails} unmountOnExit>
         <Box>
-          {isEmploymentIncome && results.employmentIncomeDeduction !== undefined && (
+          {results.isEmploymentIncome && results.employmentIncomeDeduction !== undefined && (
             <>
               <ResultRow label="Employment Income Deduction" value={formatJPY(results.employmentIncomeDeduction)} type="detail" />
               <ResultRow label="Income After Employment Deduction" value={formatJPY(incomeAfterEmploymentDeduction)} type="detail-subtotal" />
@@ -275,8 +269,8 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results, an
         </Typography>
         <ResultRow label="Health Insurance" value={formatJPY(results.healthInsurance)} type="indented" />
         <ResultRow label="Pension Payments" value={formatJPY(results.pensionPayments)} type="indented" />
-        {isEmploymentIncome && (
-          <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance)} type="indented" />
+        {results.isEmploymentIncome && (
+          <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance ?? 0)} type="indented" />
         )}
         <ResultRow label="Total Social Insurance" value={formatJPY(totalSocialInsurance)} type="subtotal" />
 

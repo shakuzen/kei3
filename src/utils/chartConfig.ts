@@ -126,7 +126,7 @@ export const generateChartData = (
       label: 'Employment Insurance',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(createTaxInputsForIncome(income)).employmentInsurance
+        y: calculateTaxes(createTaxInputsForIncome(income)).employmentInsurance ?? 0
       })),
       borderColor: 'rgb(255, 159, 64)',
       backgroundColor: 'rgba(255, 159, 64, 0.5)',
