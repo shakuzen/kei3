@@ -1,7 +1,15 @@
 export const formatJPY = (amount: number) => {
   return new Intl.NumberFormat('ja-JP', {
     style: 'currency',
-    currency: 'JPY',
-    maximumFractionDigits: 0
+    currency: 'JPY'
   }).format(amount)
-} 
+}
+
+export const formatYenCompact = (amount: number, locale: string = 'en-US') =>{
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'JPY',
+    notation: 'compact',
+    compactDisplay: 'short'
+  }).format(amount)
+}

@@ -294,7 +294,7 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
               max={100000000}
               step={STEP_SIZE}
               marks={visibleMarks}
-              valueLabelFormat={(value) => `¥${value.toLocaleString()}`}
+              valueLabelFormat={(value) => `¥${formatJPY(value)}`}
               aria-labelledby="range-slider"
               className="range-slider"
               sx={{

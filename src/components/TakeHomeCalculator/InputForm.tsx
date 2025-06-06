@@ -27,6 +27,7 @@ import {
 } from '../../types/healthInsurance';
 import { NATIONAL_HEALTH_INSURANCE_REGIONS } from '../../data/nationalHealthInsurance';
 import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from '../../data/employeesHealthInsurance'; // Import data source
+import { formatJPY } from '../../utils/formatters';
 
 interface TaxInputFormProps {
   inputs: TakeHomeInputs;
@@ -497,7 +498,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
             max={20000000}
             step={10000}
             valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `¥${value.toLocaleString()}`}
+            valueLabelFormat={(value) => `${formatJPY(value)}`}
             marks={[
               { value: 0, label: '¥0' },
               { value: 5000000, label: '¥5M' },

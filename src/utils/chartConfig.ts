@@ -1,5 +1,5 @@
 import type { ChartRange, TakeHomeInputs } from '../types/tax'
-import { formatJPY } from './formatters'
+import { formatJPY, formatYenCompact } from './formatters'
 import { calculateTaxes } from './taxCalculations'
 import type { ChartData, ChartOptions, Chart, TooltipItem, Scale, CoreScaleOptions, Plugin } from 'chart.js'
 
@@ -167,13 +167,6 @@ export const generateChartData = (
     labels: incomePoints.map(income => formatJPY(income)),
     datasets
   }
-}
-
-function formatYenCompact(value: number): string {
-  if (value === 0) return '¥0';
-  if (value >= 1_000_000) return `¥${value / 1_000_000}M`;
-  if (value >= 1_000) return `¥${value / 1_000}k`;
-  return `¥${value}`;
 }
 
 export const getChartOptions = (
