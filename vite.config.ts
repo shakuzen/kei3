@@ -12,7 +12,6 @@ export default defineConfig({
         brotliSize: true,
       })
   ],
-  base: '/kei3/', // Replace with your repository name
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
