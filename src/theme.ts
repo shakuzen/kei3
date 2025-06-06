@@ -34,7 +34,6 @@ export const getTheme = (mode: 'light' | 'dark') => {
           body: {
             backgroundColor: 'var(--background-default)',
             color: 'var(--text-primary)',
-            transition: 'background-color 0.3s ease, color 0.3s ease',
           },
         },
       },
