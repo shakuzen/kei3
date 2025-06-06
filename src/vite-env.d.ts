@@ -12,7 +12,6 @@ declare module 'chart.js' {
         currentIncomePosition: number;
         medianIncomePosition: number;
         currentIncome: number;
-        medianIncome: number;
       };
     };
   }

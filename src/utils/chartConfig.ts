@@ -2,6 +2,7 @@ import type { ChartRange, TakeHomeInputs } from '../types/tax'
 import { formatJPY, formatYenCompact } from './formatters'
 import { calculateTaxes } from './taxCalculations'
 import type { ChartData, ChartOptions, Chart, TooltipItem, Scale, CoreScaleOptions, Plugin } from 'chart.js'
+import { MEDIAN_INCOME_VALUE } from '../data/income'
 
 
 // Create custom plugin for vertical lines
@@ -177,7 +178,7 @@ export const getChartOptions = (
   const maxIncome = chartRange.max
   const minIncome = chartRange.min
   const currentIncomePosition = Math.max(0, Math.min(1, (currentIncome - minIncome) / (maxIncome - minIncome)))
-  const medianIncomePosition = Math.max(0, Math.min(1, (4330000 - minIncome) / (maxIncome - minIncome)))
+  const medianIncomePosition = Math.max(0, Math.min(1, (MEDIAN_INCOME_VALUE - minIncome) / (maxIncome - minIncome)))
 
   return {
     responsive: true,
@@ -219,7 +220,6 @@ export const getChartOptions = (
           currentIncomePosition,
           medianIncomePosition,
           currentIncome,
-          medianIncome: 4330000,
         }
       }
     },

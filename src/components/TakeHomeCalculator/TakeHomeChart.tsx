@@ -16,6 +16,7 @@ import type { ChartRange } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig';
 import type { HealthInsuranceProviderId } from '../../types/healthInsurance';
+import { MEDIAN_INCOME_VALUE } from '../../data/income';
 
 // Register only the Chart.js components we need
 ChartJS.register(
@@ -70,7 +71,6 @@ const STEP_SIZE = 1000000; // 1M steps
 // Constants for custom legend
 const YOUR_INCOME_COLOR = 'rgba(255, 99, 132, 1)';
 const MEDIAN_INCOME_COLOR = 'rgba(255, 206, 86, 1)';
-const MEDIAN_INCOME_VALUE = 4330000; // Matches value in chartConfig.ts
 
 const TakeHomeChart: React.FC<TakeHomeChartProps> = ({ 
   currentIncome, 
