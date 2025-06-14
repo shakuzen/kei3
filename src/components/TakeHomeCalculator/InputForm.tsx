@@ -454,7 +454,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               value={inputs.annualIncome}
               onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
               label="Annual Income"
-              helperText={inputs.annualIncome > 0 ? `¥${inputs.annualIncome.toLocaleString()}` : 'Enter your annual income'}
+              helperText={inputs.annualIncome > 0 ? `${formatJPY(inputs.annualIncome)}` : 'Enter your annual income'}
               sx={sharedInputSx}
               slotProps={{
                 input: {
@@ -512,8 +512,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
             min={0}
             max={20000000}
             step={10000}
-            valueLabelDisplay="auto"
-            valueLabelFormat={(value) => `${formatJPY(value)}`}
+            valueLabelDisplay="off"
             marks={[
               { value: 0, label: '¥0' },
               { value: 5000000, label: '¥5M' },
