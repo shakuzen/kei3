@@ -490,6 +490,21 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
 
         {/* Annual Income Slider */}
         <Box sx={{ px: 1, mb: { xs: 0.3, sm: 0.5 }, mt: 0 }}>
+          {/* Explanatory text above the slider */}
+          <Typography
+            sx={{
+              mb: 0.5,
+              fontSize: '0.93rem',
+              color: 'text.secondary',
+              textAlign: 'center',
+              fontStyle: 'italic',
+            }}
+          >
+            {isMobile
+              ? 'For 20M+ yen incomes, use the field above.'
+              : 'For incomes over 20 million yen, enter the amount in the field above.'
+            }
+          </Typography>
           <Slider
             className="income-slider"
             value={inputs.annualIncome}
