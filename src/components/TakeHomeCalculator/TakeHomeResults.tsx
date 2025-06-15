@@ -349,7 +349,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                           <ul>
                             <li>
                               <a href="https://www.nta.go.jp/users/gensen/2025kiso/index.htm#a-01" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                            令和７年度税制改正による所得税の基礎控除の見直し等について
+                                令和７年度税制改正による所得税の基礎控除の見直し等について
                               </a>
                             </li>
                             <li>
