@@ -223,7 +223,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         control={<Switch checked={showDetails} onChange={handleDetailsToggle} size="small" />}
         label={<Typography variant="caption">Show Calculation Details</Typography>}
         sx={{ mt: 0.5, mb: { xs: 1, sm: 1.5 }, color: 'text.secondary', alignSelf: 'flex-start' }}
-        title="Detailed breakdown coming soon!"
+        title="Show more detailed breakdown of calculations, including official sources and deduction tables."
       />
 
       <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
