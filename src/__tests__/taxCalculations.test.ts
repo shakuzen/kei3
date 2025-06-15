@@ -1,28 +1,45 @@
 import { describe, it, expect } from 'vitest'
-import { calculateTaxes, getEmploymentIncomeDeduction, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
+import { calculateTaxes, calculateNetEmploymentIncome, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
 import { HealthInsuranceProvider } from '../types/healthInsurance'
 
-describe('getEmploymentIncomeDeduction', () => {
-  it('returns 650,000 yen for income up to 1,900,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(1_500_000)).toBe(650_000)
-    expect(getEmploymentIncomeDeduction(1_900_000)).toBe(650_000)
+describe('calculateNetEmploymentIncome', () => {
+  it('deduction of 650,000 yen for income up to 1,900,000 yen', () => {
+    expect(calculateNetEmploymentIncome(1_500_000)).toBe(850_000)
+    expect(calculateNetEmploymentIncome(1_899_999)).toBe(1_249_999)
+  })
+
+  it('between 1,900,000 and 6,600,000 yen, income is rounded down to the nearest 4000 yen', () => {
+    expect(calculateNetEmploymentIncome(1_900_000)).toBe(1_250_000)
+    expect(calculateNetEmploymentIncome(1_901_123)).toBe(1_250_000)
+    expect(calculateNetEmploymentIncome(1_903_333)).toBe(1_250_000)
+    expect(calculateNetEmploymentIncome(1_904_000)).toBe(1_252_800)
+
+    expect(calculateNetEmploymentIncome(3_600_000)).toBe(2_440_000)
+    expect(calculateNetEmploymentIncome(3_603_999)).toBe(2_440_000)
+    expect(calculateNetEmploymentIncome(3_604_000)).toBe(2_443_200)
   })
 
   it('calculates deduction correctly for income between 1,900,001 and 3,600,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(2_500_000)).toBe(2_500_000 * 0.3 + 80_000)
+    expect(calculateNetEmploymentIncome(2_500_000)).toBe(2_500_000 - (2_500_000 * 0.3 + 80_000))
   })
 
   it('calculates deduction correctly for income between 3,600,001 and 6,600,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(5_000_000)).toBe(5_000_000 * 0.2 + 440_000)
+    expect(calculateNetEmploymentIncome(5_000_000)).toBe(5_000_000 - (5_000_000 * 0.2 + 440_000))
   })
 
   it('calculates deduction correctly for income between 6,600,001 and 8,500,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(7_500_000)).toBe(7_500_000 * 0.1 + 1_100_000)
+    expect(calculateNetEmploymentIncome(7_500_000)).toBe(7_500_000 - (7_500_000 * 0.1 + 1_100_000))
+  })
+
+  it('From 6.6 million yen, income is not rounded down to the nearest 4000 yen', () => {
+    expect(calculateNetEmploymentIncome(6_600_100)).toBe(6_600_100 - (6_600_100 * 0.1 + 1_100_000))
+    expect(calculateNetEmploymentIncome(6_600_123)).toBe((Math.floor(6_600_123 * 0.9) - 1_100_000))
+    expect(calculateNetEmploymentIncome(6_601_000)).not.toBe(calculateNetEmploymentIncome(6_600_100))
   })
 
   it('returns maximum deduction of 1,950,000 yen for income above 8,500,000 yen', () => {
-    expect(getEmploymentIncomeDeduction(9_000_000)).toBe(1_950_000)
-    expect(getEmploymentIncomeDeduction(10_000_000)).toBe(1_950_000)
+    expect(calculateNetEmploymentIncome(9_000_000)).toBe(9_000_000 - 1_950_000)
+    expect(calculateNetEmploymentIncome(10_000_000)).toBe(10_000_000 - 1_950_000)
   })
 })
 

@@ -1,21 +1,31 @@
 import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
 import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
+
 /**
- * Calculates the employment income deduction based on the 2025 tax rules
+ * Calculates the net employment income based on the tax rules for 2025 income, applying the employment income deduction.
  * Source: https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm
  */
-export const getEmploymentIncomeDeduction = (income: number): number => {
-    if (income <= 1_900_000) {
-        return 650_000 // 2025 Update
-    } else if (income <= 3_600_000) {
-        return income * 0.3 + 80_000
-    } else if (income <= 6_600_000) {
-        return income * 0.2 + 440_000
-    } else if (income <= 8_500_000) {
-        return income * 0.1 + 1_100_000
+export const calculateNetEmploymentIncome = (grossEmploymentIncome: number): number => {
+    if (grossEmploymentIncome < 651_000) 
+        return 0;
+    
+    if (grossEmploymentIncome < 1_900_000)
+        return grossEmploymentIncome - 650_000;
+
+    // From 1.9M yen through 6.6M yen, gross income is rounded down to the nearest 4,000 yen
+    const roundedGrossIncome = Math.floor(grossEmploymentIncome / 4000) * 4000;
+
+    if (grossEmploymentIncome <= 3_600_000) {
+        return Math.floor(roundedGrossIncome * 0.7) - 80_000
+    } else if (grossEmploymentIncome <= 6_600_000) {
+        return Math.floor(roundedGrossIncome * 0.8) - 440_000
+    } 
+    
+    if (grossEmploymentIncome <= 8_500_000) {
+        return Math.floor(grossEmploymentIncome * 0.9) - 1_100_000
     } else {
-        return 1_950_000 // Maximum cap
+        return grossEmploymentIncome - 1_950_000
     }
 }
 
@@ -68,9 +78,9 @@ export const calculateEmploymentInsurance = (annualIncome: number, isEmploymentI
  * 
  * 2025 Changes:
  * - 1,320,000 yen or less: 950,000 yen (was 480,000 yen)
- * - 1,320,001 - 3,360,000 yen: 880,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
- * - 3,360,001 - 4,890,000 yen: 680,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
- * - 4,890,001 - 6,550,000 yen: 630,000 yen (will be 580,000 yen from 2027) (was 480,000 yen)
+ * - 1,320,001 - 3,360,000 yen: 880,000 yen (will be 580,000 from 2027) (was 480,000 yen)
+ * - 3,360,001 - 4,890,000 yen: 680,000 yen (will be 580,000 from 2027) (was 480,000 yen)
+ * - 4,890,001 - 6,550,000 yen: 630,000 yen (will be 580,000 from 2027) (was 480,000 yen)
  * - 6,550,001 - 23,500,000 yen: 580,000 yen (was 480,000 yen)
  * - Over 23,500,000 yen: no change
  */
@@ -189,7 +199,7 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     }
     const annualIncome = inputs.annualIncome;
     const isEmploymentIncome = inputs.isEmploymentIncome;
-    const netIncome = isEmploymentIncome ? annualIncome - getEmploymentIncomeDeduction(annualIncome) : annualIncome;
+    const netIncome = isEmploymentIncome ? calculateNetEmploymentIncome(annualIncome) : annualIncome;
 
     const healthInsurance = calculateHealthInsurancePremium(
         inputs.annualIncome,
@@ -206,9 +216,12 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     const nationalIncomeTaxBasicDeduction = calculateNationalIncomeTaxBasicDeduction(netIncome);
 
-    const taxableIncomeForNationalIncomeTax = Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000;
+    const taxableIncomeForNationalIncomeTax = Math.max(0, Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000);
 
     const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
+
+    const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
+    const taxableIncomeForResidenceTax = Math.max(0, Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000);
 
     const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
@@ -225,6 +238,11 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         pensionPayments,
         employmentInsurance,
         totalTax,
-        takeHomeIncome
-    }
-} 
+        takeHomeIncome,
+        netEmploymentIncome: isEmploymentIncome ? netIncome : undefined,
+        nationalIncomeTaxBasicDeduction,
+        taxableIncomeForNationalIncomeTax,
+        residenceTaxBasicDeduction,
+        taxableIncomeForResidenceTax,
+    };
+}

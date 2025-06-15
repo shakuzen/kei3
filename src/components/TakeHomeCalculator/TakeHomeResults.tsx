@@ -16,14 +16,11 @@ import { formatJPY } from '../../utils/formatters';
 import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import InfoTooltip from '../ui/InfoTooltip';
+import DetailInfoTooltip from '../ui/DetailInfoTooltip';
 
 // Extend the results type for the detailed view
 interface DetailedTaxResultsProps {
-  results: TakeHomeResults & {
-    employmentIncomeDeduction?: number;
-    taxableIncomeForNationalTax?: number;
-    taxableIncomeForResidenceTax?: number;
-  };
+  results: TakeHomeResults;
 }
 
 const labelTooltips: Record<string, string> = {
@@ -55,7 +52,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
     valuePrefix,
     sx: rowSxOverride // Allow overriding sx for specific rows
   }: {
-    label: string;
+    label: string | React.ReactNode;
     value: string | React.ReactNode;
     type?: 'default' | 'indented' | 'subtotal' | 'total' | 'final' | 'header' | 'detail' | 'detail-subtotal';
     valuePrefix?: string;
@@ -172,9 +169,9 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
     // Add tooltip and icon if available
     const labelContent = (
       <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
-        {iconMap[label] || null}
+        {iconMap[typeof label === 'string' ? label : ''] || null}
         {label}
-        {labelTooltips[label] && (
+        {typeof label === 'string' && labelTooltips[label] && (
           <InfoTooltip title={labelTooltips[label]} />
         )}
       </Box>
@@ -203,9 +200,6 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
   const totalDeductions = results.totalTax; // results.totalTax is the sum of all taxes and social insurance payments
   const takeHomePercentage = results.annualIncome > 0 ? `${((results.takeHomeIncome / results.annualIncome) * 100).toFixed(1)}%` : '100%';
 
-  const incomeAfterEmploymentDeduction = results.annualIncome - (results.employmentIncomeDeduction ?? 0);
-  const incomeBaseForTaxCalc = incomeAfterEmploymentDeduction - totalSocialInsurance;
-
   return (
     <Paper
       elevation={0}
@@ -226,7 +220,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         Take-Home Pay Breakdown
       </Typography>
       <FormControlLabel
-        control={<Switch checked={showDetails} onChange={handleDetailsToggle} size="small" disabled />}
+        control={<Switch checked={showDetails} onChange={handleDetailsToggle} size="small" />}
         label={<Typography variant="caption">Show Calculation Details</Typography>}
         sx={{ mt: 0.5, mb: { xs: 1, sm: 1.5 }, color: 'text.secondary', alignSelf: 'flex-start' }}
         title="Detailed breakdown coming soon!"
@@ -234,19 +228,6 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
 
       <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
       <Divider sx={{ my: { xs: 1, sm: 1.5 } }} />
-
-      {/* Details Section */}
-      <Fade in={showDetails} unmountOnExit>
-        <Box>
-          {results.isEmploymentIncome && results.employmentIncomeDeduction !== undefined && (
-            <>
-              <ResultRow label="Employment Income Deduction" value={formatJPY(results.employmentIncomeDeduction)} type="detail" />
-              <ResultRow label="Income After Employment Deduction" value={formatJPY(incomeAfterEmploymentDeduction)} type="detail-subtotal" />
-              <Divider variant="middle" sx={{ my: 0.5, mx: 2, borderColor: 'rgba(0,0,0,0.05)' }} />
-            </>
-          )}
-        </Box>
-      </Fade>
 
       {/* Social Insurance Section */}
       <Box sx={{ bgcolor: 'rgba(33,150,243,0.03)', borderRadius: 2, px: 1, py: 1, mb: { xs: 0.5, sm: 1 } }}>
@@ -270,15 +251,8 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
           <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance ?? 0)} type="indented" />
         )}
         <ResultRow label="Total Social Insurance" value={formatJPY(totalSocialInsurance)} type="subtotal" />
-
-        <Fade in={showDetails} unmountOnExit>
-          <Box>
-            <Divider variant="middle" sx={{ my: 0.5, mx: 2, borderColor: 'rgba(0,0,0,0.05)' }} />
-            <ResultRow label="Income Base (after Social Insurance)" value={formatJPY(incomeBaseForTaxCalc)} type="detail-subtotal" />
-          </Box>
-        </Fade>
       </Box>
-
+      
       {/* Taxes Section */}
       <Box sx={{ bgcolor: 'rgba(255,193,7,0.03)', borderRadius: 2, px: 1, py: 1, mb: { xs: 0.5, sm: 1 } }}>
         <Typography
@@ -297,16 +271,227 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         </Typography>
         <Fade in={showDetails} unmountOnExit>
           <Box>
-            {results.taxableIncomeForNationalTax !== undefined && (
-              <ResultRow label="Taxable Income (National)" value={formatJPY(results.taxableIncomeForNationalTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
+            <ResultRow label={results.isEmploymentIncome ? "Gross Employment Income" : "Net Annual Income"} value={formatJPY(results.annualIncome)} type="detail" />
+            {results.isEmploymentIncome && results.netEmploymentIncome !== undefined && (
+              <ResultRow 
+                label={
+                  <span>
+                    Net Employment Income
+                    <DetailInfoTooltip 
+                      title="Employment Income Deduction Table"
+                      children={<EmploymentIncomeDeductionTooltip />} 
+                    />
+                  </span>
+                }
+                value={formatJPY(results.netEmploymentIncome)} 
+                type="detail" 
+              />
+            )}
+            <ResultRow 
+              label={
+                <span>
+                  Basic Deduction
+                  <DetailInfoTooltip
+                    title="National Income Tax Basic Deduction"
+                    children={
+                      <Box sx={{ minWidth: { xs: 0, sm: 320 }, maxWidth: { xs: '100vw', sm: 420 } }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          National Income Tax Basic Deduction (2025)
+                        </Typography>
+                        <table style={{ width: '100%', fontSize: '0.95em' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Net Income (¥)</th>
+                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 1,320,000</td>
+                              <td style={{ padding: '2px 6px' }}>950,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 3,360,000</td>
+                              <td style={{ padding: '2px 6px' }}>880,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 4,890,000</td>
+                              <td style={{ padding: '2px 6px' }}>680,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 6,550,000</td>
+                              <td style={{ padding: '2px 6px' }}>630,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 23,500,000</td>
+                              <td style={{ padding: '2px 6px' }}>580,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 24,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>480,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 24,500,000</td>
+                              <td style={{ padding: '2px 6px' }}>320,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 25,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>160,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Over 25,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <Box sx={{ mt: 1 }}>
+                          Official Sources (NTA):
+                          <ul>
+                            <li>
+                              <a href="https://www.nta.go.jp/users/gensen/2025kiso/index.htm#a-01" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                            令和７年度税制改正による所得税の基礎控除の見直し等について
+                              </a>
+                            </li>
+                            <li>
+                              <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1199.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                                No.1199 基礎控除
+                              </a>
+                            </li>
+                          </ul>
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </span>
+              }
+              value={formatJPY(-(results.nationalIncomeTaxBasicDeduction ?? 0))} 
+              type="detail" 
+            />
+            <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
+            {results.taxableIncomeForNationalIncomeTax !== undefined && (
+              <ResultRow 
+                label={
+                  <span>
+                    Taxable Income
+                    <DetailInfoTooltip
+                      title="Taxable Income for National Income Tax"
+                      children={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            Taxable Income = Net Income - Social Insurance Deduction - Basic Deduction
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            Official Sources:
+                            <ul>
+                              <li>
+                                <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                                  所得税のしくみ (NTA)
+                                </a>
+                              </li>
+                            </ul>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </span>
+                }
+                value={formatJPY(results.taxableIncomeForNationalIncomeTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
             )}
           </Box>
         </Fade>
         <ResultRow label="Income Tax" value={formatJPY(results.nationalIncomeTax)} type="indented" />
         <Fade in={showDetails} unmountOnExit>
           <Box>
+            <ResultRow label={results.isEmploymentIncome ? "Gross Employment Income" : "Net Annual Income"} value={formatJPY(results.annualIncome)} type="detail" />
+            {results.isEmploymentIncome && results.netEmploymentIncome !== undefined && (
+              <ResultRow 
+                label={
+                  <span>
+                    Net Employment Income
+                    <DetailInfoTooltip 
+                      title="Employment Income Deduction Table"
+                      children={<EmploymentIncomeDeductionTooltip />} 
+                    />
+                  </span>
+                }
+                value={formatJPY(results.netEmploymentIncome)} 
+                type="detail" 
+              />
+            )}
+            <ResultRow 
+              label={
+                <span>
+                  Basic Deduction
+                  <DetailInfoTooltip
+                    title="Residence Tax Basic Deduction"
+                    children={
+                      <Box sx={{ minWidth: { xs: 0, sm: 320 }, maxWidth: { xs: '100vw', sm: 420 } }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Residence Tax Basic Deduction (2025)
+                        </Typography>
+                        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.95em' }}>
+                          <thead>
+                            <tr>
+                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Net Income (¥)</th>
+                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Up to 24,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>430,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>24,000,001 - 24,500,000</td>
+                              <td style={{ padding: '2px 6px' }}>290,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>24,500,001 - 25,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>150,000</td>
+                            </tr>
+                            <tr>
+                              <td style={{ padding: '2px 6px' }}>Over 25,000,000</td>
+                              <td style={{ padding: '2px 6px' }}>0</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <Box sx={{ mt: 1 }}>
+                          <a href="https://www.city.yokohama.lg.jp/kurashi/koseki-zei-hoken/zeikin/y-shizei/kojin-shiminzei-kenminzei/kaisei/R3zeiseikaisei.html#4" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                            Official Source (Yokohama City)
+                          </a>
+                        </Box>
+                      </Box>
+                    }
+                  />
+                </span>
+              }
+              value={formatJPY(-(results.residenceTaxBasicDeduction ?? 0))} 
+              type="detail" 
+            />
+            <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
             {results.taxableIncomeForResidenceTax !== undefined && (
-              <ResultRow label="Taxable Income (Residence)" value={formatJPY(results.taxableIncomeForResidenceTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
+              <ResultRow 
+                label={
+                  <span>
+                    Taxable Income
+                    <DetailInfoTooltip
+                      title="Taxable Income for Residence Tax"
+                      children={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            Taxable Income = Net Income - Social Insurance Deduction - Basic Deduction
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            <a href="https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              個人住民税 (Tokyo Bureau of Taxation)
+                            </a>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </span>
+                }
+                value={formatJPY(results.taxableIncomeForResidenceTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
             )}
           </Box>
         </Fade>
@@ -345,5 +530,64 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
     </Paper>
   );
 };
+
+// Reusable tooltip content for employment income deduction
+const EmploymentIncomeDeductionTooltip: React.FC = () => (
+  <Box>
+    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+      2025 Employment Income Deduction Table
+    </Typography>
+    <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.95em' }}>
+      <thead>
+        <tr>
+          <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Gross Employment Income (¥)</th>
+          <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style={{ padding: '2px 6px' }}>Up to 1,900,000</td>
+          <td style={{ padding: '2px 6px' }}>650,000</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '2px 6px' }}>1,900,001 – 3,600,000</td>
+          <td style={{ padding: '2px 6px' }}>30% of income + 80,000</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '2px 6px' }}>3,600,001 – 6,600,000</td>
+          <td style={{ padding: '2px 6px' }}>20% of income + 440,000</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '2px 6px' }}>6,600,001 – 8,500,000</td>
+          <td style={{ padding: '2px 6px' }}>10% of income + 1,100,000</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '2px 6px' }}>8,500,001 and above</td>
+          <td style={{ padding: '2px 6px' }}>1,950,000 (max)</td>
+        </tr>
+      </tbody>
+    </table>
+    <Box sx={{ mt: 1 }}>
+      Official Sources:
+      <ul>
+        <li>
+          <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+            No.1410 給与所得控除 - NTA
+          </a>
+        </li>
+        <li>
+          <a href="https://www.nta.go.jp/users/gensen/2025kiso/index.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+            令和７年度税制改正による所得税の基礎控除の見直し等について - NTA
+          </a>
+        </li>
+        <li>
+          <a href="https://www.city.yokohama.lg.jp/kurashi/koseki-zei-hoken/zeikin/y-shizei/kojin-shiminzei-kenminzei/R7kaisei.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+            令和７年度税制改正（いわゆる年収の壁への対応）の概要 - Yokohama City
+          </a>
+        </li>
+      </ul>
+    </Box>
+  </Box>
+);
 
 export default TakeHomeResultsDisplay;

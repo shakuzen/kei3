@@ -17,12 +17,18 @@ interface InfoTooltipProps {
   title: string;
   children?: React.ReactNode;
   mobileOnly?: boolean;
+  icon?: React.ReactNode; // Custom icon
+  iconSx?: object; // Custom icon/button style
+  iconAriaLabel?: string; // Custom aria-label
 }
 
 export const InfoTooltip: React.FC<InfoTooltipProps> = ({ 
   title, 
   children,
-  mobileOnly = false 
+  mobileOnly = false,
+  icon,
+  iconSx,
+  iconAriaLabel
 }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
@@ -33,7 +39,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
   const handleClose = () => setOpen(false);
 
   const tooltipContent = (
-    <Box sx={{ maxWidth: 300, p: 1, fontSize: isMobile ? '0.85rem' : '1rem' }}>
+    <Box sx={{ maxWidth: 420, p: 1, fontSize: isMobile ? '0.85rem' : '1rem' }}>
       {children || title}
     </Box>
   );
@@ -44,18 +50,15 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
         <IconButton 
           onClick={handleOpen}
           size="small"
-          sx={{
-            p: 0.5,
-            ml: 0.5,
-            color: 'text.secondary',
-            '&:hover': {
-              color: 'primary.main',
-              bgcolor: 'transparent',
-            },
+          sx={{ 
+            p: 0.5, 
+            ml: 0.5, 
+            color: 'text.secondary', 
+            ...(iconSx || {}) 
           }}
-          aria-label="More information"
+          aria-label={iconAriaLabel || 'More information'}
         >
-          <HelpOutlineIcon fontSize="small" />
+          {icon || <HelpOutlineIcon fontSize="small" />}
         </IconButton>
         
         <Dialog
@@ -93,6 +96,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
       slotProps={{
         tooltip: {
           sx: {
+            maxWidth: 420,
             bgcolor: 'background.paper',
             color: 'text.primary',
             border: '1px solid',
@@ -111,18 +115,16 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
     >
       <IconButton 
         size="small"
-        sx={{
-          p: 0.5,
-          ml: 0.5,
-          color: 'text.secondary',
-          '&:hover': {
-            color: 'primary.main',
-            bgcolor: 'transparent',
-          },
+        sx={{ 
+          p: 0.5, 
+          ml: 0.5, 
+          color: 'text.secondary', 
+          verticalAlign: 'middle', 
+          ...(iconSx || {}) 
         }}
-        aria-label="More information"
+        aria-label={iconAriaLabel || 'More information'}
       >
-        <HelpOutlineIcon fontSize="small" />
+        {icon || <HelpOutlineIcon fontSize="small" />}
       </IconButton>
     </MuiTooltip>
   );
