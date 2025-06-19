@@ -91,7 +91,7 @@ export const generateChartData = (
       label: 'Residence Tax',
       data: incomePoints.map(income => ({
         x: income,
-        y: calculateTaxes(createTaxInputsForIncome(income)).residenceTax
+        y: calculateTaxes(createTaxInputsForIncome(income)).residenceTax.totalResidenceTax
       })),
       borderColor: 'rgb(54, 162, 235)',
       backgroundColor: 'rgba(54, 162, 235, 0.5)',

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calculateTaxes, calculateNetEmploymentIncome, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax, calculateResidenceTaxBasicDeduction, calculateResidenceTax } from '../utils/taxCalculations'
+import { calculateTaxes, calculateNetEmploymentIncome, calculateEmploymentInsurance, calculateNationalIncomeTaxBasicDeduction, calculateNationalIncomeTax } from '../utils/taxCalculations'
 import { HealthInsuranceProvider } from '../types/healthInsurance'
 
 describe('calculateNetEmploymentIncome', () => {
@@ -56,7 +56,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
-    expect(result.residenceTax).toBe(22_200)
+    expect(result.residenceTax.totalResidenceTax).toBe(22_200)
     expect(result.healthInsurance).toBe(74_916)
     expect(result.pensionPayments).toBe(138_348)
     // 1,500,000 / 12 = 125,000 per month
@@ -77,7 +77,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(22_300)
-    expect(result.residenceTax).toBe(91_100)
+    expect(result.residenceTax.totalResidenceTax).toBe(91_100)
     expect(result.healthInsurance).toBe(118_920)
     expect(result.pensionPayments).toBe(219_600)
     // 2,500,000 / 12 ≈ 208,333.33 per month
@@ -98,7 +98,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(120_700)
-    expect(result.residenceTax).toBe(243_200)
+    expect(result.residenceTax.totalResidenceTax).toBe(243_200)
     expect(result.healthInsurance).toBe(243_792)
     expect(result.pensionPayments).toBe(450_180)
     // 5,000,000 / 12 ≈ 416,666.67 per month
@@ -120,7 +120,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(16_345_400) // 50M - 1.95M (employment deduction) - 1.815194M (social insurance) - 0 (basic deduction) = 46.234806M, rounded to 46.234M, then 45% - 4.796M = 16.0093M, + 2.1% = 16.345495M, rounded down to 16.3454M
-    expect(result.residenceTax).toBe(4_628_300) // (50M - 1.95M - 1.815194M - 0) = 46.234806M, rounded to 46.234M, then 6% city tax (2.774M) + 4% prefectural tax (1.8493M) + 5K 均等割
+    expect(result.residenceTax.totalResidenceTax).toBe(4_628_300) // (50M - 1.95M - 1.815194M - 0) = 46.234806M, rounded to 46.234M, then 6% city tax (2.774M) + 4% prefectural tax (1.8493M) + 5K 均等割
     expect(result.healthInsurance).toBe(826_500) // Capped at 68,874.5 * 12
     expect(result.pensionPayments).toBe(713_700) // Capped at 59,475 * 12
     // 50,000,000 / 12 ≈ 4,166,666.67 per month
@@ -142,7 +142,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
-    expect(result.residenceTax).toBe(0)
+    expect(result.residenceTax.totalResidenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
     expect(result.employmentInsurance).toBe(0)
@@ -160,7 +160,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
-    expect(result.residenceTax).toBe(0)
+    expect(result.residenceTax.totalResidenceTax).toBe(0)
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
     expect(result.employmentInsurance).toBe(0)
@@ -178,7 +178,7 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(302_700)
-    expect(result.residenceTax).toBe(384_500)
+    expect(result.residenceTax.totalResidenceTax).toBe(384_500)
     expect(result.healthInsurance).toBe(539_380)
     expect(result.pensionPayments).toBe(210_120)
     expect(result.employmentInsurance).toBe(0)
@@ -365,75 +365,3 @@ describe('calculateNationalIncomeTax', () => {
     expect(calculateNationalIncomeTax(-1_000_000)).toBe(0) // Negative income is clamped to 0
   })
 })
-
-describe('calculateResidenceTaxBasicDeduction', () => {
-  it('returns 430,000 yen for income up to 24,000,000 yen', () => {
-    expect(calculateResidenceTaxBasicDeduction(0)).toBe(430_000)
-    expect(calculateResidenceTaxBasicDeduction(10_000_000)).toBe(430_000)
-    expect(calculateResidenceTaxBasicDeduction(24_000_000)).toBe(430_000)
-  })
-
-  it('returns 290,000 yen for income between 24,000,001 and 24,500,000 yen', () => {
-    expect(calculateResidenceTaxBasicDeduction(24_000_001)).toBe(290_000)
-    expect(calculateResidenceTaxBasicDeduction(24_500_000)).toBe(290_000)
-  })
-
-  it('returns 150,000 yen for income between 24,500,001 and 25,000,000 yen', () => {
-    expect(calculateResidenceTaxBasicDeduction(24_500_001)).toBe(150_000)
-    expect(calculateResidenceTaxBasicDeduction(25_000_000)).toBe(150_000)
-  })
-
-  it('returns 0 yen for income above 25,000,000 yen', () => {
-    expect(calculateResidenceTaxBasicDeduction(25_000_001)).toBe(0)
-    expect(calculateResidenceTaxBasicDeduction(30_000_000)).toBe(0)
-  })
-
-  it('handles negative income correctly', () => {
-    expect(calculateResidenceTaxBasicDeduction(-1_000_000)).toBe(430_000)
-  })
-})
-
-describe('calculateResidenceTax', () => {
-  it('calculates tax correctly for income with full deductions', () => {
-    // Example: 5M income, 1M social insurance
-    expect(calculateResidenceTax(5_000_000, 1_000_000)).toBe(359_500) // (5M - 1M - 430K) * 0.1 + 5000
-  })
-
-  it('calculates tax correctly for income with partial basic deduction', () => {
-    // Example: 24.2M income, 1M social insurance
-    expect(calculateResidenceTax(24_200_000, 1_000_000)).toBe(2_293_500) // (24.2M - 1M - 290K) * 0.1 + 5000
-  })
-
-  it('calculates tax correctly for income with minimum basic deduction', () => {
-    // Example: 24.7M income, 1M social insurance
-    expect(calculateResidenceTax(24_700_000, 1_000_000)).toBe(2_357_500) // (24.7M - 1M - 150K) * 0.1 + 5000
-  })
-
-  it('calculates tax correctly for income with no basic deduction', () => {
-    // Example: 26M income, 1M social insurance
-    expect(calculateResidenceTax(26_000_000, 1_000_000)).toBe(2_505_000) // (26M - 1M - 0) * 0.1 + 5000
-  })
-
-  it('returns minimum tax amount when deductions exceed net income', () => {
-    // Example: 1M income, 2M social insurance
-    expect(calculateResidenceTax(1_000_000, 2_000_000)).toBe(5_000) // Only 5000 yen 均等割 when taxable income is 0
-  })
-
-  it('returns 0 yen when net income is 450,000 yen or less due to 非課税制度', () => {
-    expect(calculateResidenceTax(449_999, 0)).toBe(0)
-    expect(calculateResidenceTax(450_000, 0)).toBe(0)
-  })
-
-  it('returns 5000 yen 均等割 when taxable income is 0', () => {
-    expect(calculateResidenceTax(450_001, 20_001)).toBe(5_000)
-    expect(calculateResidenceTax(1_000_000, 600_000)).toBe(5_000)
-  })
-
-  it('handles zero income correctly', () => {
-    expect(calculateResidenceTax(0, 0)).toBe(0)
-  })
-
-  it('handles negative income correctly', () => {
-    expect(calculateResidenceTax(-1_000_000, 0)).toBe(0)
-  })
-}) 

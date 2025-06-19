@@ -19,6 +19,7 @@ import InfoTooltip from '../ui/InfoTooltip';
 import DetailInfoTooltip from '../ui/DetailInfoTooltip';
 import { employmentInsuranceRate } from '../../utils/taxCalculations';
 import { monthlyNationalPensionContribution } from '../../utils/pensionCalculator';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 // Extend the results type for the detailed view
 interface DetailedTaxResultsProps {
@@ -198,8 +199,8 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
   };
 
   const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (results.employmentInsurance ?? 0);
-  const totalIncomeTaxes = results.nationalIncomeTax + results.residenceTax;
-  const totalDeductions = totalSocialInsurance + totalIncomeTaxes;
+  const totalTaxes = results.nationalIncomeTax + results.residenceTax.totalResidenceTax;
+  const totalDeductions = totalSocialInsurance + totalTaxes;
   const takeHomePercentage = results.annualIncome > 0 ? `${((results.takeHomeIncome / results.annualIncome) * 100).toFixed(1)}%` : '100%';
 
   return (
@@ -565,8 +566,8 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
             )}
           </Box>
         </Fade>
-        <ResultRow label="Residence Tax" value={formatJPY(results.residenceTax)} type="indented" />
-        <ResultRow label="Total Taxes" value={formatJPY(totalIncomeTaxes)} type="subtotal" />
+        <ResultRow label="Residence Tax" value={formatJPY(results.residenceTax.totalResidenceTax)} type="indented" />
+        <ResultRow label="Total Taxes" value={formatJPY(totalTaxes)} type="subtotal" />
       </Box>
       
       {/* Total Deductions */}
@@ -588,7 +589,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                 color: 'success.dark',
                 fontWeight: 600,
                 ml: 1,
-                whiteSpace: 'nowrap', // Prevents breaking inside the percentage
+                whiteSpace: 'nowrap',
               }}
             >
               ({takeHomePercentage})
@@ -597,6 +598,125 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         }
         type="final"
       />
+
+      {/* Furusato Nozei Limit */}
+      {results.furusatoNozei !== undefined && results.furusatoNozei.limit > 0 && (
+        <Box sx={{ bgcolor: 'rgba(156,39,176,0.07)', borderRadius: 2, px: 1, py: 1, mt: { xs: 0.5, sm: 1 }, mb: { xs: 0.5, sm: 1 } }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              mt: { xs: 0.5, sm: 1 }, mb: { xs: 0.5, sm: 1 },
+              color: 'secondary.main',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: isMobile ? '1rem' : '1.1rem'
+            }}
+          >
+            <VolunteerActivismIcon sx={{ mr: 1, fontSize: isMobile ? 18 : 20, color: 'secondary.main' }} />
+            Furusato Nozei
+          </Typography>
+          <Fade in={showDetails} unmountOnExit>
+            <Box>
+              <ResultRow
+                label={
+                  <span>
+                    Income Tax Reduction
+                    <InfoTooltip
+                      title="Income Tax Reduction"
+                      children={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            Income Tax Reduction (Furusato Nozei)
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            This reduction is applied to your income tax if you file a tax return (確定申告) for Furusato Nozei. It is applied in the form of a donation deduction that reduces your taxable income. If you use the One-Stop Exception system (ワンストップ特例制度), the reduction will instead be applied to your residence tax, not your income tax.
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            <a href="https://japanfinance.github.io/tax/residence/furusato-nozei/" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              More about Furusato Nozei
+                            </a>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </span>
+                }
+                value={formatJPY(results.furusatoNozei.incomeTaxReduction)}
+                type="detail" />
+              {/* <ResultRow
+                label="Residence Tax Donation Reduction"
+                value={formatJPY(results.furusatoNozei.residenceTaxDonationBasicDeduction)}
+                type="detail" />
+              <ResultRow
+                label="Residence Tax Special Deduction"
+                value={formatJPY(results.furusatoNozei.residenceTaxSpecialDeduction)}
+                type="detail" /> */}
+              <ResultRow
+                label="Residence Tax Reduction"
+                value={formatJPY(results.furusatoNozei.residenceTaxReduction)}
+                type="detail" />
+              <ResultRow
+                label="Out-of-Pocket Cost"
+                value={
+                  <Box component="span" sx={{ color: results.furusatoNozei.outOfPocketCost > 2200 ? 'error.main' : 'inherit', fontWeight: results.furusatoNozei.outOfPocketCost > 2200 ? 700 : 500, display: 'inline-flex', alignItems: 'center' }}>
+                    {formatJPY(results.furusatoNozei.outOfPocketCost)}
+                    {results.furusatoNozei.outOfPocketCost > 2200 && (
+                      <InfoTooltip
+                        title="Warning: High Out-of-Pocket Cost"
+                        children={
+                          <Box>
+                            <Typography variant="body2">
+                              Your out-of-pocket cost is higher than the expected 2,000 yen. This can happen if your income straddles two tax brackets and you file for Furusato Nozei via a tax return (確定申告).<br />
+                              <b>This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).</b>
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    )}
+                  </Box>
+                }
+                type="detail" />
+            </Box>
+          </Fade>
+          <ResultRow
+            label={
+              <span>
+                Furusato Nozei Limit
+                <InfoTooltip
+                  icon={results.furusatoNozei.outOfPocketCost > 2200 ? (
+                    <svg style={{ color: '#d32f2f', width: 20, height: 20, marginLeft: 4, verticalAlign: 'middle' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                    </svg>
+                  ) : undefined}
+                  title={
+                    results.furusatoNozei.outOfPocketCost > 2200
+                      ? `Warning: If your out-of-pocket cost is higher than 2,000 yen, it may be because your income straddles two tax brackets and you file via a tax return (確定申告). This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).`
+                      : `Furusato Nozei Limit\n\nFor information about Furusato Nozei, see this wiki. This limit is the estimated maximum donation for which your out-of-pocket cost is only 2,000 yen, based on your current income and tax situation. Actual limits may vary depending on your deductions and municipality. If you claim deductions or tax credits not supported by this calculator, this will not be accurate for you. You can use kaikei7 instead.`
+                  }
+                  children={
+                    <Box>
+                      For information about Furusato Nozei, see <a href="https://japanfinance.github.io/tax/residence/furusato-nozei/" target="_blank" rel="noopener">this wiki</a>.<br />
+                      This limit is the maximum donation for which your out-of-pocket cost is only 2,000 yen, based on the input income and other options.<br />
+                      Actual limits may vary depending on your deductions and municipality.<br />
+                      If you claim deductions or tax credits or otherwise have a tax situation not supported by this calculator, this limit will not be accurate for you (it will be too high, most likely).<br />
+                      You can use <a href="https://kaikei7.com/furusato_nouzei_keisan/" target="_blank" rel="noopener noreferrer">kaikei7</a>, which supports virtually all deductions and credits.<br />
+                      {results.furusatoNozei.outOfPocketCost > 2200 && (
+                        <Box sx={{ color: 'error.main', fontWeight: 600, mt: 1 }}>
+                          Warning: Your out-of-pocket cost is higher than 2,000 yen. This can happen if your income straddles two tax brackets and you file via a tax return (確定申告). This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).
+                        </Box>
+                      )}
+                    </Box>
+                  }
+                />
+              </span>
+            }
+            value={formatJPY(results.furusatoNozei.limit)}
+            type="subtotal"
+            sx={{ mt: 1, borderRadius: 2 }}
+          />
+        </Box>
+      )}
     </Paper>
   );
 };
