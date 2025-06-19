@@ -25,6 +25,7 @@ export interface TakeHomeResults {
   taxableIncomeForNationalIncomeTax?: number;
   residenceTaxBasicDeduction?: number;
   taxableIncomeForResidenceTax?: number;
+  furusatoNozeiLimit?: number;
 }
 
 export interface ChartRange {

@@ -518,7 +518,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                 color: 'success.dark',
                 fontWeight: 600,
                 ml: 1,
-                whiteSpace: 'nowrap', // Prevents breaking inside the percentage
+                whiteSpace: 'nowrap',
               }}
             >
               ({takeHomePercentage})
@@ -527,6 +527,30 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         }
         type="final"
       />
+
+      {/* Furusato Nozei Limit */}
+      {results.furusatoNozeiLimit !== undefined && results.furusatoNozeiLimit > 0 && (
+        <ResultRow
+          label={
+            <span>
+              Furusato Nozei Limit
+              <InfoTooltip title="Furusato Nozei Limit"
+              children={
+                <Box>
+                  For information about Furusato Nozei, see <a href="https://japanfinance.github.io/tax/residence/furusato-nozei/" target="_blank" rel="noopener">this wiki</a>.
+                  This limit is the estimated maximum donation for which your out-of-pocket cost is only 2,000 yen, based on your current income and tax situation.
+                  Actual limits may vary depending on your deductions and municipality.
+                  If you claim deductions or tax credits not supported by this calculator, this will not be accurate for you.
+                  You can use <a href="https://kaikei7.com/furusato_nouzei_keisan/" target="_blank" rel="noopener noreferrer">kaikei7</a> instead.
+                </Box>
+              } />
+            </span>
+          }
+          value={formatJPY(results.furusatoNozeiLimit)}
+          type="header"
+          sx={{ mt: 1, borderRadius: 2 }}
+        />
+      )}
     </Paper>
   );
 };
