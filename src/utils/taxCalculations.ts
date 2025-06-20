@@ -1,6 +1,7 @@
 import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
 import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
+import { calculateFurusatoNozeiLimit } from './furusato';
 
 /**
  * Calculates the net employment income based on the tax rules for 2025 income, applying the employment income deduction.
@@ -229,6 +230,11 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
     const takeHomeIncome = annualIncome - totalTax;
 
+    const furusatoNozeiLimit = calculateFurusatoNozeiLimit(
+        taxableIncomeForResidenceTax,
+        taxableIncomeForNationalIncomeTax
+    );
+
     return {
         annualIncome,
         isEmploymentIncome,
@@ -244,5 +250,6 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         taxableIncomeForNationalIncomeTax,
         residenceTaxBasicDeduction,
         taxableIncomeForResidenceTax,
+        furusatoNozeiLimit,
     };
 }
