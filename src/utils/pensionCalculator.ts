@@ -5,6 +5,11 @@ interface IncomeBracketToPensionPremium {
   halfAmount: number;
 }
 
+/** National pension (国民年金) - fixed monthly contribution.
+ * Source: https://www.nenkin.go.jp/service/kokunen/hokenryo/hokenryo.html#cms01
+ */
+export const monthlyNationalPensionContribution = 17510;
+
 const EMPLOYEES_PENSION_PREMIUM: IncomeBracketToPensionPremium[] = [
   { min: 0, max: 93000, fullAmount: 16104.00, halfAmount: 8052.00 },
   { min: 93000, max: 101000, fullAmount: 17934.00, halfAmount: 8967.00 },
@@ -51,9 +56,7 @@ const EMPLOYEES_PENSION_PREMIUM: IncomeBracketToPensionPremium[] = [
  */
 export function calculatePensionPremium(isEmployee: boolean = true, monthlyIncome: number = 0, isHalfAmount: boolean = true): number {
   if (!isEmployee) {
-    // National pension (国民年金) - fixed monthly contribution
-    const monthlyContribution = 17510;
-    return monthlyContribution * 12; // Annual contribution
+    return monthlyNationalPensionContribution * 12; // Annual contribution
   }
   if (monthlyIncome < 0) {
     throw new Error('Monthly income must be a positive number');

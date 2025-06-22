@@ -2,6 +2,7 @@ import type { NationalHealthInsuranceRegionParams } from '../../types/healthInsu
 
 // Parameters for Tokyo Special Wards under the National Health Insurance (NHI) system.
 // Based on typical values often seen for Tokyo's 23 special wards.
+// https://www.city.setagaya.lg.jp/02060/297.html
 export const NHI_TOKYO_PARAMS: NationalHealthInsuranceRegionParams = {
   regionName: "Tokyo Special Wards",
   medicalRate: 0.0771,

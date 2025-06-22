@@ -17,6 +17,8 @@ import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import InfoTooltip from '../ui/InfoTooltip';
 import DetailInfoTooltip from '../ui/DetailInfoTooltip';
+import { employmentInsuranceRate } from '../../utils/taxCalculations';
+import { monthlyNationalPensionContribution } from '../../utils/pensionCalculator';
 
 // Extend the results type for the detailed view
 interface DetailedTaxResultsProps {
@@ -246,9 +248,69 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
           Social Insurance
         </Typography>
         <ResultRow label="Health Insurance" value={formatJPY(results.healthInsurance)} type="indented" />
+        {!results.isEmploymentIncome && (
+        <ResultRow label={
+          <span>
+            Monthly Premium
+            <DetailInfoTooltip
+              title="National Pension (国民年金)"
+              children={
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    National Basic Pension (2025)
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Contributions to the National Pension (国民年金) system are a fixed amount irrespective of income.
+                  </Typography>
+                  <Box sx={{ mt: 1 }}>
+                    Official Source:
+                    <ul>
+                      <li>
+                        <a href="https://www.nenkin.go.jp/service/kokunen/hokenryo/hokenryo.html#cms01" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                          国民年金保険料の金額 (Japan Pension Service)
+                        </a>
+                      </li>
+                    </ul>
+                  </Box>
+                </Box>
+              }
+            />
+          </span>
+        } value={formatJPY(monthlyNationalPensionContribution)} type="detail" />
+      )}
         <ResultRow label="Pension Payments" value={formatJPY(results.pensionPayments)} type="indented" />
         {results.isEmploymentIncome && (
-          <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance ?? 0)} type="indented" />
+          <>
+            <ResultRow label={
+              <span>
+                Premium Rate
+                <DetailInfoTooltip
+                  title="Employment Insurance Rate"
+                  children={
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Employment Insurance Rate (2025)
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        This is the employment insurance rate paid by the employee. The rate is applied to your gross salary. The employer also contributes to employment insurance at a different rate.
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        Official Source:
+                        <ul>
+                          <li>
+                            <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              Employment Insurance System Overview (MHLW)
+                            </a>
+                          </li>
+                        </ul>
+                      </Box>
+                    </Box>
+                  }
+                />
+                </span>
+                } value={`${(employmentInsuranceRate * 100).toFixed(2)}%`} type="detail" />
+            <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance ?? 0)} type="indented" />
+          </>
         )}
         <ResultRow label="Total Social Insurance" value={formatJPY(totalSocialInsurance)} type="subtotal" />
       </Box>

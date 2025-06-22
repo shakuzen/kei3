@@ -2,6 +2,9 @@ import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
 import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
 
+/** https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html */
+export const employmentInsuranceRate = 0.0055; // 0.55%
+
 /**
  * Calculates the net employment income based on the tax rules for 2025 income, applying the employment income deduction.
  * Source: https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1410.htm
@@ -33,7 +36,7 @@ export const calculateNetEmploymentIncome = (grossEmploymentIncome: number): num
  * Calculates employment insurance premiums based on income
  * Source: Ministry of Health, Labour and Welfare (MHLW) rates for 2025
  * https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html
- * Note: Only calculates employee portion (0.55% of income)
+ * Note: Only calculates employee portion of the premium.
  * 
  * The premium is calculated monthly with special rounding rules:
  * - 0.55% of monthly salary
@@ -49,12 +52,11 @@ export const calculateEmploymentInsurance = (annualIncome: number, isEmploymentI
     }
 
     const monthlySalary = annualIncome / 12;
-    const monthlyRate = 0.0055; // 0.55%
     let annualPremium = 0;
 
 
     for (let i = 0; i < 12; i++) {
-        const monthlyPremium = monthlySalary * monthlyRate;
+        const monthlyPremium = monthlySalary * employmentInsuranceRate;
         // Apply special rounding rules
         const decimal = monthlyPremium - Math.floor(monthlyPremium);
         let roundedPremium: number;
