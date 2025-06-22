@@ -17,7 +17,6 @@ export interface TakeHomeResults {
   healthInsurance: number;
   pensionPayments: number;
   employmentInsurance?: number;
-  totalTax: number;
   takeHomeIncome: number;
   // Added detailed properties
   netEmploymentIncome?: number;

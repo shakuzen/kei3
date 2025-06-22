@@ -197,7 +197,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
 
   const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (results.employmentInsurance ?? 0);
   const totalIncomeTaxes = results.nationalIncomeTax + results.residenceTax;
-  const totalDeductions = results.totalTax; // results.totalTax is the sum of all taxes and social insurance payments
+  const totalDeductions = totalSocialInsurance + totalIncomeTaxes;
   const takeHomePercentage = results.annualIncome > 0 ? `${((results.takeHomeIncome / results.annualIncome) * 100).toFixed(1)}%` : '100%';
 
   return (

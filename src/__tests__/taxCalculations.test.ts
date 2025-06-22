@@ -63,7 +63,6 @@ describe('calculateTaxes', () => {
     // 125,000 * 0.55% = 687.5 per month → 687 yen (exactly 0.5 yen → round down)
     // 687 * 12 = 8,244 yen annually
     expect(result.employmentInsurance).toBe(8_244)
-    expect(result.totalTax).toBe(243_708)
     expect(result.takeHomeIncome).toBe(1_256_292)
   })
 
@@ -85,7 +84,6 @@ describe('calculateTaxes', () => {
     // 208,333.33 * 0.55% ≈ 1,145.83 per month → 1,146 yen (round up)
     // 1,146 * 12 = 13,752 yen annually
     expect(result.employmentInsurance).toBe(13_752)
-    expect(result.totalTax).toBe(465_672)
     expect(result.takeHomeIncome).toBe(2_034_328)
   })
 
@@ -107,7 +105,6 @@ describe('calculateTaxes', () => {
     // 416,666.67 * 0.55% ≈ 2,291.67 per month → 2,292 yen (round up)
     // 2,292 * 12 = 27,504 yen annually
     expect(result.employmentInsurance).toBe(27_504)
-    expect(result.totalTax).toBe(1_085_376)
     expect(result.takeHomeIncome).toBe(3_914_624)
   })
 
@@ -130,7 +127,6 @@ describe('calculateTaxes', () => {
     // 4,166,666.67 * 0.55% = 22,916.67 per month → 22,917 yen (round up)
     // 22,917 * 12 = 275,004 yen annually
     expect(result.employmentInsurance).toBe(275_004)
-    expect(result.totalTax).toBe(22_788_904) // 16,345,400 + 4,628,300 + 826,500 + 713,700 + 275,004
     expect(result.takeHomeIncome).toBe(27_211_096)
   })
 
@@ -150,7 +146,6 @@ describe('calculateTaxes', () => {
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(0)
     expect(result.takeHomeIncome).toBe(0)
   })
 
@@ -169,7 +164,6 @@ describe('calculateTaxes', () => {
     expect(result.healthInsurance).toBe(0)
     expect(result.pensionPayments).toBe(0)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(0)
     expect(result.takeHomeIncome).toBe(0)
   })
 
@@ -188,7 +182,6 @@ describe('calculateTaxes', () => {
     expect(result.healthInsurance).toBe(539_380)
     expect(result.pensionPayments).toBe(210_120)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(1_436_700)
     expect(result.takeHomeIncome).toBe(3_563_300)
   })
 })

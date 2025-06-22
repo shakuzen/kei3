@@ -204,7 +204,6 @@ const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
     healthInsurance: 0,
     pensionPayments: 0,
     employmentInsurance: 0,
-    totalTax: 0,
     takeHomeIncome: 0
 };
 
@@ -241,8 +240,8 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
     // Calculate totals
-    const totalTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
-    const takeHomeIncome = annualIncome - totalTax;
+    const totalSocialsAndTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
+    const takeHomeIncome = annualIncome - totalSocialsAndTax;
 
     return {
         annualIncome,
@@ -252,7 +251,6 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         healthInsurance,
         pensionPayments,
         employmentInsurance,
-        totalTax,
         takeHomeIncome,
         netEmploymentIncome: isEmploymentIncome ? netIncome : undefined,
         nationalIncomeTaxBasicDeduction,
