@@ -56,15 +56,15 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
-    expect(result.residenceTax).toBe(24_700)
+    expect(result.residenceTax).toBe(22_200)
     expect(result.healthInsurance).toBe(74_916)
     expect(result.pensionPayments).toBe(138_348)
     // 1,500,000 / 12 = 125,000 per month
     // 125,000 * 0.55% = 687.5 per month → 687 yen (exactly 0.5 yen → round down)
     // 687 * 12 = 8,244 yen annually
     expect(result.employmentInsurance).toBe(8_244)
-    expect(result.totalTax).toBe(246_208)
-    expect(result.takeHomeIncome).toBe(1_253_792)
+    expect(result.totalTax).toBe(243_708)
+    expect(result.takeHomeIncome).toBe(1_256_292)
   })
 
   it('calculates taxes correctly for income between 1,950,000 and 3,300,000 yen', () => {
@@ -78,15 +78,15 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(22_300)
-    expect(result.residenceTax).toBe(93_600)
+    expect(result.residenceTax).toBe(91_100)
     expect(result.healthInsurance).toBe(118_920)
     expect(result.pensionPayments).toBe(219_600)
     // 2,500,000 / 12 ≈ 208,333.33 per month
     // 208,333.33 * 0.55% ≈ 1,145.83 per month → 1,146 yen (round up)
     // 1,146 * 12 = 13,752 yen annually
     expect(result.employmentInsurance).toBe(13_752)
-    expect(result.totalTax).toBe(468_172)
-    expect(result.takeHomeIncome).toBe(2_031_828)
+    expect(result.totalTax).toBe(465_672)
+    expect(result.takeHomeIncome).toBe(2_034_328)
   })
 
   it('calculates taxes correctly for income between 3,300,000 and 6,950,000 yen', () => {
@@ -100,15 +100,15 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(120_700)
-    expect(result.residenceTax).toBe(245_700)
+    expect(result.residenceTax).toBe(243_200)
     expect(result.healthInsurance).toBe(243_792)
     expect(result.pensionPayments).toBe(450_180)
     // 5,000,000 / 12 ≈ 416,666.67 per month
     // 416,666.67 * 0.55% ≈ 2,291.67 per month → 2,292 yen (round up)
     // 2,292 * 12 = 27,504 yen annually
     expect(result.employmentInsurance).toBe(27_504)
-    expect(result.totalTax).toBe(1_087_876)
-    expect(result.takeHomeIncome).toBe(3_912_124)
+    expect(result.totalTax).toBe(1_085_376)
+    expect(result.takeHomeIncome).toBe(3_914_624)
   })
 
   // Test cases for high income brackets
@@ -184,12 +184,12 @@ describe('calculateTaxes', () => {
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(302_700)
-    expect(result.residenceTax).toBe(387_000)
+    expect(result.residenceTax).toBe(384_500)
     expect(result.healthInsurance).toBe(539_380)
     expect(result.pensionPayments).toBe(210_120)
     expect(result.employmentInsurance).toBe(0)
-    expect(result.totalTax).toBe(1_439_200)
-    expect(result.takeHomeIncome).toBe(3_560_800)
+    expect(result.totalTax).toBe(1_436_700)
+    expect(result.takeHomeIncome).toBe(3_563_300)
   })
 })
 
@@ -403,17 +403,17 @@ describe('calculateResidenceTaxBasicDeduction', () => {
 describe('calculateResidenceTax', () => {
   it('calculates tax correctly for income with full deductions', () => {
     // Example: 5M income, 1M social insurance
-    expect(calculateResidenceTax(5_000_000, 1_000_000)).toBe(362_000) // (5M - 1M - 430K) * 0.1 + 5000
+    expect(calculateResidenceTax(5_000_000, 1_000_000)).toBe(359_500) // (5M - 1M - 430K) * 0.1 + 5000
   })
 
   it('calculates tax correctly for income with partial basic deduction', () => {
     // Example: 24.2M income, 1M social insurance
-    expect(calculateResidenceTax(24_200_000, 1_000_000)).toBe(2_296_000) // (24.2M - 1M - 290K) * 0.1 + 5000
+    expect(calculateResidenceTax(24_200_000, 1_000_000)).toBe(2_293_500) // (24.2M - 1M - 290K) * 0.1 + 5000
   })
 
   it('calculates tax correctly for income with minimum basic deduction', () => {
     // Example: 24.7M income, 1M social insurance
-    expect(calculateResidenceTax(24_700_000, 1_000_000)).toBe(2_360_000) // (24.7M - 1M - 150K) * 0.1 + 5000
+    expect(calculateResidenceTax(24_700_000, 1_000_000)).toBe(2_357_500) // (24.7M - 1M - 150K) * 0.1 + 5000
   })
 
   it('calculates tax correctly for income with no basic deduction', () => {

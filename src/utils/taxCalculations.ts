@@ -176,9 +176,24 @@ export const calculateResidenceTax = (
     }
     const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
     const taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000;
-    const cityTax = Math.floor(taxableIncome * 0.06 / 100) * 100;
-    const prefecturalTax = Math.floor(taxableIncome * 0.04 / 100) * 100;
-    return cityTax + prefecturalTax + 5000; // 10% rate + 5000 yen 均等割
+
+    // 調整控除額
+    let adjustmentDeduction = 0;
+    // 人的控除額調整控除 - 50,000 yen for the basic deduction; should be updated if other deductions are added to the calculator
+    const personalDeductionDifference = 50_000;
+    if (netIncome <= 2_000_000) {
+        adjustmentDeduction = Math.min(personalDeductionDifference * 0.05, taxableIncome * 0.05);
+    } else if (netIncome <= 25_000_000) {
+        adjustmentDeduction = Math.max((personalDeductionDifference - (taxableIncome - 2_000_000)) * 0.05, personalDeductionDifference * 0.05);
+    }
+    // The split between city and prefectural tax varies by municipality, but this is the split for Tokyo 23 wards. Update when other municipalities are added.
+    const cityAdjustmentDeduction = adjustmentDeduction * 0.6;
+    const prefecturalAdjustmentDeduction = adjustmentDeduction * 0.4;
+
+    const cityTax = Math.floor(((taxableIncome * 0.06) - cityAdjustmentDeduction) / 100) * 100;
+    const prefecturalTax = Math.floor(((taxableIncome * 0.04) - prefecturalAdjustmentDeduction) / 100) * 100;
+    const perCapitaTax = 5000; // 均等割額 (fixed amount per person, varies by municipality)
+    return cityTax + prefecturalTax + perCapitaTax;
 }
 
 const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
