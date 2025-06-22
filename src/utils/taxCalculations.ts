@@ -1,6 +1,7 @@
 import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
 import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
+import { calculateFurusatoNozeiDetails, calculateResidenceTax, calculateResidenceTaxBasicDeduction, NON_TAXABLE_RESIDENCE_TAX_DETAIL } from './residenceTax';
 
 /** https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html */
 export const employmentInsuranceRate = 0.0055; // 0.55%
@@ -142,71 +143,16 @@ export const calculateNationalIncomeTax = (taxableIncome: number): number => {
     return Math.floor((baseTax + reconstructionSurtax) / 100) * 100;
 }
 
-/**
- * Calculates the basic deduction (基礎控除) for residence tax based on income
- * Source: https://www.machi-gr-blog.com/【住民税】給与所得控除・基礎控除の改正でどう変わる？/
- * - 430,000 yen for income up to 24,000,000 yen
- * - 290,000 yen for income between 24,000,001 and 24,500,000 yen
- * - 150,000 yen for income between 24,500,001 and 25,000,000 yen
- * - 0 yen for income above 25,000,000 yen
- */
-export const calculateResidenceTaxBasicDeduction = (netIncome: number): number => {
-    if (netIncome <= 24000000) {
-        return 430000;
-    } else if (netIncome <= 24500000) {
-        return 290000;
-    } else if (netIncome <= 25000000) {
-        return 150000;
-    } else {
-        return 0;
-    }
-}
-
-/**
- * Calculates residence tax (住民税) based on net income and deductions
- * Rate: 10% (6% municipal tax + 4% prefectural tax) of taxable income
- * Taxable income = net income - social insurance deductions - residence tax basic deduction
- * The details vary by municipality, but most deviate little from this calculation.
- * https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju
- */
-export const calculateResidenceTax = (
-    netIncome: number,
-    socialInsuranceDeduction: number
-): number => {
-    if (netIncome <= 450_000) {
-        return 0; // 非課税制度
-    }
-    const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
-    const taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000;
-
-    // 調整控除額
-    let adjustmentDeduction = 0;
-    // 人的控除額調整控除 - 50,000 yen for the basic deduction; should be updated if other deductions are added to the calculator
-    const personalDeductionDifference = 50_000;
-    if (netIncome <= 2_000_000) {
-        adjustmentDeduction = Math.min(personalDeductionDifference * 0.05, taxableIncome * 0.05);
-    } else if (netIncome <= 25_000_000) {
-        adjustmentDeduction = Math.max((personalDeductionDifference - (taxableIncome - 2_000_000)) * 0.05, personalDeductionDifference * 0.05);
-    }
-    // The split between city and prefectural tax varies by municipality, but this is the split for Tokyo 23 wards. Update when other municipalities are added.
-    const cityAdjustmentDeduction = adjustmentDeduction * 0.6;
-    const prefecturalAdjustmentDeduction = adjustmentDeduction * 0.4;
-
-    const cityTax = Math.floor(((taxableIncome * 0.06) - cityAdjustmentDeduction) / 100) * 100;
-    const prefecturalTax = Math.floor(((taxableIncome * 0.04) - prefecturalAdjustmentDeduction) / 100) * 100;
-    const perCapitaTax = 5000; // 均等割額 (fixed amount per person, varies by municipality)
-    return cityTax + prefecturalTax + perCapitaTax;
-}
-
 const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
     annualIncome: 0,
     isEmploymentIncome: true,
     nationalIncomeTax: 0,
-    residenceTax: 0,
+    residenceTax: NON_TAXABLE_RESIDENCE_TAX_DETAIL,
     healthInsurance: 0,
     pensionPayments: 0,
     employmentInsurance: 0,
-    takeHomeIncome: 0
+    takeHomeIncome: 0,
+    furusatoNozei: calculateFurusatoNozeiDetails(0, NON_TAXABLE_RESIDENCE_TAX_DETAIL),
 };
 
 export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
@@ -242,8 +188,10 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
 
     // Calculate totals
-    const totalSocialsAndTax = nationalIncomeTax + residenceTax + healthInsurance + pensionPayments + employmentInsurance;
+    const totalSocialsAndTax = nationalIncomeTax + residenceTax.totalResidenceTax + healthInsurance + pensionPayments + employmentInsurance;
     const takeHomeIncome = annualIncome - totalSocialsAndTax;
+
+    const furusatoNozeiLimit = calculateFurusatoNozeiDetails(netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction, residenceTax);
 
     return {
         annualIncome,
@@ -259,5 +207,6 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         taxableIncomeForNationalIncomeTax,
         residenceTaxBasicDeduction,
         taxableIncomeForResidenceTax,
+        furusatoNozei: furusatoNozeiLimit,
     };
 }
