@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Chart } from 'react-chartjs-2';
 import { Chart as ChartJS,
   LinearScale,
@@ -86,9 +86,47 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
     max: 10000000, // 10 million yen
   });
   
-  const handleRangeChange = (_: Event, newValue: number | number[]) => {
+  // Track whether the user has manually adjusted the range
+  const [hasManuallyAdjustedRange, setHasManuallyAdjustedRange] = useState(false);
+  
+  // Function to calculate auto-centered range based on income
+  const calculateAutoCenteredRange = (income: number): ChartRange => {
+    // Round down to the nearest million
+    const roundedDownIncome = Math.floor(income / 1000000) * 1000000;
+    
+    // Set range to be from that number plus or minus 5 million yen
+    let min = roundedDownIncome - 5000000;
+    let max = roundedDownIncome + 5000000;
+    
+    // Ensure range is never less than 0 or more than 100 million
+    min = Math.max(0, min);
+    max = Math.min(100000000, max);
+    
+    // If max would be less than min after the constraint, adjust accordingly
+    if (max - min < 10000000) {
+      if (min === 0) {
+        max = 10000000;
+      } else if (max === 100000000) {
+        min = 90000000;
+      }
+    }
+    
+    return { min, max };
+  };
+  
+  // Auto-adjust range when income changes, but only if user hasn't manually adjusted it
+  useEffect(() => {
+    if (!hasManuallyAdjustedRange && currentIncome > 0) {
+      const newRange = calculateAutoCenteredRange(currentIncome);
+      setChartRange(newRange);
+    }
+  }, [currentIncome, hasManuallyAdjustedRange]);
+  
+  const handleManualRangeChange = (_: Event, newValue: number | number[]) => {
     if (Array.isArray(newValue)) {
       setChartRange({ min: newValue[0], max: newValue[1] });
+      // Mark that the user has manually adjusted the range
+      setHasManuallyAdjustedRange(true);
     }
   };
   
@@ -288,7 +326,7 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
           >
             <Slider
               value={[chartRange.min, chartRange.max]}
-              onChange={handleRangeChange}
+              onChange={handleManualRangeChange}
               valueLabelDisplay="off"
               min={0}
               max={100000000}
