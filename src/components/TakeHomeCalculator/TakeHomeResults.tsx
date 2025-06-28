@@ -17,7 +17,6 @@ import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import InfoTooltip from '../ui/InfoTooltip';
 import DetailInfoTooltip from '../ui/DetailInfoTooltip';
-import { employmentInsuranceRate } from '../../utils/taxCalculations';
 import { monthlyNationalPensionContribution } from '../../utils/pensionCalculator';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
@@ -301,49 +300,43 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
           type="indented" 
         />
         {results.isEmploymentIncome && (
-          <>
-            <Fade in={showDetails} unmountOnExit>
-              <Box>
-                <ResultRow label={
-                  <span>
-                    Premium Rate
-                    <DetailInfoTooltip
-                      title="Employment Insurance Rate"
-                      children={
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                            Employment Insurance Rate (2025)
-                          </Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            This is the employment insurance rate paid by the employee. The rate is applied to your gross salary. The employer also contributes to employment insurance at a different rate.
-                          </Typography>
-                          <Box sx={{ mt: 1 }}>
-                            Official Source:
-                            <ul>
-                              <li>
-                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                                  Employment Insurance System Overview (MHLW)
-                                </a>
-                              </li>
-                            </ul>
-                          </Box>
-                        </Box>
-                      }
-                    />
-                  </span>
-                } value={`${(employmentInsuranceRate * 100).toFixed(2)}%`} type="detail" />
-              </Box>
-            </Fade>
-            <ResultRow 
-              label="Employment Insurance" 
-              value={
-                !isMobile ? 
-                  `${formatJPY(results.employmentInsurance ?? 0)} (${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(2)}%)` : 
-                  formatJPY(results.employmentInsurance ?? 0)
-              } 
-              type="indented" 
-            />
-          </>
+          <ResultRow 
+            label={
+              <span>
+                Employment Insurance
+                <InfoTooltip 
+                  title="Employment Insurance (雇用保険)"
+                  children={
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Employment Insurance (雇用保険)
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        Insurance for unemployment and work-related benefits.
+                        This amount includes only the employment insurance premium paid by the employee. The rate is applied to your gross salary. The employer also contributes to employment insurance separately.
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        Official Source:
+                        <ul>
+                          <li>
+                            <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              Employment Insurance Premium Rate (MHLW)
+                            </a>
+                          </li>
+                        </ul>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </span>
+            }
+            value={
+              !isMobile ? 
+                `${formatJPY(results.employmentInsurance ?? 0)} (${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(2)}%)` : 
+                formatJPY(results.employmentInsurance ?? 0)
+            } 
+            type="indented" 
+          />
         )}
         <ResultRow 
           label="Total Social Insurance" 
