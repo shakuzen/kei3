@@ -208,7 +208,10 @@ export const getChartOptions = (
               if (context.dataset.yAxisID === 'y1') {
                 label += context.parsed.y.toFixed(1) + '%';
               } else {
-                label += formatJPY(context.parsed.y);
+                const income = context.parsed.x;
+                const fractionDigits = context.dataset.label === 'Employment Insurance' ? 2 : 1;
+                const percentage = income > 0 ? ((context.parsed.y / income) * 100).toFixed(fractionDigits) : '0.0';
+                label += `${formatJPY(context.parsed.y)} (${percentage}%)`;
               }
             }
             return label;

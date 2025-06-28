@@ -248,7 +248,15 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
           <InsuranceIcon sx={{ mr: 1, fontSize: isMobile ? 18 : 20 }} />
           Social Insurance
         </Typography>
-        <ResultRow label="Health Insurance" value={formatJPY(results.healthInsurance)} type="indented" />
+        <ResultRow 
+          label="Health Insurance" 
+          value={
+            !isMobile ? 
+              `${formatJPY(results.healthInsurance)} (${((results.healthInsurance / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(results.healthInsurance)
+          } 
+          type="indented" 
+        />
         <Fade in={showDetails} unmountOnExit>
           <Box>
             {!results.isEmploymentIncome && (
@@ -283,7 +291,15 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
             )}
           </Box>
         </Fade>
-        <ResultRow label="Pension Payments" value={formatJPY(results.pensionPayments)} type="indented" />
+        <ResultRow 
+          label="Pension Payments" 
+          value={
+            !isMobile ? 
+              `${formatJPY(results.pensionPayments)} (${((results.pensionPayments / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(results.pensionPayments)
+          } 
+          type="indented" 
+        />
         {results.isEmploymentIncome && (
           <>
             <Fade in={showDetails} unmountOnExit>
@@ -318,10 +334,26 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                 } value={`${(employmentInsuranceRate * 100).toFixed(2)}%`} type="detail" />
               </Box>
             </Fade>
-            <ResultRow label="Employment Insurance" value={formatJPY(results.employmentInsurance ?? 0)} type="indented" />
+            <ResultRow 
+              label="Employment Insurance" 
+              value={
+                !isMobile ? 
+                  `${formatJPY(results.employmentInsurance ?? 0)} (${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(2)}%)` : 
+                  formatJPY(results.employmentInsurance ?? 0)
+              } 
+              type="indented" 
+            />
           </>
         )}
-        <ResultRow label="Total Social Insurance" value={formatJPY(totalSocialInsurance)} type="subtotal" />
+        <ResultRow 
+          label="Total Social Insurance" 
+          value={
+            !isMobile ? 
+              `${formatJPY(totalSocialInsurance)} (${((totalSocialInsurance / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(totalSocialInsurance)
+          } 
+          type="subtotal" 
+        />
       </Box>
       
       {/* Taxes Section */}
@@ -470,7 +502,15 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
             )}
           </Box>
         </Fade>
-        <ResultRow label="Income Tax" value={formatJPY(results.nationalIncomeTax)} type="indented" />
+        <ResultRow 
+          label="Income Tax" 
+          value={
+            !isMobile ? 
+              `${formatJPY(results.nationalIncomeTax)} (${((results.nationalIncomeTax / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(results.nationalIncomeTax)
+          } 
+          type="indented" 
+        />
         <Fade in={showDetails} unmountOnExit>
           <Box>
             <ResultRow label={results.isEmploymentIncome ? "Gross Employment Income" : "Net Annual Income"} value={formatJPY(results.annualIncome)} type="detail" />
@@ -566,13 +606,37 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
             )}
           </Box>
         </Fade>
-        <ResultRow label="Residence Tax" value={formatJPY(results.residenceTax.totalResidenceTax)} type="indented" />
-        <ResultRow label="Total Taxes" value={formatJPY(totalTaxes)} type="subtotal" />
+        <ResultRow 
+          label="Residence Tax" 
+          value={
+            !isMobile ? 
+              `${formatJPY(results.residenceTax.totalResidenceTax)} (${((results.residenceTax.totalResidenceTax / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(results.residenceTax.totalResidenceTax)
+          } 
+          type="indented" 
+        />
+        <ResultRow 
+          label="Total Taxes" 
+          value={
+            !isMobile ? 
+              `${formatJPY(totalTaxes)} (${((totalTaxes / results.annualIncome) * 100).toFixed(1)}%)` : 
+              formatJPY(totalTaxes)
+          } 
+          type="subtotal" 
+        />
       </Box>
       
       {/* Total Deductions */}
       <Box>
-         <ResultRow label="Total Deductions" value={formatJPY(totalDeductions)} type="total" valuePrefix="- " />
+         <ResultRow 
+           label="Total Deductions" 
+           value={
+             !isMobile ? 
+               `${formatJPY(-totalDeductions)} (${((totalDeductions / results.annualIncome) * 100).toFixed(1)}%)` : 
+               formatJPY(-totalDeductions)
+           } 
+           type="total"
+         />
       </Box>
       
       <Divider sx={{ borderBottomWidth: 2 }} />
