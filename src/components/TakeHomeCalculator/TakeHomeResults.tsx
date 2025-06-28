@@ -401,52 +401,67 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
                           National Income Tax Basic Deduction (2025)
                         </Typography>
-                        <table style={{ width: '100%', fontSize: '0.95em' }}>
+                        <Box
+                          component="table"
+                          sx={{
+                            width: '100%',
+                            fontSize: '0.95em',
+                            borderCollapse: 'collapse',
+                            '& td': {
+                              padding: '2px 6px'
+                            },
+                            '& th': {
+                              borderBottom: '1px solid #ccc',
+                              padding: '2px 6px',
+                              textAlign: 'left'
+                            }
+                          }}
+                        >
                           <thead>
                             <tr>
-                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Net Income (¥)</th>
-                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+                              <th>Net Income (¥)</th>
+                              <th>Deduction Amount</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 1,320,000</td>
-                              <td style={{ padding: '2px 6px' }}>950,000</td>
+                              <td>Up to 1,320,000</td>
+                              <td>950,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 3,360,000</td>
-                              <td style={{ padding: '2px 6px' }}>880,000</td>
+                              <td>Up to 3,360,000</td>
+                              <td>880,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 4,890,000</td>
-                              <td style={{ padding: '2px 6px' }}>680,000</td>
+                              <td>Up to 4,890,000</td>
+                              <td>680,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 6,550,000</td>
-                              <td style={{ padding: '2px 6px' }}>630,000</td>
+                              <td>Up to 6,550,000</td>
+                              <td>630,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 23,500,000</td>
-                              <td style={{ padding: '2px 6px' }}>580,000</td>
+                              <td>Up to 23,500,000</td>
+                              <td>580,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 24,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>480,000</td>
+                              <td>Up to 24,000,000</td>
+                              <td>480,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 24,500,000</td>
-                              <td style={{ padding: '2px 6px' }}>320,000</td>
+                              <td>Up to 24,500,000</td>
+                              <td>320,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 25,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>160,000</td>
+                              <td>Up to 25,000,000</td>
+                              <td>160,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Over 25,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>0</td>
+                              <td>Over 25,000,000</td>
+                              <td>0</td>
                             </tr>
                           </tbody>
-                        </table>
+                        </Box>
                         <Box sx={{ mt: 1 }}>
                           Official Sources (NTA):
                           <ul>
@@ -540,32 +555,47 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
                           Residence Tax Basic Deduction (2025)
                         </Typography>
-                        <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.95em' }}>
+                        <Box
+                          component="table"
+                          sx={{
+                            borderCollapse: 'collapse',
+                            width: '100%',
+                            fontSize: '0.95em',
+                            '& td': {
+                              padding: '2px 6px'
+                            },
+                            '& th': {
+                              borderBottom: '1px solid #ccc',
+                              padding: '2px 6px',
+                              textAlign: 'left'
+                            }
+                          }}
+                        >
                           <thead>
                             <tr>
-                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Net Income (¥)</th>
-                              <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+                              <th>Net Income (¥)</th>
+                              <th>Deduction Amount</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Up to 24,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>430,000</td>
+                              <td>Up to 24,000,000</td>
+                              <td>430,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>24,000,001 - 24,500,000</td>
-                              <td style={{ padding: '2px 6px' }}>290,000</td>
+                              <td>24,000,001 - 24,500,000</td>
+                              <td>290,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>24,500,001 - 25,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>150,000</td>
+                              <td>24,500,001 - 25,000,000</td>
+                              <td>150,000</td>
                             </tr>
                             <tr>
-                              <td style={{ padding: '2px 6px' }}>Over 25,000,000</td>
-                              <td style={{ padding: '2px 6px' }}>0</td>
+                              <td>Over 25,000,000</td>
+                              <td>0</td>
                             </tr>
                           </tbody>
-                        </table>
+                        </Box>
                         <Box sx={{ mt: 1 }}>
                           <a href="https://www.city.yokohama.lg.jp/kurashi/koseki-zei-hoken/zeikin/y-shizei/kojin-shiminzei-kenminzei/kaisei/R3zeiseikaisei.html#4" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
                             Official Source (Yokohama City)
@@ -791,36 +821,51 @@ const EmploymentIncomeDeductionTooltip: React.FC = () => (
     <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
       2025 Employment Income Deduction Table
     </Typography>
-    <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: '0.95em' }}>
+    <Box
+      component="table"
+      sx={{
+        borderCollapse: 'collapse',
+        width: '100%',
+        fontSize: '0.95em',
+        '& td': {
+          padding: '2px 6px'
+        },
+        '& th': {
+          borderBottom: '1px solid #ccc',
+          padding: '2px 6px',
+          textAlign: 'left'
+        }
+      }}
+    >
       <thead>
         <tr>
-          <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Gross Employment Income (¥)</th>
-          <th style={{ borderBottom: '1px solid #ccc', padding: '2px 6px', textAlign: 'left' }}>Deduction Amount</th>
+          <th>Gross Employment Income (¥)</th>
+          <th>Deduction Amount</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style={{ padding: '2px 6px' }}>Up to 1,900,000</td>
-          <td style={{ padding: '2px 6px' }}>650,000</td>
+          <td>Up to 1,900,000</td>
+          <td>650,000</td>
         </tr>
         <tr>
-          <td style={{ padding: '2px 6px' }}>1,900,001 – 3,600,000</td>
-          <td style={{ padding: '2px 6px' }}>30% of income + 80,000</td>
+          <td>1,900,001 – 3,600,000</td>
+          <td>30% of income + 80,000</td>
         </tr>
         <tr>
-          <td style={{ padding: '2px 6px' }}>3,600,001 – 6,600,000</td>
-          <td style={{ padding: '2px 6px' }}>20% of income + 440,000</td>
+          <td>3,600,001 – 6,600,000</td>
+          <td>20% of income + 440,000</td>
         </tr>
         <tr>
-          <td style={{ padding: '2px 6px' }}>6,600,001 – 8,500,000</td>
-          <td style={{ padding: '2px 6px' }}>10% of income + 1,100,000</td>
+          <td>6,600,001 – 8,500,000</td>
+          <td>10% of income + 1,100,000</td>
         </tr>
         <tr>
-          <td style={{ padding: '2px 6px' }}>8,500,001 and above</td>
-          <td style={{ padding: '2px 6px' }}>1,950,000 (max)</td>
+          <td>8,500,001 and above</td>
+          <td>1,950,000 (max)</td>
         </tr>
       </tbody>
-    </table>
+    </Box>
     <Box sx={{ mt: 1 }}>
       Official Sources:
       <ul>
