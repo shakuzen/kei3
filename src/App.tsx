@@ -26,7 +26,8 @@ function App({ mode, toggleColorMode }: AppProps) {
     prefecture: "Tokyo",
     showDetailedInput: false,
     healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
-    numberOfDependents: 0
+    numberOfDependents: 0,
+    dcPlanContributions: 0
   }
 
   // State for form inputs
@@ -192,6 +193,7 @@ function App({ mode, toggleColorMode }: AppProps) {
           isOver40={inputs.isOver40}
           healthInsuranceProvider={inputs.healthInsuranceProvider}
           prefecture={inputs.prefecture}
+          dcPlanContributions={inputs.dcPlanContributions}
         />
       </Suspense>
 

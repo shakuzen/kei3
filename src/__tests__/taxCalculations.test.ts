@@ -52,7 +52,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo", // Default for Kyokai Kenpo in tests
-      numberOfDependents: 0, showDetailedInput: false, // Added missing properties
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -73,7 +73,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(22_300)
@@ -94,7 +94,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(120_700)
@@ -116,7 +116,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(16_345_400) // 50M - 1.95M (employment deduction) - 1.815194M (social insurance) - 0 (basic deduction) = 46.234806M, rounded to 46.234M, then 45% - 4.796M = 16.0093M, + 2.1% = 16.345495M, rounded down to 16.3454M
@@ -138,7 +138,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -156,7 +156,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -174,7 +174,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id,
       prefecture: "Tokyo", // For NHI
-      numberOfDependents: 0, showDetailedInput: false,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(302_700)
@@ -184,6 +184,43 @@ describe('calculateTaxes', () => {
     expect(result.employmentInsurance).toBe(0)
     expect(result.takeHomeIncome).toBe(3_563_300)
   })
+
+  it('calculates taxes correctly with DC plan contributions', () => {
+    // Test without DC plan contributions
+    const inputsWithoutDcPlan = {
+      annualIncome: 5_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+    };
+    const resultWithoutIdeco = calculateTaxes(inputsWithoutDcPlan);
+
+    // Test with 240,000 yen annual iDeCo contributions (20,000 yen monthly)
+    const inputsWithIdeco = {
+      ...inputsWithoutDcPlan,
+      dcPlanContributions: 240_000,
+    };
+    const resultWithIdeco = calculateTaxes(inputsWithIdeco);
+
+    // iDeCo contributions should reduce taxes
+    expect(resultWithIdeco.nationalIncomeTax).toBeLessThan(resultWithoutIdeco.nationalIncomeTax);
+    expect(resultWithIdeco.residenceTax.totalResidenceTax).toBeLessThan(resultWithoutIdeco.residenceTax.totalResidenceTax);
+    
+    // Take-home pay should be higher with iDeCo contributions
+    // This is because the tax savings offset part of the contribution
+    expect(resultWithIdeco.takeHomeIncome).toBeGreaterThan(resultWithoutIdeco.takeHomeIncome);
+    
+    // Verify that the tax savings are calculated correctly
+    const incomeTaxSavings = resultWithoutIdeco.nationalIncomeTax - resultWithIdeco.nationalIncomeTax;
+    const residenceTaxSavings = resultWithoutIdeco.residenceTax.totalResidenceTax - resultWithIdeco.residenceTax.totalResidenceTax;
+    
+    // With 240,000 yen contribution at ~10% marginal tax rate, we expect around 24,000 yen in income tax savings
+    // and around 24,000 yen in residence tax savings (10% rate)
+    expect(incomeTaxSavings).equals(22_800); // less because it crosses into the 5% bracket
+    expect(residenceTaxSavings).equals(24_000);
+  });
 })
 
 describe('calculateEmploymentInsurance', () => {

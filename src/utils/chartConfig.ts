@@ -56,14 +56,13 @@ export const currentAndMedianIncomeChartPlugin: Plugin<'bar' | 'line'> = {
 
 export const generateChartData = (
   chartRange: ChartRange,
-  currentInputs: Omit<TakeHomeInputs, 'annualIncome' | 'showDetailedInput' | 'numberOfDependents'> // Chart varies by income, other inputs are fixed for a given chart
+  currentInputs: Omit<TakeHomeInputs, 'annualIncome' | 'showDetailedInput'> // Chart varies by income, other inputs are fixed for a given chart
 ): ChartData<'bar' | 'line'> => {
 
   const createTaxInputsForIncome = (income: number): TakeHomeInputs => ({
     ...currentInputs,
     annualIncome: income,
     showDetailedInput: false, // Not relevant for chart calculation
-    numberOfDependents: 0, // Not relevant for chart calculation
   });
   // Create income points based on the current range
   const step = 1000000 // 1 million yen

@@ -41,6 +41,7 @@ interface AdvancedOptionsFieldsProps {
   isHealthInsuranceProviderDropdownDisabled: boolean;
   inputs: TakeHomeInputs;
   handleSelectChange: (e: { target: { name: string; value: unknown } }) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => void;
   sharedInputSx: object;
   HealthInsuranceProvider: typeof HealthInsuranceProvider;
   prefectureSelectValueForUI: string;
@@ -54,6 +55,7 @@ function AdvancedOptionsFields({
   isHealthInsuranceProviderDropdownDisabled,
   inputs,
   handleSelectChange,
+  onInputChange,
   sharedInputSx,
   HealthInsuranceProvider,
   prefectureSelectValueForUI,
@@ -137,6 +139,66 @@ function AdvancedOptionsFields({
             </MenuItem>
           ))}
         </Select>
+      </FormControl>
+      <FormControl fullWidth>
+        <Typography
+          gutterBottom
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '0.97rem',
+            fontWeight: 500,
+            mb: 0.2,
+            color: 'text.primary',
+          }}
+        >
+          <a
+            href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/nenkin/kyoshutsu/gaiyou.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', fontWeight: 500 }}
+          >iDeCo/Corporate DC</a>{'\u00A0'}Contributions
+          <InfoTooltip title="Annual contributions to iDeCo (individual defined contribution pension) and corporate DC plans. Do not include employer contributions in this amount. The max allowed contribution will vary depending on your situation." />
+        </Typography>
+        <TextField
+          id="dcPlanContributions"
+          name="dcPlanContributions"
+          type="number"
+          value={inputs.dcPlanContributions}
+          onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
+          label="Annual Contributions"
+          helperText={inputs.dcPlanContributions > 0 ? `${formatJPY(inputs.dcPlanContributions)}` : 'Enter your annual iDeCo/DC contributions'}
+          sx={sharedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Typography color="text.secondary">¥</Typography>
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Typography variant="caption" color="text.secondary">
+                    JPY
+                  </Typography>
+                </InputAdornment>
+              ),
+              inputProps: {
+                min: 0,
+                max: 10000000,
+                step: 1000,
+                inputMode: 'numeric',
+                pattern: '[0-9]*',
+                style: { textAlign: 'right' },
+                'aria-label': 'Annual iDeCo and Corporate DC contributions in Japanese Yen',
+                size: 10
+              }
+            },
+            inputLabel: {
+              shrink: true,
+            }
+          }}
+        />
       </FormControl>
     </Box>
   );
@@ -671,6 +733,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 isHealthInsuranceProviderDropdownDisabled={isHealthInsuranceProviderDropdownDisabled}
                 inputs={inputs}
                 handleSelectChange={handleSelectChange}
+                onInputChange={onInputChange}
                 sharedInputSx={sharedInputSx}
                 HealthInsuranceProvider={HealthInsuranceProvider}
                 prefectureSelectValueForUI={prefectureSelectValueForUI}
@@ -697,6 +760,7 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
               isHealthInsuranceProviderDropdownDisabled={isHealthInsuranceProviderDropdownDisabled}
               inputs={inputs}
               handleSelectChange={handleSelectChange}
+              onInputChange={onInputChange}
               sharedInputSx={sharedInputSx}
               HealthInsuranceProvider={HealthInsuranceProvider}
               prefectureSelectValueForUI={prefectureSelectValueForUI}
