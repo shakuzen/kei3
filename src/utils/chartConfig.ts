@@ -73,7 +73,7 @@ export const generateChartData = (
     (_, i) => chartRange.min + (i * step)
   )
 
-  // Create datasets with proper alignment
+  // Create datasets with proper alignment using accessible color palette
   const datasets = [
     {
       label: 'Take-Home Pay',
@@ -81,8 +81,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).takeHomeIncome
       })),
-      borderColor: 'rgb(34, 197, 94)',
-      backgroundColor: 'rgba(34, 197, 94, 0.5)',
+      borderColor: 'rgb(34, 139, 34)', // Forest Green - positive outcome
+      backgroundColor: 'rgba(34, 139, 34, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -93,8 +93,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).nationalIncomeTax
       })),
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      borderColor: 'rgb(220, 20, 60)', // Crimson - high contrast red
+      backgroundColor: 'rgba(220, 20, 60, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -105,8 +105,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).residenceTax.totalResidenceTax
       })),
-      borderColor: 'rgb(54, 162, 235)',
-      backgroundColor: 'rgba(54, 162, 235, 0.5)',
+      borderColor: 'rgb(30, 144, 255)', // Dodger Blue - distinct blue
+      backgroundColor: 'rgba(30, 144, 255, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -117,8 +117,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).healthInsurance
       })),
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.5)',
+      borderColor: 'rgb(255, 140, 0)', // Dark Orange - distinct from other colors
+      backgroundColor: 'rgba(255, 140, 0, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -129,8 +129,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).pensionPayments
       })),
-      borderColor: 'rgb(153, 102, 255)',
-      backgroundColor: 'rgba(153, 102, 255, 0.5)',
+      borderColor: 'rgb(138, 43, 226)', // Blue Violet - distinct purple
+      backgroundColor: 'rgba(138, 43, 226, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -141,8 +141,8 @@ export const generateChartData = (
         x: income,
         y: calculateTaxes(createTaxInputsForIncome(income)).employmentInsurance ?? 0
       })),
-      borderColor: 'rgb(255, 159, 64)',
-      backgroundColor: 'rgba(255, 159, 64, 0.5)',
+      borderColor: 'rgb(255, 20, 147)', // Deep Pink - highly distinct
+      backgroundColor: 'rgba(255, 20, 147, 0.7)',
       yAxisID: 'y',
       type: 'bar' as const,
       stack: 'stack0',
@@ -156,8 +156,8 @@ export const generateChartData = (
           y: (result.takeHomeIncome / income) * 100
         }
       }),
-      borderColor: 'rgb(255, 159, 64)',
-      backgroundColor: 'rgba(255, 159, 64, 0.5)',
+      borderColor: 'rgb(105, 105, 105)', // Dim Gray - neutral for percentage line
+      backgroundColor: 'rgba(105, 105, 105, 0.7)',
       yAxisID: 'y1',
       borderDash: [5, 5],
       type: 'line' as const,
