@@ -33,7 +33,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
     <Paper
       elevation={0}
       sx={{
-        p: { xs: 1.2, sm: 3 },
+        p: { xs: 1.2, sm: 2 },
         bgcolor: 'background.paper',
         borderRadius: 3,
         boxShadow: 2,
@@ -45,7 +45,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         mx: 'auto',
       }}
     >
-      <Typography variant="h6" component="h2" sx={{ fontSize: { xs: '1.08rem', sm: '1.3rem' }, mb: { xs: 1, sm: 2 }, fontWeight: 700 }}>
+      <Typography variant="h6" component="h2" sx={{ fontSize: { xs: '1.08rem', sm: '1.3rem' }, mb: { xs: 0.7, sm: 1.2 }, fontWeight: 700 }}>
         Take-Home Pay Breakdown
       </Typography>
 
@@ -53,9 +53,8 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         <Tabs 
           value={currentTab} 
           onChange={handleTabChange} 
-          variant={isMobile ? "scrollable" : "standard"}
-          scrollButtons={isMobile ? "auto" : false}
-          allowScrollButtonsMobile
+          variant="scrollable"
+          scrollButtons="auto"
           sx={{
             minHeight: isMobile ? 36 : 48,
             '& .MuiTab-root': {
