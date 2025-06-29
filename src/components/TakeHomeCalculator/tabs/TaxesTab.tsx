@@ -94,6 +94,8 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (results.employmentInsurance ?? 0);
+  // Almost taxable income but before applying the basic deduction
+  const subtotalIncome = (results.netEmploymentIncome ?? results.annualIncome) - totalSocialInsurance - (results.dcPlanContributions ?? 0);
   const totalTaxes = results.nationalIncomeTax + results.residenceTax.totalResidenceTax;
 
   return (
@@ -101,7 +103,7 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
       <Typography
         variant="h6"
         sx={{
-          mb: 2,
+          mb: 1,
           color: 'warning.main',
           fontWeight: 600,
           display: 'flex',
@@ -114,11 +116,9 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
       </Typography>
 
       {/* Income Overview */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
-          Income Overview
-        </Typography>
+      <Box sx={{ mb: 1 }}>
         <ResultRow label={results.isEmploymentIncome ? "Gross Employment Income" : "Net Annual Income"} value={formatJPY(results.annualIncome)} type="header" />
+
         {results.isEmploymentIncome && results.netEmploymentIncome !== undefined && (
           <ResultRow 
             label={
@@ -134,14 +134,58 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
             type="indented" 
           />
         )}
+
+        {results.dcPlanContributions > 0 && (
+          <ResultRow 
+            label={
+              <span>
+                iDeCo/Corp DC Deduction
+                <DetailInfoTooltip
+                  title="iDeCo and Corporate DC Contributions (小規模企業共済等掛金控除)"
+                  children={
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Small Enterprise Mutual Aid Contribution Deduction
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        Contributions to iDeCo (individual defined contribution pension) and corporate defined contribution plans reduce your taxable income for income tax and residence tax.
+                        Employer contributions cannot be included in this deduction.
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        Official Sources:
+                        <ul>
+                            <li>
+                            <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1135.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
+                              小規模企業共済等掛金控除 (NTA)
+                            </a>
+                            </li>
+                            <li>
+                            <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/nenkin/kyoshutsu/gaiyou.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
+                              確定拠出年金制度の概要 (MHLW)
+                            </a>
+                            </li>
+                        </ul>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </span>
+            } 
+            value={formatJPY(-results.dcPlanContributions)} 
+            type="detail" 
+          />
+        )}
+        
+        <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
+        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="subtotal" sx={{ mt: 0.5 }} />
       </Box>
 
       {/* Income Tax Calculation */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Income Tax Calculation
         </Typography>
-        <ResultRow label="Starting Income" value={formatJPY(results.netEmploymentIncome ?? results.annualIncome)} type="indented" />
+        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="indented" />
         
         <ResultRow 
           label={
@@ -239,49 +283,6 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
           type="detail" 
         />
         
-        {results.dcPlanContributions > 0 && (
-          <ResultRow 
-            label={
-              <span>
-                iDeCo/Corp DC Deduction
-                <DetailInfoTooltip
-                  title="iDeCo and Corporate DC Contributions (小規模企業共済等掛金控除)"
-                  children={
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Small Enterprise Mutual Aid Contribution Deduction
-                      </Typography>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        Contributions to iDeCo (individual defined contribution pension) and corporate defined contribution plans reduce your taxable income for income tax and residence tax.
-                        Employer contributions cannot be included in this deduction.
-                      </Typography>
-                      <Box sx={{ mt: 1 }}>
-                        Official Sources:
-                        <ul>
-                            <li>
-                            <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1135.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
-                              小規模企業共済等掛金控除 (NTA)
-                            </a>
-                            </li>
-                            <li>
-                            <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/nenkin/kyoshutsu/gaiyou.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
-                              確定拠出年金制度の概要 (MHLW)
-                            </a>
-                            </li>
-                        </ul>
-                      </Box>
-                    </Box>
-                  }
-                />
-              </span>
-            } 
-            value={formatJPY(-results.dcPlanContributions)} 
-            type="detail" 
-          />
-        )}
-        
-        <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
-        
         {results.taxableIncomeForNationalIncomeTax !== undefined && (
           <ResultRow 
             label={
@@ -320,11 +321,11 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
       </Box>
 
       {/* Residence Tax Calculation */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Residence Tax Calculation
         </Typography>
-        <ResultRow label="Starting Income" value={formatJPY(results.netEmploymentIncome ?? results.annualIncome)} type="indented" />
+        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="indented" />
         
         <ResultRow 
           label={
@@ -392,8 +393,6 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
           type="detail" 
         />
         
-        <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
-        
         {results.taxableIncomeForResidenceTax !== undefined && (
           <ResultRow 
             label={
@@ -427,16 +426,11 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
       </Box>
 
       {/* Total */}
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 2 }}>
         <ResultRow 
           label="Total Taxes" 
           value={formatJPY(totalTaxes)} 
           type="total" 
-        />
-        <ResultRow 
-          label="Total as % of Income" 
-          value={`${((totalTaxes / results.annualIncome) * 100).toFixed(2)}%`} 
-          type="detail" 
         />
         <ResultRow 
           label="Monthly Total" 

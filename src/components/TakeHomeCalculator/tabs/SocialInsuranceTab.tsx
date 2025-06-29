@@ -28,7 +28,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       <Typography
         variant="h6"
         sx={{
-          mb: 2,
+          mb: 1,
           color: 'primary.main',
           fontWeight: 600,
           display: 'flex',
@@ -43,7 +43,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
 
       {/* Health Insurance */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Health Insurance
         </Typography>
@@ -53,11 +53,6 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
           type="indented" 
         />
         <ResultRow 
-          label="Percentage of Income" 
-          value={`${((results.healthInsurance / results.annualIncome) * 100).toFixed(2)}%`} 
-          type="detail" 
-        />
-        <ResultRow 
           label="Monthly Premium" 
           value={formatJPY(Math.round(results.healthInsurance / 12))} 
           type="detail" 
@@ -65,7 +60,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       </Box>
 
       {/* Pension Payments */}
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Pension Payments
         </Typography>
@@ -73,11 +68,6 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
           label="Annual Premium" 
           value={formatJPY(results.pensionPayments)} 
           type="indented" 
-        />
-        <ResultRow 
-          label="Percentage of Income" 
-          value={`${((results.pensionPayments / results.annualIncome) * 100).toFixed(2)}%`} 
-          type="detail" 
         />
         <ResultRow 
           label="Monthly Premium" 
@@ -119,7 +109,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
 
       {/* Employment Insurance */}
       {results.isEmploymentIncome && (
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 1 }}>
           <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
             Employment Insurance
           </Typography>
@@ -158,7 +148,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
           />
           <ResultRow 
             label="Percentage of Income" 
-            value={`${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(3)}%`} 
+            value={`${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(2)}%`} 
             type="detail" 
           />
           <ResultRow 
@@ -170,16 +160,11 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       )}
 
       {/* Total */}
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 2 }}>
         <ResultRow 
           label="Total Social Insurance" 
           value={formatJPY(totalSocialInsurance)} 
           type="total" 
-        />
-        <ResultRow 
-          label="Total as % of Income" 
-          value={`${((totalSocialInsurance / results.annualIncome) * 100).toFixed(2)}%`} 
-          type="detail" 
         />
         <ResultRow 
           label="Monthly Total" 

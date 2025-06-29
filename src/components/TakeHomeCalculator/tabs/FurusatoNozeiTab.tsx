@@ -39,7 +39,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
       <Typography
         variant="h6"
         sx={{
-          mb: 2,
+          mb: 1,
           color: 'secondary.main',
           fontWeight: 600,
           display: 'flex',
@@ -51,7 +51,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
         Furusato Nozei Details
       </Typography>
 
-      <Box sx={{ mb: 2, p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'info.contrastText' }}>
+      <Box sx={{ mb: 1, p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'info.contrastText' }}>
         <Typography variant="body2">
           For comprehensive information about Furusato Nozei, see{' '}
           <a 
@@ -66,10 +66,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
       </Box>
 
       {/* Limit */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
-          Donation Limit
-        </Typography>
+      <Box sx={{ mb: 1 }}>
         <ResultRow
           label={
             <span>
@@ -105,7 +102,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
       </Box>
 
       {/* Tax Reductions */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Tax Reductions (at limit)
         </Typography>
@@ -155,7 +152,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
       </Box>
 
       {/* Cost Analysis */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Cost Analysis (at limit)
         </Typography>
@@ -211,27 +208,15 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
       </Box>
 
       {/* Effective Return */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Effective Return Analysis
         </Typography>
         
         <ResultRow
-          label="Net Cost After Tax Reduction"
-          value={formatJPY(results.furusatoNozei.outOfPocketCost)}
-          type="indented" 
-        />
-        
-        <ResultRow
-          label="Effective Return Rate"
-          value={`${(((results.furusatoNozei.limit - results.furusatoNozei.outOfPocketCost) / results.furusatoNozei.limit) * 100).toFixed(1)}%`}
-          type="indented" 
-        />
-        
-        <ResultRow
           label="Value of Goods Received"
           value={`≈ ${formatJPY(Math.round(results.furusatoNozei.limit * 0.3))}`}
-          type="detail" 
+          type="indented" 
         />
         
         <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 1, display: 'block' }}>
