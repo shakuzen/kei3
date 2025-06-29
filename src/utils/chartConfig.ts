@@ -76,6 +76,18 @@ export const generateChartData = (
   // Create datasets with proper alignment
   const datasets = [
     {
+      label: 'Take-Home Pay',
+      data: incomePoints.map(income => ({
+        x: income,
+        y: calculateTaxes(createTaxInputsForIncome(income)).takeHomeIncome
+      })),
+      borderColor: 'rgb(34, 197, 94)',
+      backgroundColor: 'rgba(34, 197, 94, 0.5)',
+      yAxisID: 'y',
+      type: 'bar' as const,
+      stack: 'stack0',
+    },
+    {
       label: 'Income Tax',
       data: incomePoints.map(income => ({
         x: income,
@@ -135,18 +147,6 @@ export const generateChartData = (
       type: 'bar' as const,
       stack: 'stack0',
     }] : []),
-    {
-      label: 'Take-Home Pay',
-      data: incomePoints.map(income => ({
-        x: income,
-        y: calculateTaxes(createTaxInputsForIncome(income)).takeHomeIncome
-      })),
-      borderColor: 'rgb(34, 197, 94)',
-      backgroundColor: 'rgba(34, 197, 94, 0.5)',
-      yAxisID: 'y',
-      type: 'bar' as const,
-      stack: 'stack0',
-    },
     {
       label: 'Take-Home %',
       data: incomePoints.map(income => {
