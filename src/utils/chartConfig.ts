@@ -194,6 +194,10 @@ export const getChartOptions = (
       tooltip: {
         mode: 'index' as const,
         intersect: false,
+        filter: function(tooltipItem: TooltipItem<'bar' | 'line'>) {
+          // Don't show tooltip for Take-Home % line (redundant with percentages on other items)
+          return tooltipItem.dataset.yAxisID !== 'y1';
+        },
         callbacks: {
           title: function(context: TooltipItem<'bar' | 'line'>[]) {
             const income = context[0].parsed.x;
@@ -205,14 +209,10 @@ export const getChartOptions = (
               label += ': ';
             }
             if (context.parsed.y !== null) {
-              if (context.dataset.yAxisID === 'y1') {
-                label += context.parsed.y.toFixed(1) + '%';
-              } else {
-                const income = context.parsed.x;
-                const fractionDigits = context.dataset.label === 'Employment Insurance' ? 2 : 1;
-                const percentage = income > 0 ? ((context.parsed.y / income) * 100).toFixed(fractionDigits) : '0.0';
-                label += `${formatJPY(context.parsed.y)} (${percentage}%)`;
-              }
+              const income = context.parsed.x;
+              const fractionDigits = context.dataset.label === 'Employment Insurance' ? 2 : 1;
+              const percentage = income > 0 ? ((context.parsed.y / income) * 100).toFixed(fractionDigits) : '0.0';
+              label += `${formatJPY(context.parsed.y)} (${percentage}%)`;
             }
             return label;
           }
