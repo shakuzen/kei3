@@ -7,6 +7,7 @@ export interface TakeHomeInputs {
   showDetailedInput: boolean;
   healthInsuranceProvider: HealthInsuranceProviderId;
   numberOfDependents: number;
+  dcPlanContributions: number;
 }
 
 export interface TakeHomeResults {
@@ -25,6 +26,7 @@ export interface TakeHomeResults {
   residenceTaxBasicDeduction?: number;
   taxableIncomeForResidenceTax?: number;
   furusatoNozei: FurusatoNozeiDetails;
+  dcPlanContributions: number;
 }
 
 export interface ResidenceTaxDetails {

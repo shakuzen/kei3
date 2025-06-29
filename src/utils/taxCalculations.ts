@@ -153,6 +153,7 @@ const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
     employmentInsurance: 0,
     takeHomeIncome: 0,
     furusatoNozei: calculateFurusatoNozeiDetails(0, NON_TAXABLE_RESIDENCE_TAX_DETAIL),
+    dcPlanContributions: 0,
 };
 
 export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
@@ -176,22 +177,25 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     const socialInsuranceDeduction = healthInsurance + pensionPayments + employmentInsurance;
 
+    // iDeCo and corporate DC contributions are deductible as 小規模企業共済等掛金控除
+    const idecoDeduction = Math.max(0, inputs.dcPlanContributions || 0);
+
     const nationalIncomeTaxBasicDeduction = calculateNationalIncomeTaxBasicDeduction(netIncome);
 
-    const taxableIncomeForNationalIncomeTax = Math.max(0, Math.floor((netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000);
+    const taxableIncomeForNationalIncomeTax = Math.max(0, Math.floor((netIncome - socialInsuranceDeduction - idecoDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000);
 
     const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
 
     const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
-    const taxableIncomeForResidenceTax = Math.max(0, Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - residenceTaxBasicDeduction) / 1000) * 1000);
+    const taxableIncomeForResidenceTax = Math.max(0, Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - idecoDeduction - residenceTaxBasicDeduction) / 1000) * 1000);
 
-    const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction);
+    const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction + idecoDeduction);
 
     // Calculate totals
     const totalSocialsAndTax = nationalIncomeTax + residenceTax.totalResidenceTax + healthInsurance + pensionPayments + employmentInsurance;
     const takeHomeIncome = annualIncome - totalSocialsAndTax;
 
-    const furusatoNozeiLimit = calculateFurusatoNozeiDetails(netIncome - socialInsuranceDeduction - nationalIncomeTaxBasicDeduction, residenceTax);
+    const furusatoNozeiLimit = calculateFurusatoNozeiDetails(netIncome - socialInsuranceDeduction - idecoDeduction - nationalIncomeTaxBasicDeduction, residenceTax);
 
     return {
         annualIncome,
@@ -208,5 +212,6 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         residenceTaxBasicDeduction,
         taxableIncomeForResidenceTax,
         furusatoNozei: furusatoNozeiLimit,
+        dcPlanContributions: inputs.dcPlanContributions,
     };
 }

@@ -54,7 +54,7 @@ const personalDeductionDifference = 50_000;
  */
 export const calculateResidenceTax = (
     netIncome: number,
-    socialInsuranceDeduction: number,
+    nonBasicDeductions: number,
     taxCredit: number = 0
 ): ResidenceTaxDetails => {
     if (netIncome <= 450_000) {
@@ -64,7 +64,7 @@ export const calculateResidenceTax = (
     const cityProportion = 0.6;
     const prefecturalProportion = 0.4;
     const basicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
-    const taxableIncome = Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - basicDeduction) / 1000) * 1000;
+    const taxableIncome = Math.floor(Math.max(0, netIncome - nonBasicDeductions - basicDeduction) / 1000) * 1000;
 
     // 調整控除額
     let adjustmentCredit = 0;

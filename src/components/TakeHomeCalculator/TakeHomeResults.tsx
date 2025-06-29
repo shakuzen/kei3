@@ -478,6 +478,46 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
               value={formatJPY(-(results.nationalIncomeTaxBasicDeduction ?? 0))} 
               type="detail" 
             />
+            {results.dcPlanContributions > 0 && (
+              <ResultRow 
+                label={
+                  <span>
+                    iDeCo/Corp DC Deduction
+                    <DetailInfoTooltip
+                      title="iDeCo and Corporate DC Contributions (小規模企業共済等掛金控除)"
+                      children={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            Small Enterprise Mutual Aid Contribution Deduction
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            Contributions to iDeCo (individual defined contribution pension) and corporate defined contribution plans reduce your taxable income for income tax and residence tax.
+                            Employer contributions cannot be included in this deduction.
+                          </Typography>
+                          <Box sx={{ mt: 1 }}>
+                            Official Sources:
+                            <ul>
+                                <li>
+                                <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1135.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
+                                  小規模企業共済等掛金控除 (NTA)
+                                </a>
+                                </li>
+                                <li>
+                                <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/nenkin/nenkin/kyoshutsu/gaiyou.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', fontSize: '0.95em' }}>
+                                  確定拠出年金制度の概要 (MHLW)
+                                </a>
+                                </li>
+                            </ul>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </span>
+                } 
+                value={formatJPY(-results.dcPlanContributions)} 
+                type="detail" 
+              />
+            )}
             <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
             {results.taxableIncomeForNationalIncomeTax !== undefined && (
               <ResultRow 
