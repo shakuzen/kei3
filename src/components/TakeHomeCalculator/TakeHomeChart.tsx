@@ -423,158 +423,158 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
             </Typography>
           </Box>
         )}
-      </Box>
-
-      {/* Quintile Bands Legend */}
-      <Box
-        className="quintile-bands-legend"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          mb: { xs: 1.2, sm: 2 },
-          mt: 0,
-        }}
-      >
-        <Typography
-          variant="body2"
-          color="text.secondary"
+        
+        {/* Quintile Bands Legend Item */}
+        <Box 
+          className="legend-item" 
           sx={{
-            fontSize: { xs: '0.92rem', sm: '0.95rem' },
-            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
           }}
         >
-          Background colors show income distribution quintiles
-        </Typography>
-        <InfoTooltip
-          title="Income Distribution Quintiles"
-          iconSx={{ 
-            width: 18, 
-            height: 18, 
-            color: 'text.secondary',
-          }}
-          iconAriaLabel="Learn more about income distribution quintiles"
-        >
-          <Box>
-            <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>
-              Income Distribution Quintiles in Japan
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 1.5 }}>
-              The colored background bands represent household income distribution quintiles based on official Japanese government data:
-            </Typography>
-            
-            {/* Quintile Data Table */}
-            <Box 
-              component="table" 
-              sx={{ 
-                width: '100%', 
-                borderCollapse: 'collapse',
-                mb: 1.5,
-                border: '1px solid',
-                borderColor: 'divider',
-                borderRadius: 1,
-                overflow: 'hidden',
-              }}
-            >
-              <Box component="thead" sx={{ bgcolor: 'action.hover' }}>
-                <Box component="tr">
-                  <Box component="th" sx={{ 
-                    p: 1, 
-                    fontSize: '0.85rem', 
-                    fontWeight: 600,
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.92rem', sm: '0.95rem' },
+              fontWeight: 500,
+            }}
+          >
+            Background colors show income distribution quintiles
+          </Typography>
+          <InfoTooltip
+            title="Income Distribution Quintiles"
+            iconSx={{ 
+              width: 18, 
+              height: 18, 
+              color: 'text.secondary',
+            }}
+            iconAriaLabel="Learn more about income distribution quintiles"
+          >
+            <Box>
+              <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                Income Distribution Quintiles in Japan
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1.5 }}>
+                The colored background bands represent household income distribution quintiles based on official Japanese government data:
+              </Typography>
+              
+              {/* Quintile Data Table */}
+              <Box 
+                component="table" 
+                sx={{ 
+                  width: '100%', 
+                  borderCollapse: 'collapse',
+                  mb: 1.5,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  // Shared styles for table cells
+                  '& th, & td': {
+                    p: 1,
+                    fontSize: '0.85rem',
                     borderBottom: '1px solid',
                     borderColor: 'divider',
-                    textAlign: 'left'
-                  }}>
-                    Percentile
-                  </Box>
-                  <Box component="th" sx={{ 
-                    p: 1, 
-                    fontSize: '0.85rem', 
+                  },
+                  '& th': {
                     fontWeight: 600,
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    textAlign: 'right'
-                  }}>
-                    Income Range
-                  </Box>
-                </Box>
-              </Box>
-              <Box component="tbody">
-                <Box component="tr">
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider' }}>
-                    0-20th
-                  </Box>
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider', textAlign: 'right' }}>
-                    ¥0 - {formatJPY(QUINTILE_DATA[20])}
-                  </Box>
-                </Box>
-                <Box component="tr">
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider' }}>
-                    20-40th
-                  </Box>
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider', textAlign: 'right' }}>
-                    {formatJPY(QUINTILE_DATA[20])} - {formatJPY(QUINTILE_DATA[40])}
-                  </Box>
-                </Box>
-                <Box component="tr">
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider' }}>
-                    40-60th
-                  </Box>
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider', textAlign: 'right' }}>
-                    {formatJPY(QUINTILE_DATA[40])} - {formatJPY(QUINTILE_DATA[60])}
-                  </Box>
-                </Box>
-                <Box component="tr">
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider' }}>
-                    60-80th
-                  </Box>
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', borderBottom: '1px solid', borderColor: 'divider', textAlign: 'right' }}>
-                    {formatJPY(QUINTILE_DATA[60])} - {formatJPY(QUINTILE_DATA[80])}
-                  </Box>
-                </Box>
-                <Box component="tr">
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem' }}>
-                    80-100th
-                  </Box>
-                  <Box component="td" sx={{ p: 1, fontSize: '0.85rem', textAlign: 'right' }}>
-                    {formatJPY(QUINTILE_DATA[80])} and above
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-            <Typography variant="body2" sx={{ mt: 1.5, mb: 1.5, fontSize: '0.9rem', fontStyle: 'italic' }}>
-              Data source: <a 
-                href="https://www.mhlw.go.jp/toukei/saikin/hw/k-tyosa/k-tyosa24/index.html" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ color: 'inherit', textDecoration: 'underline' }}
+                  },
+                  '& td:last-child, & th:last-child': {
+                    textAlign: 'right',
+                  },
+                  '& tr:last-child td': {
+                    borderBottom: 'none',
+                  },
+                }}
               >
-                Ministry of Health, Labour and Welfare's 2024 Comprehensive Survey of Living Conditions
-              </a>
-            </Typography>
-            
-            {/* Explanation of quintiles and percentiles */}
-            <Box sx={{ 
-              mt: 1.5, 
-              p: 1.5, 
-              bgcolor: 'action.hover',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}>
-              <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 600, mb: 0.5 }}>
-                What are percentiles and quintiles?
+                <Box component="thead" sx={{ bgcolor: 'action.hover' }}>
+                  <Box component="tr">
+                    <Box component="th">
+                      Percentile
+                    </Box>
+                    <Box component="th">
+                      Income Range
+                    </Box>
+                  </Box>
+                </Box>
+                <Box component="tbody">
+                  <Box component="tr">
+                    <Box component="td">
+                      0-20th
+                    </Box>
+                    <Box component="td">
+                      ¥0 - {formatJPY(QUINTILE_DATA[20])}
+                    </Box>
+                  </Box>
+                  <Box component="tr">
+                    <Box component="td">
+                      20-40th
+                    </Box>
+                    <Box component="td">
+                      {formatJPY(QUINTILE_DATA[20])} - {formatJPY(QUINTILE_DATA[40])}
+                    </Box>
+                  </Box>
+                  <Box component="tr">
+                    <Box component="td">
+                      40-60th
+                    </Box>
+                    <Box component="td">
+                      {formatJPY(QUINTILE_DATA[40])} - {formatJPY(QUINTILE_DATA[60])}
+                    </Box>
+                  </Box>
+                  <Box component="tr">
+                    <Box component="td">
+                      60-80th
+                    </Box>
+                    <Box component="td">
+                      {formatJPY(QUINTILE_DATA[60])} - {formatJPY(QUINTILE_DATA[80])}
+                    </Box>
+                  </Box>
+                  <Box component="tr">
+                    <Box component="td">
+                      80-100th
+                    </Box>
+                    <Box component="td">
+                      {formatJPY(QUINTILE_DATA[80])} and above
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+              <Typography variant="body2" sx={{ mt: 1.5, mb: 1.5, fontSize: '0.9rem', fontStyle: 'italic' }}>
+                Data source: <a 
+                  href="https://www.mhlw.go.jp/toukei/saikin/hw/k-tyosa/k-tyosa24/index.html" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit', textDecoration: 'underline' }}
+                >
+                  Ministry of Health, Labour and Welfare's 2024 Comprehensive Survey of Living Conditions
+                </a>
               </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.82rem', mb: 0.5 }}>
-                <strong>Percentiles:</strong> If you're in the 70th percentile, your income is higher than 70% of all households.
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: '0.82rem' }}>
-                <strong>Quintiles:</strong> The population divided into 5 equal groups (20% each), from lowest to highest income.
-              </Typography>
+              
+              {/* Explanation of quintiles and percentiles */}
+              <Box sx={{ 
+                mt: 1.5, 
+                p: 1.5, 
+                bgcolor: 'action.hover',
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}>
+                <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 600, mb: 0.5 }}>
+                  What are percentiles and quintiles?
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.82rem', mb: 0.5 }}>
+                  <strong>Percentiles:</strong> If you're in the 70th percentile, your income is higher than 70% of all households.
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: '0.82rem' }}>
+                  <strong>Quintiles:</strong> The population divided into 5 equal groups (20% each), from lowest to highest income.
+                </Typography>
+              </Box>
             </Box>
-          </Box>
-        </InfoTooltip>
+          </InfoTooltip>
+        </Box>
       </Box>
 
       <Paper 
