@@ -10,13 +10,64 @@ import { Chart as ChartJS,
   Legend,
   BarController,
   LineController } from 'chart.js';
-import type { ChartData, ChartOptions } from 'chart.js'; // Added TooltipItem
+import type { ChartData, ChartOptions, TooltipItem } from 'chart.js';
 import { Box, Paper, Slider, Typography, useTheme, useMediaQuery } from '@mui/material';
 import type { ChartRange } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig';
 import type { HealthInsuranceProviderId } from '../../types/healthInsurance';
-import { MEDIAN_INCOME_VALUE } from '../../data/income';
+import { MEDIAN_INCOME_VALUE, QUINTILE_DATA, INCOME_RANGE_DISTRIBUTION } from '../../data/income';
+
+// Percentile bands configuration
+const QUINTILE_BANDS = [
+  { min: 0, max: QUINTILE_DATA[20], label: '0-20th percentile', color: 'rgba(255, 99, 132, 0.1)' },      // Light red
+  { min: QUINTILE_DATA[20], max: QUINTILE_DATA[40], label: '20-40th percentile', color: 'rgba(255, 159, 64, 0.1)' },   // Light orange
+  { min: QUINTILE_DATA[40], max: QUINTILE_DATA[60], label: '40-60th percentile', color: 'rgba(153, 102, 255, 0.1)' },  // Light purple
+  { min: QUINTILE_DATA[60], max: QUINTILE_DATA[80], label: '60-80th percentile', color: 'rgba(46, 125, 50, 0.1)' },    // Light green
+  { min: QUINTILE_DATA[80], max: Infinity, label: '80-100th percentile', color: 'rgba(54, 162, 235, 0.1)' },           // Light blue
+];
+
+// Chart.js plugin for percentile background bands
+const percentileBandsPlugin = {
+  id: 'percentileBands',
+  beforeDraw: (chart: ChartJS<'bar' | 'line'>) => {
+    const { ctx, scales } = chart;
+    const { x: xScale, y: yScale } = scales;
+    
+    if (!xScale || !yScale) return;
+    
+    ctx.save();
+    
+    // Draw each percentile band
+    QUINTILE_BANDS.forEach(band => {
+      const xMin = Math.max(xScale.getPixelForValue(band.min), xScale.left);
+      const xMax = Math.min(xScale.getPixelForValue(band.max), xScale.right);
+      
+      if (xMax > xMin) {
+        ctx.fillStyle = band.color;
+        ctx.fillRect(xMin, yScale.top, xMax - xMin, yScale.height);
+      }
+    });
+    
+    // Draw dotted lines between bands
+    ctx.strokeStyle = 'rgba(128, 128, 128, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]); // Create dotted line pattern
+    
+    // Draw vertical lines at each percentile boundary
+    [QUINTILE_DATA[20], QUINTILE_DATA[40], QUINTILE_DATA[60], QUINTILE_DATA[80]].forEach(value => {
+      const x = xScale.getPixelForValue(value);
+      if (x >= xScale.left && x <= xScale.right) {
+        ctx.beginPath();
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+      }
+    });
+    
+    ctx.restore();
+  }
+};
 
 // Register only the Chart.js components we need
 ChartJS.register(
@@ -29,7 +80,8 @@ ChartJS.register(
   Legend,
   BarController,
   LineController,
-  currentAndMedianIncomeChartPlugin
+  currentAndMedianIncomeChartPlugin,
+  percentileBandsPlugin
 );
 
 interface TakeHomeChartProps {
@@ -72,6 +124,41 @@ const STEP_SIZE = 1000000; // 1M steps
 // Constants for custom legend
 const YOUR_INCOME_COLOR = 'rgba(255, 99, 132, 1)';
 const MEDIAN_INCOME_COLOR = 'rgba(255, 206, 86, 1)';
+
+// Utility function to calculate income percentile
+const calculateIncomePercentile = (income: number): number => {
+  if (income <= 0) return 0;
+  
+  // Use detailed income range distribution data for accurate calculation
+  let cumulativePercent = 0;
+  
+  // Find the income range and calculate cumulative percentage
+  for (const [, range] of Object.entries(INCOME_RANGE_DISTRIBUTION)) {
+    if (income < range.max_exclusive) {
+      // Income falls within this range
+      if (income >= range.min_inclusive) {
+        // Calculate position within the range
+        const rangeSpan = range.max_exclusive - range.min_inclusive;
+        const positionInRange = income - range.min_inclusive;
+        const percentWithinRange = rangeSpan > 0 ? (positionInRange / rangeSpan) * range.percent : 0;
+        
+        return cumulativePercent + percentWithinRange;
+      } else {
+        // Income is below this range, return cumulative up to previous ranges
+        return cumulativePercent;
+      }
+    }
+    cumulativePercent += range.percent;
+  }
+  // The distribution covers up to Infinity, so this should never be reached
+  throw new Error(`Income ${formatJPY(income)} not within distribution range`);
+};
+
+// Utility function to get percentile band for income
+const getPercentileBand = (income: number): { label: string; color: string } => {
+  const band = QUINTILE_BANDS.find(b => income >= b.min && income < b.max) || QUINTILE_BANDS[QUINTILE_BANDS.length - 1];
+  return { label: band.label, color: band.color };
+};
 
 const TakeHomeChart: React.FC<TakeHomeChartProps> = ({ 
   currentIncome, 
@@ -152,7 +239,32 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
 
   // Get chart options using the utility function
   const chartOptions = useMemo<ChartOptions<'bar' | 'line'>>(
-    () => getChartOptions(chartRange, currentIncome, useCompactLabelFormat),
+    () => {
+      const baseOptions = getChartOptions(chartRange, currentIncome, useCompactLabelFormat);
+      
+      // Enhance tooltips to include percentile information
+      return {
+        ...baseOptions,
+        plugins: {
+          ...baseOptions.plugins,
+          tooltip: {
+            ...baseOptions.plugins?.tooltip,
+            callbacks: {
+              ...baseOptions.plugins?.tooltip?.callbacks,
+              afterTitle: (tooltipItems: TooltipItem<'bar' | 'line'>[]) => {
+                if (tooltipItems.length > 0) {
+                  const income = tooltipItems[0].parsed.x;
+                  // const percentile = calculateIncomePercentile(income);
+                  const band = getPercentileBand(income);
+                  return `(${band.label})`;
+                }
+                return '';
+              },
+            },
+          },
+        },
+      };
+    },
     [chartRange, currentIncome, useCompactLabelFormat]
   );
 
@@ -288,6 +400,28 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
             Median Income: {formatJPY(MEDIAN_INCOME_VALUE)}
           </Typography>
         </Box>
+        {currentIncome > 0 && (
+          <Box 
+            className="legend-item" 
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+            }}
+          >
+            <Typography 
+              variant="body2"
+              color="text.secondary"
+              sx={{ 
+                fontSize: { xs: '0.95rem', sm: '0.98rem' },
+                fontWeight: 500,
+                color: 'primary.main',
+              }}
+            >
+              Your income is higher than {calculateIncomePercentile(currentIncome).toFixed(1)}% of households in Japan.
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Paper 
