@@ -8,3 +8,7 @@ updates:
       mui:
         patterns:
           - "@mui*"
+      eslint:
+        patterns:
+          - "@eslint*"
+          - "eslint"
