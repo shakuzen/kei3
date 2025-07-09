@@ -548,6 +548,51 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
                 }
                 value={formatJPY(results.taxableIncomeForNationalIncomeTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
             )}
+            {results.mortgageTaxCredit > 0 && (
+              <ResultRow 
+                label={
+                  <span>
+                    Mortgage Tax Credit Applied
+                    <DetailInfoTooltip
+                      title="Mortgage Tax Credit (住宅ローン控除)"
+                      children={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                            Mortgage Tax Credit (住宅ローン控除)
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            The mortgage tax credit is first applied to income tax, and any remaining credit 
+                            can be applied to residence tax up to legal limits (7% of net income, capped at ¥136,500).
+                          </Typography>
+                          {results.mortgageIncomeTaxCredit && results.mortgageIncomeTaxCredit > 0 && (
+                            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                              Applied to income tax: {formatJPY(results.mortgageIncomeTaxCredit)}
+                            </Typography>
+                          )}
+                          {results.mortgageResidenceTaxCredit && results.mortgageResidenceTaxCredit > 0 && (
+                            <Typography variant="body2" sx={{ mb: 1 }}>
+                              Applied to residence tax: {formatJPY(results.mortgageResidenceTaxCredit)}
+                            </Typography>
+                          )}
+                          <Box sx={{ mt: 1 }}>
+                            Official Source:
+                            <ul>
+                              <li>
+                                <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                                  No.1211 住宅借入金等特別控除 (NTA)
+                                </a>
+                              </li>
+                            </ul>
+                          </Box>
+                        </Box>
+                      }
+                    />
+                  </span>
+                }
+                value={formatJPY(-results.mortgageTaxCredit)} 
+                type="detail" 
+              />
+            )}
           </Box>
         </Fade>
         <ResultRow 

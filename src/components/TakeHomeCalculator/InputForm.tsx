@@ -200,6 +200,66 @@ function AdvancedOptionsFields({
           }}
         />
       </FormControl>
+      <FormControl fullWidth>
+        <Typography
+          gutterBottom
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '0.97rem',
+            fontWeight: 500,
+            mb: 0.2,
+            color: 'text.primary',
+          }}
+        >
+          <a
+            href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'inherit', fontWeight: 500 }}
+          >Mortgage Tax Credit</a>{'\u00A0'}(住宅ローン控除)
+          <InfoTooltip title="Annual mortgage tax credit amount. This credit is directly subtracted from your income tax liability. For homes acquired in 2022-2025, the credit is typically 0.7% of the remaining loan balance, subject to annual limits based on home type." />
+        </Typography>
+        <TextField
+          id="mortgageTaxCredit"
+          name="mortgageTaxCredit"
+          type="number"
+          value={inputs.mortgageTaxCredit}
+          onChange={(e) => onInputChange(e as React.ChangeEvent<HTMLInputElement>)}
+          label="Annual Credit Amount"
+          helperText={inputs.mortgageTaxCredit > 0 ? `${formatJPY(inputs.mortgageTaxCredit)}` : 'Enter your annual mortgage tax credit'}
+          sx={sharedInputSx}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Typography color="text.secondary">¥</Typography>
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Typography variant="caption" color="text.secondary">
+                    JPY
+                  </Typography>
+                </InputAdornment>
+              ),
+              inputProps: {
+                min: 0,
+                max: 1000000,
+                step: 1000,
+                inputMode: 'numeric',
+                pattern: '[0-9]*',
+                style: { textAlign: 'right' },
+                'aria-label': 'Annual mortgage tax credit amount in Japanese Yen',
+                size: 10
+              }
+            },
+            inputLabel: {
+              shrink: true,
+            }
+          }}
+        />
+      </FormControl>
     </Box>
   );
 }

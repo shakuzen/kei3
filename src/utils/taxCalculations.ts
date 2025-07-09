@@ -143,6 +143,67 @@ export const calculateNationalIncomeTax = (taxableIncome: number): number => {
     return Math.floor((baseTax + reconstructionSurtax) / 100) * 100;
 }
 
+/**
+ * Calculates the mortgage tax credit (住宅ローン控除) based on annual mortgage loan balance
+ * The mortgage tax credit is directly subtracted from income tax liability
+ * 
+ * For homes acquired in 2022-2025 (new construction, energy efficient):
+ * - Credit rate: 0.7% of remaining loan balance 
+ * - Maximum credit period: 13 years
+ * - Annual credit limit varies by home type:
+ *   - ZEH/Nearly ZEH homes: ¥4.55M loan balance → max ¥318,500/year
+ *   - Energy-efficient homes: ¥4M loan balance → max ¥280,000/year  
+ *   - General homes: ¥3M loan balance → max ¥210,000/year
+ * 
+ * Source: National Tax Agency https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211.htm
+ * Note: This is a simplified calculation. Actual credit may have additional restrictions.
+ */
+export const calculateMortgageTaxCredit = (
+    annualMortgageTaxCredit: number, 
+    calculatedIncomeTax: number,
+    netIncome: number,
+    totalResidenceTax: number
+): { incomeTaxCredit: number; residenceTaxCredit: number } => {
+    if (annualMortgageTaxCredit <= 0) {
+        return { incomeTaxCredit: 0, residenceTaxCredit: 0 };
+    }
+
+    // First, apply to income tax (cannot exceed income tax liability)
+    const incomeTaxCredit = Math.min(annualMortgageTaxCredit, calculatedIncomeTax);
+    
+    // Calculate remaining credit that can be applied to residence tax
+    const remainingCredit = annualMortgageTaxCredit - incomeTaxCredit;
+    
+    if (remainingCredit <= 0) {
+        return { incomeTaxCredit, residenceTaxCredit: 0 };
+    }
+
+    // Calculate residence tax credit limits according to Japanese law
+    // 1. 7% of net income limit, capped at 136,500 yen
+    const sevenPercentLimit = Math.min(Math.floor(netIncome * 0.07), 136_500);
+    
+    // 2. Income-based limit (varies by income level)
+    let incomeBasedLimit = 0;
+    if (netIncome < 2_000_000) {
+        incomeBasedLimit = Math.floor(netIncome * 0.07);
+    } else if (netIncome < 5_000_000) {
+        incomeBasedLimit = Math.floor(netIncome * 0.07) - Math.floor((netIncome - 2_000_000) * 0.016);
+    } else if (netIncome < 10_000_000) {
+        incomeBasedLimit = Math.floor(netIncome * 0.07) - Math.floor((netIncome - 2_000_000) * 0.016);
+    } else {
+        incomeBasedLimit = Math.floor(netIncome * 0.05) + 50_000;
+    }
+    
+    // The residence tax credit is limited by:
+    // - The remaining credit amount
+    // - The minimum of the two limits above
+    // - The actual residence tax liability
+    const residenceTaxLimit = Math.min(sevenPercentLimit, incomeBasedLimit);
+    const residenceTaxCredit = Math.min(remainingCredit, residenceTaxLimit, totalResidenceTax);
+    
+    return { incomeTaxCredit, residenceTaxCredit };
+}
+
 const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
     annualIncome: 0,
     isEmploymentIncome: true,
@@ -154,6 +215,9 @@ const DEFAULT_TAKE_HOME_RESULTS: TakeHomeResults = {
     takeHomeIncome: 0,
     furusatoNozei: calculateFurusatoNozeiDetails(0, NON_TAXABLE_RESIDENCE_TAX_DETAIL),
     dcPlanContributions: 0,
+    mortgageTaxCredit: 0,
+    mortgageIncomeTaxCredit: 0,
+    mortgageResidenceTaxCredit: 0,
 };
 
 export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
@@ -184,12 +248,29 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     const taxableIncomeForNationalIncomeTax = Math.max(0, Math.floor((netIncome - socialInsuranceDeduction - idecoDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000);
 
-    const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
+    const nationalIncomeTaxBeforeCredit = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
 
     const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
     const taxableIncomeForResidenceTax = Math.max(0, Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - idecoDeduction - residenceTaxBasicDeduction) / 1000) * 1000);
 
-    const residenceTax = calculateResidenceTax(netIncome, socialInsuranceDeduction + idecoDeduction);
+    const residenceTaxBeforeCredit = calculateResidenceTax(netIncome, socialInsuranceDeduction + idecoDeduction);
+
+    // Apply mortgage tax credit to both income tax and residence tax
+    const mortgageCreditResult = calculateMortgageTaxCredit(
+        inputs.mortgageTaxCredit || 0, 
+        nationalIncomeTaxBeforeCredit,
+        netIncome,
+        residenceTaxBeforeCredit.totalResidenceTax
+    );
+    
+    const nationalIncomeTax = nationalIncomeTaxBeforeCredit - mortgageCreditResult.incomeTaxCredit;
+    const residenceTaxAfterCredit = residenceTaxBeforeCredit.totalResidenceTax - mortgageCreditResult.residenceTaxCredit;
+    
+    // Update residence tax details with the credit applied
+    const residenceTax = {
+        ...residenceTaxBeforeCredit,
+        totalResidenceTax: residenceTaxAfterCredit
+    };
 
     // Calculate totals
     const totalSocialsAndTax = nationalIncomeTax + residenceTax.totalResidenceTax + healthInsurance + pensionPayments + employmentInsurance;
@@ -213,5 +294,8 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         taxableIncomeForResidenceTax,
         furusatoNozei: furusatoNozeiLimit,
         dcPlanContributions: inputs.dcPlanContributions,
+        mortgageTaxCredit: mortgageCreditResult.incomeTaxCredit + mortgageCreditResult.residenceTaxCredit,
+        mortgageIncomeTaxCredit: mortgageCreditResult.incomeTaxCredit,
+        mortgageResidenceTaxCredit: mortgageCreditResult.residenceTaxCredit,
     };
 }

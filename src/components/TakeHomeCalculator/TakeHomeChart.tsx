@@ -92,6 +92,7 @@ interface TakeHomeChartProps {
   healthInsuranceProvider: HealthInsuranceProviderId;
   prefecture: string;
   dcPlanContributions: number;
+  mortgageTaxCredit: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -168,6 +169,7 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
   healthInsuranceProvider,
   prefecture,
   dcPlanContributions,
+  mortgageTaxCredit,
   className = '',
   style
 }) => {
@@ -233,9 +235,10 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
       healthInsuranceProvider, 
       prefecture,
       dcPlanContributions,
+      mortgageTaxCredit,
       numberOfDependents: 0 // TODO: Replace 0 with actual value if available
     }),
-    [chartRange, isEmploymentIncome, isOver40, healthInsuranceProvider, prefecture, dcPlanContributions]
+    [chartRange, isEmploymentIncome, isOver40, healthInsuranceProvider, prefecture, dcPlanContributions, mortgageTaxCredit]
   );
 
   // Get chart options using the utility function

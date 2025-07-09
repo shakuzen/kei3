@@ -52,7 +52,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo", // Default for Kyokai Kenpo in tests
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -73,7 +73,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(22_300)
@@ -94,7 +94,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(120_700)
@@ -116,7 +116,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(16_345_400) // 50M - 1.95M (employment deduction) - 1.815194M (social insurance) - 0 (basic deduction) = 46.234806M, rounded to 46.234M, then 45% - 4.796M = 16.0093M, + 2.1% = 16.345495M, rounded down to 16.3454M
@@ -138,7 +138,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -156,7 +156,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(0)
@@ -174,7 +174,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id,
       prefecture: "Tokyo", // For NHI
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const result = calculateTaxes(inputs);
     expect(result.nationalIncomeTax).toBe(302_700)
@@ -193,7 +193,7 @@ describe('calculateTaxes', () => {
       isOver40: false,
       healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
       prefecture: "Tokyo",
-      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
     };
     const resultWithoutIdeco = calculateTaxes(inputsWithoutDcPlan);
 
@@ -221,6 +221,147 @@ describe('calculateTaxes', () => {
     expect(incomeTaxSavings).equals(22_800); // less because it crosses into the 5% bracket
     expect(residenceTaxSavings).equals(24_000);
   });
+
+  it('calculates taxes correctly with mortgage tax credit', () => {
+    // Test without mortgage tax credit
+    const inputsWithoutMortgageCredit = {
+      annualIncome: 5_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 0,
+    };
+    const resultWithoutMortgageCredit = calculateTaxes(inputsWithoutMortgageCredit);
+
+    // Test with 100,000 yen mortgage tax credit (less than the income tax amount)
+    const inputsWithMortgageCredit = {
+      ...inputsWithoutMortgageCredit,
+      mortgageTaxCredit: 100_000,
+    };
+    const resultWithMortgageCredit = calculateTaxes(inputsWithMortgageCredit);
+
+    // Mortgage tax credit should reduce income tax by exactly the credit amount (when credit <= tax)
+    expect(resultWithMortgageCredit.nationalIncomeTax).toBe(resultWithoutMortgageCredit.nationalIncomeTax - 100_000);
+    
+    // Take-home pay should be higher with mortgage tax credit
+    expect(resultWithMortgageCredit.takeHomeIncome).toBe(resultWithoutMortgageCredit.takeHomeIncome + 100_000);
+    
+    // The applied mortgage credit should be recorded
+    expect(resultWithMortgageCredit.mortgageTaxCredit).toBe(100_000);
+    expect(resultWithMortgageCredit.mortgageIncomeTaxCredit).toBe(100_000);
+    expect(resultWithMortgageCredit.mortgageResidenceTaxCredit).toBe(0);
+  })
+
+  it('mortgage tax credit cannot exceed income tax liability', () => {
+    const inputs = {
+      annualIncome: 2_000_000, // Low income with small tax liability
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, mortgageTaxCredit: 500_000, // Large credit
+    };
+    const result = calculateTaxes(inputs);
+
+    // Mortgage credit applied should not exceed the calculated income tax + residence tax before credit
+    expect(result.mortgageTaxCredit).toBeLessThanOrEqual(500_000); // Should be capped by the actual tax amount
+    
+    // Income tax should not be negative
+    expect(result.nationalIncomeTax).toBeGreaterThanOrEqual(0);
+    
+    // Total tax reduction should equal the applied credit
+    const inputsWithoutCredit = { ...inputs, mortgageTaxCredit: 0 };
+    const resultWithoutCredit = calculateTaxes(inputsWithoutCredit);
+    const totalTaxReduction = (resultWithoutCredit.nationalIncomeTax - result.nationalIncomeTax) + 
+                             (resultWithoutCredit.residenceTax.totalResidenceTax - result.residenceTax.totalResidenceTax);
+    expect(totalTaxReduction).toBe(result.mortgageTaxCredit);
+  })
+
+  it('mortgage tax credit applies to residence tax when it exceeds income tax', () => {
+    const inputs = {
+      annualIncome: 3_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, 
+      mortgageTaxCredit: 300_000, // Large credit that will exceed income tax
+    };
+    const result = calculateTaxes(inputs);
+    
+    // Should have both income tax and residence tax credits
+    expect(result.mortgageIncomeTaxCredit).toBeGreaterThan(0);
+    expect(result.mortgageResidenceTaxCredit).toBeGreaterThan(0);
+    
+    // Total applied credit should equal the sum
+    expect(result.mortgageTaxCredit).toBe(
+      result.mortgageIncomeTaxCredit! + result.mortgageResidenceTaxCredit!
+    );
+    
+    // Income tax should be zero (fully offset by credit)
+    expect(result.nationalIncomeTax).toBe(0);
+    
+    // Residence tax should be reduced but not negative
+    expect(result.residenceTax.totalResidenceTax).toBeGreaterThanOrEqual(0);
+  })
+
+  it('residence tax credit respects legal limits', () => {
+    const inputs = {
+      annualIncome: 4_000_000,
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, 
+      mortgageTaxCredit: 1_000_000, // Very large credit
+    };
+    const result = calculateTaxes(inputs);
+    const netIncome = 4_000_000 - 1_380_000; // Approximate after employment deduction
+    
+    // Residence tax credit should not exceed 7% of net income, capped at 136,500
+    const expectedLimit = Math.min(Math.floor(netIncome * 0.07), 136_500);
+    expect(result.mortgageResidenceTaxCredit).toBeLessThanOrEqual(expectedLimit);
+  })
+
+  it('calculates mortgage tax credit correctly for scenario matching the screenshot', () => {
+    // This test case approximates the scenario from the screenshot
+    const inputs = {
+      annualIncome: 6_810_000, // Close to the example that shows residence tax credit
+      isEmploymentIncome: true,
+      isOver40: false,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      prefecture: "Tokyo",
+      numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0, 
+      mortgageTaxCredit: 817_200, // Large credit from the screenshot
+    };
+    const result = calculateTaxes(inputs);
+    
+    // Should have both income tax and residence tax credits
+    expect(result.mortgageIncomeTaxCredit).toBeGreaterThan(0);
+    expect(result.mortgageResidenceTaxCredit).toBeGreaterThan(0);
+    
+    // Total applied credit should equal the sum
+    expect(result.mortgageTaxCredit).toBe(
+      result.mortgageIncomeTaxCredit! + result.mortgageResidenceTaxCredit!
+    );
+    
+    // Based on the screenshot, the residence tax credit should be capped
+    // The 7% limit for this income level should be around 47,670 yen
+    const netIncome = 6_810_000 - 1_836_000; // Approximate after employment deduction  
+    const sevenPercentLimit = Math.min(Math.floor(netIncome * 0.07), 136_500);
+    expect(result.mortgageResidenceTaxCredit).toBeLessThanOrEqual(sevenPercentLimit);
+    
+    // Verify the credit doesn't exceed available taxes
+    const resultWithoutCredit = calculateTaxes({ ...inputs, mortgageTaxCredit: 0 });
+    expect(result.mortgageIncomeTaxCredit).toBeLessThanOrEqual(resultWithoutCredit.nationalIncomeTax);
+    expect(result.mortgageResidenceTaxCredit).toBeLessThanOrEqual(resultWithoutCredit.residenceTax.totalResidenceTax);
+    
+    // Should reduce overall tax burden
+    const totalTaxReduction = (resultWithoutCredit.nationalIncomeTax - result.nationalIncomeTax) + 
+                             (resultWithoutCredit.residenceTax.totalResidenceTax - result.residenceTax.totalResidenceTax);
+    expect(totalTaxReduction).toBe(result.mortgageTaxCredit);
+  })
 })
 
 describe('calculateEmploymentInsurance', () => {

@@ -8,6 +8,7 @@ export interface TakeHomeInputs {
   healthInsuranceProvider: HealthInsuranceProviderId;
   numberOfDependents: number;
   dcPlanContributions: number;
+  mortgageTaxCredit: number;
 }
 
 export interface TakeHomeResults {
@@ -27,6 +28,9 @@ export interface TakeHomeResults {
   taxableIncomeForResidenceTax?: number;
   furusatoNozei: FurusatoNozeiDetails;
   dcPlanContributions: number;
+  mortgageTaxCredit: number; // Total applied credit (income + residence)
+  mortgageIncomeTaxCredit?: number; // Applied to income tax
+  mortgageResidenceTaxCredit?: number; // Applied to residence tax
 }
 
 export interface ResidenceTaxDetails {

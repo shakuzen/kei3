@@ -27,7 +27,8 @@ function App({ mode, toggleColorMode }: AppProps) {
     showDetailedInput: false,
     healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
     numberOfDependents: 0,
-    dcPlanContributions: 0
+    dcPlanContributions: 0,
+    mortgageTaxCredit: 0,
   }
 
   // State for form inputs
@@ -194,6 +195,7 @@ function App({ mode, toggleColorMode }: AppProps) {
           healthInsuranceProvider={inputs.healthInsuranceProvider}
           prefecture={inputs.prefecture}
           dcPlanContributions={inputs.dcPlanContributions}
+          mortgageTaxCredit={inputs.mortgageTaxCredit}
         />
       </Suspense>
 
