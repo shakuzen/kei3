@@ -5,19 +5,22 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import type { TakeHomeResults } from '../../../types/tax';
+import type { TakeHomeResults, TakeHomeInputs } from '../../../types/tax';
 import { formatJPY } from '../../../utils/formatters';
 import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import InfoTooltip from '../../ui/InfoTooltip';
 import DetailInfoTooltip from '../../ui/DetailInfoTooltip';
 import { monthlyNationalPensionContribution } from '../../../utils/pensionCalculator';
 import { ResultRow } from '../ResultRow';
+import { employmentInsuranceRate } from '../../../utils/taxCalculations';
+import PremiumTableTooltip from './PremiumTableTooltip';
 
 interface SocialInsuranceTabProps {
   results: TakeHomeResults;
+  inputs: TakeHomeInputs;
 }
 
-const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
+const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results, inputs }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -41,20 +44,25 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       </Typography>
 
       <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
+      <ResultRow label="Monthly Income" value={formatJPY(results.annualIncome / 12)} type="default" />
 
       {/* Health Insurance */}
       <Box sx={{ mt: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Health Insurance
+          <DetailInfoTooltip
+            title="Health Insurance Premium Details"
+            children={<PremiumTableTooltip results={results} inputs={inputs} />}
+          />
         </Typography>
         <ResultRow 
-          label="Annual Premium" 
-          value={formatJPY(results.healthInsurance)} 
+          label="Monthly Premium" 
+          value={formatJPY(results.healthInsurance / 12)} 
           type="indented" 
         />
         <ResultRow 
-          label="Monthly Premium" 
-          value={formatJPY(Math.round(results.healthInsurance / 12))} 
+          label="Annual Premium" 
+          value={formatJPY(results.healthInsurance)} 
           type="detail" 
         />
       </Box>
@@ -65,13 +73,13 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
           Pension Payments
         </Typography>
         <ResultRow 
-          label="Annual Premium" 
-          value={formatJPY(results.pensionPayments)} 
+          label="Monthly Premium" 
+          value={formatJPY(Math.round(results.pensionPayments / 12))} 
           type="indented" 
         />
         <ResultRow 
-          label="Monthly Premium" 
-          value={formatJPY(Math.round(results.pensionPayments / 12))} 
+          label="Annual Premium" 
+          value={formatJPY(results.pensionPayments)} 
           type="detail" 
         />
         
@@ -112,48 +120,39 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
         <Box sx={{ mt: 1 }}>
           <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
             Employment Insurance
+            <InfoTooltip
+              title="Employment Insurance (雇用保険)"
+              children={
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    Employment Insurance (雇用保険)
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Insurance for unemployment and work-related benefits.
+                    This amount includes only the employment insurance premium paid by the employee. The rate is applied to your gross salary. The employer also contributes to employment insurance separately.
+                  </Typography>
+                  <Box sx={{ mt: 1 }}>
+                    Official Source:
+                    <ul>
+                      <li>
+                        <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                          Employment Insurance Premium Rate (MHLW)
+                        </a>
+                      </li>
+                    </ul>
+                  </Box>
+                </Box>
+              }
+            />
           </Typography>
           <ResultRow 
-            label={
-              <span>
-                Annual Premium
-                <InfoTooltip 
-                  title="Employment Insurance (雇用保険)"
-                  children={
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Employment Insurance (雇用保険)
-                      </Typography>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        Insurance for unemployment and work-related benefits.
-                        This amount includes only the employment insurance premium paid by the employee. The rate is applied to your gross salary. The employer also contributes to employment insurance separately.
-                      </Typography>
-                      <Box sx={{ mt: 1 }}>
-                        Official Source:
-                        <ul>
-                          <li>
-                            <a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                              Employment Insurance Premium Rate (MHLW)
-                            </a>
-                          </li>
-                        </ul>
-                      </Box>
-                    </Box>
-                  }
-                />
-              </span>
-            }
-            value={formatJPY(results.employmentInsurance ?? 0)} 
+            label={`Monthly Premium (${(employmentInsuranceRate * 100).toFixed(2)}%)`}
+            value={formatJPY(Math.round((results.employmentInsurance ?? 0) / 12))} 
             type="indented" 
           />
           <ResultRow 
-            label="Percentage of Income" 
-            value={`${(((results.employmentInsurance ?? 0) / results.annualIncome) * 100).toFixed(2)}%`} 
-            type="detail" 
-          />
-          <ResultRow 
-            label="Monthly Premium" 
-            value={formatJPY(Math.round((results.employmentInsurance ?? 0) / 12))} 
+            label="Annual Premium"
+            value={formatJPY(results.employmentInsurance ?? 0)} 
             type="detail" 
           />
         </Box>
@@ -162,14 +161,14 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results }) => {
       {/* Total */}
       <Box sx={{ mt: 2 }}>
         <ResultRow 
-          label="Total Social Insurance" 
-          value={formatJPY(totalSocialInsurance)} 
+          label="Monthly Total" 
+          value={formatJPY(Math.round(totalSocialInsurance / 12))} 
           type="total" 
         />
         <ResultRow 
-          label="Monthly Total" 
-          value={formatJPY(Math.round(totalSocialInsurance / 12))} 
-          type="detail" 
+          label="Annual Social Insurance" 
+          value={formatJPY(totalSocialInsurance)} 
+          type="total" 
         />
       </Box>
     </Box>

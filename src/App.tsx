@@ -173,6 +173,7 @@ function App({ mode, toggleColorMode }: AppProps) {
           }>
             <TakeHomeResultsDisplay 
               results={results}
+              inputs={inputs}
             />
           </Suspense>
         )}

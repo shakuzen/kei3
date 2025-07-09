@@ -8,7 +8,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import type { TakeHomeResults } from '../../types/tax';
+import type { TakeHomeResults, TakeHomeInputs } from '../../types/tax';
 import SummaryTab from './tabs/SummaryTab';
 import SocialInsuranceTab from './tabs/SocialInsuranceTab';
 import TaxesTab from './tabs/TaxesTab';
@@ -16,21 +16,48 @@ import FurusatoNozeiTab from './tabs/FurusatoNozeiTab';
 
 interface DetailedTaxResultsProps {
   results: TakeHomeResults;
+  inputs: TakeHomeInputs;
 }
 
-const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) => {
+const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results, inputs }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [currentTab, setCurrentTab] = React.useState(0);
+  const [containerWidth, setContainerWidth] = React.useState<number>(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Use ResizeObserver to track container width
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };
 
-  const tabLabels = ['Summary', 'Social Insurance', 'Taxes', 'Furusato Nozei'];
+  // Use container width instead of screen breakpoint for tab labels
+  // Threshold around 500px works well for tab label switching
+  const useShortLabels = containerWidth > 0 && containerWidth < 500;
+  
+  const tabLabels = useShortLabels 
+    ? ['Summary', 'Social', 'Taxes', 'Furusato']
+    : ['Summary', 'Social Insurance', 'Taxes', 'Furusato Nozei'];
 
   return (
     <Paper
+      ref={containerRef}
       elevation={0}
       sx={{
         p: { xs: 1.2, sm: 2 },
@@ -58,7 +85,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
           sx={{
             minHeight: isMobile ? 36 : 48,
             '& .MuiTab-root': {
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
+              fontSize: useShortLabels ? '0.8rem' : '0.9rem',
               minHeight: isMobile ? 36 : 48,
               padding: isMobile ? '6px 8px' : '12px 16px',
             }
@@ -83,7 +110,7 @@ const TakeHomeResultsDisplay: React.FC<DetailedTaxResultsProps> = ({ results }) 
         )}
         {currentTab === 1 && (
           <Box role="tabpanel" id="tabpanel-1" aria-labelledby="tab-1">
-            <SocialInsuranceTab results={results} />
+            <SocialInsuranceTab results={results} inputs={inputs} />
           </Box>
         )}
         {currentTab === 2 && (
