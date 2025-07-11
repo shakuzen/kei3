@@ -1,6 +1,6 @@
 import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
-import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
+import { calculateHealthInsurancePremium, calculateNationalHealthInsurancePremiumWithBreakdown } from './healthInsuranceCalculator';
 import { calculateFurusatoNozeiDetails, calculateResidenceTax, calculateResidenceTaxBasicDeduction, NON_TAXABLE_RESIDENCE_TAX_DETAIL } from './residenceTax';
 
 /** https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html */
@@ -171,6 +171,18 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         inputs.prefecture
     );
 
+    // Calculate NHI breakdown if National Health Insurance is selected
+    let nhiBreakdown = null;
+    if (inputs.healthInsuranceProvider === 'NationalHealthInsurance') {
+        // For NHI, we need to use age instead of isOver40 boolean and convert prefecture to string
+        const age = inputs.isOver40 ? 45 : 30; // Estimate age based on LTC eligibility
+        nhiBreakdown = calculateNationalHealthInsurancePremiumWithBreakdown(
+            inputs.annualIncome,
+            age,
+            inputs.prefecture as string
+        );
+    }
+
     const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
     const employmentInsurance = calculateEmploymentInsurance(annualIncome, isEmploymentIncome);
@@ -213,5 +225,9 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         taxableIncomeForResidenceTax,
         furusatoNozei: furusatoNozeiLimit,
         dcPlanContributions: inputs.dcPlanContributions,
+        // NHI breakdown fields (populated only when NHI is selected)
+        nhiMedicalPortion: nhiBreakdown?.medicalPortion,
+        nhiElderlySupportPortion: nhiBreakdown?.elderlySupportPortion,
+        nhiLongTermCarePortion: nhiBreakdown?.longTermCarePortion,
     };
 }

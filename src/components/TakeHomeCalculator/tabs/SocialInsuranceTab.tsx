@@ -10,10 +10,10 @@ import { formatJPY } from '../../../utils/formatters';
 import InsuranceIcon from '@mui/icons-material/HealthAndSafety';
 import InfoTooltip from '../../ui/InfoTooltip';
 import DetailInfoTooltip from '../../ui/DetailInfoTooltip';
-import { monthlyNationalPensionContribution } from '../../../utils/pensionCalculator';
 import { ResultRow } from '../ResultRow';
 import { employmentInsuranceRate } from '../../../utils/taxCalculations';
-import PremiumTableTooltip from './PremiumTableTooltip';
+import PremiumTableTooltip from './HealthInsurancePremiumTableTooltip';
+import PensionPremiumTableTooltip from './PensionPremiumTableTooltip';
 
 interface SocialInsuranceTabProps {
   results: TakeHomeResults;
@@ -44,75 +44,84 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results, inputs
       </Typography>
 
       <ResultRow label="Annual Income" value={formatJPY(results.annualIncome)} type="header" />
-      <ResultRow label="Monthly Income" value={formatJPY(results.annualIncome / 12)} type="default" />
+      {results.isEmploymentIncome ? (
+        <ResultRow label="Monthly Income" value={formatJPY(results.annualIncome / 12)} type="default" />
+      ) : (
+        <>
+          <ResultRow label="Basic Deduction" value={formatJPY(-results.residenceTaxBasicDeduction!)} type="default" />
+          <ResultRow label="NHI Calculation Base" value={formatJPY(Math.max(0, results.annualIncome - results.residenceTaxBasicDeduction!))} type="default" />
+        </>
+      )}
 
       {/* Health Insurance */}
       <Box sx={{ mt: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
-          Health Insurance
+          {results.isEmploymentIncome ? "Employees' Health Insurance" : "National Health Insurance"}
           <DetailInfoTooltip
             title="Health Insurance Premium Details"
             children={<PremiumTableTooltip results={results} inputs={inputs} />}
           />
         </Typography>
-        <ResultRow 
-          label="Monthly Premium" 
-          value={formatJPY(results.healthInsurance / 12)} 
-          type="indented" 
-        />
-        <ResultRow 
-          label="Annual Premium" 
-          value={formatJPY(results.healthInsurance)} 
-          type="detail" 
-        />
+        {results.isEmploymentIncome ? (
+          <>
+            <ResultRow 
+              label="Monthly Premium" 
+              value={formatJPY(results.healthInsurance / 12)} 
+              type="indented" 
+            />
+            <ResultRow 
+              label="Annual Premium" 
+              value={formatJPY(results.healthInsurance)} 
+              type="subtotal" 
+            />
+          </>
+        ) : (
+          <>
+            <ResultRow
+              label="Medical Portion"
+              value={formatJPY(results.nhiMedicalPortion ?? 0)}
+              type="indented"
+            />
+            <ResultRow
+              label="Elderly Support Portion"
+              value={formatJPY(results.nhiElderlySupportPortion ?? 0)}
+              type="indented"
+            />
+            {results.nhiLongTermCarePortion !== undefined && results.nhiLongTermCarePortion > 0 && (
+              <ResultRow
+                label="Long-term Care Portion"
+                value={formatJPY(results.nhiLongTermCarePortion)}
+                type="indented"
+              />
+            )}
+            <ResultRow 
+              label="Annual Premium" 
+              value={formatJPY(results.healthInsurance)} 
+              type="subtotal" 
+            />
+          </>
+        )}
       </Box>
 
       {/* Pension Payments */}
       <Box sx={{ mt: 1 }}>
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
-          Pension Payments
+          {results.isEmploymentIncome ? "Employees' Pension Insurance" : "National Pension"}
+          <DetailInfoTooltip
+            title="Pension Contribution Details"
+            children={<PensionPremiumTableTooltip results={results} />}
+          />
         </Typography>
         <ResultRow 
-          label="Monthly Premium" 
+          label="Monthly Contribution" 
           value={formatJPY(Math.round(results.pensionPayments / 12))} 
           type="indented" 
         />
         <ResultRow 
-          label="Annual Premium" 
+          label="Annual Contribution" 
           value={formatJPY(results.pensionPayments)} 
-          type="detail" 
+          type="subtotal" 
         />
-        
-        {!results.isEmploymentIncome && (
-          <ResultRow label={
-            <span>
-              National Pension Rate (2025)
-              <DetailInfoTooltip
-                title="National Pension (国民年金)"
-                children={
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                      National Basic Pension (2025)
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      Contributions to the National Pension (国民年金) system are a fixed amount irrespective of income.
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      Official Source:
-                      <ul>
-                        <li>
-                          <a href="https://www.nenkin.go.jp/service/kokunen/hokenryo/hokenryo.html#cms01" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                            国民年金保険料の金額 (Japan Pension Service)
-                          </a>
-                        </li>
-                      </ul>
-                    </Box>
-                  </Box>
-                }
-              />
-            </span>
-          } value={formatJPY(monthlyNationalPensionContribution)} type="detail" />
-        )}
       </Box>
 
       {/* Employment Insurance */}
@@ -153,7 +162,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results, inputs
           <ResultRow 
             label="Annual Premium"
             value={formatJPY(results.employmentInsurance ?? 0)} 
-            type="detail" 
+            type="subtotal" 
           />
         </Box>
       )}
@@ -161,7 +170,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results, inputs
       {/* Total */}
       <Box sx={{ mt: 2 }}>
         <ResultRow 
-          label="Monthly Total" 
+          label={`Monthly ${results.isEmploymentIncome ? 'Total' : 'Average'}`}
           value={formatJPY(Math.round(totalSocialInsurance / 12))} 
           type="total" 
         />

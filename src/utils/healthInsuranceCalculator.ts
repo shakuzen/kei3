@@ -4,6 +4,16 @@ import { getNationalHealthInsuranceParams } from '../data/nationalHealthInsuranc
 import { DEFAULT_PROVIDER_REGION, HealthInsuranceProvider } from '../types/healthInsurance';
 
 /**
+ * Breakdown of National Health Insurance premium components
+ */
+export interface NationalHealthInsuranceBreakdown {
+    medicalPortion: number;
+    elderlySupportPortion: number;
+    longTermCarePortion: number;
+    total: number;
+}
+
+/**
  * Calculates the annual health insurance premium.
  *
  * @param annualIncome The person's total annual income.
@@ -46,13 +56,13 @@ export function calculateHealthInsurancePremium(
 }
 
 /**
- * Calculates National Health Insurance premium based on regional parameters.
+ * Calculates National Health Insurance premium breakdown based on regional parameters.
  */
-function calculateNationalHealthInsurancePremiumLogic(
+function calculateNationalHealthInsurancePremiumBreakdown(
     annualIncome: number,
     includeNursingCareInsurance: boolean, // Person is 40-64 years old
     params: NationalHealthInsuranceRegionParams
-): number {
+): NationalHealthInsuranceBreakdown {
     // Calculate NHI taxable income (住民税算定基礎額等 - often previous year's income minus a standard deduction)
     // For simplicity, using current annual income minus the NHI standard deduction.
     // Real-world calculations might use prior year's certified income.
@@ -77,7 +87,25 @@ function calculateNationalHealthInsurancePremiumLogic(
     }
 
     const totalPremium = totalMedicalPremium + totalSupportPremium + totalLtcPremium;
-    return Math.round(totalPremium);
+    
+    return {
+        medicalPortion: Math.round(totalMedicalPremium),
+        elderlySupportPortion: Math.round(totalSupportPremium),
+        longTermCarePortion: Math.round(totalLtcPremium),
+        total: Math.round(totalPremium)
+    };
+}
+
+/**
+ * Calculates National Health Insurance premium based on regional parameters.
+ */
+function calculateNationalHealthInsurancePremiumLogic(
+    annualIncome: number,
+    includeNursingCareInsurance: boolean, // Person is 40-64 years old
+    params: NationalHealthInsuranceRegionParams
+): number {
+    const breakdown = calculateNationalHealthInsurancePremiumBreakdown(annualIncome, includeNursingCareInsurance, params);
+    return breakdown.total;
 }
 
 function calculateEmployeesHealthInsurancePremium(
@@ -101,4 +129,41 @@ function calculateEmployeesHealthInsurancePremium(
     // Given the last bracket usually has maxIncomeExclusive = Infinity,
     // this should ideally not be reached for valid positive incomes if the table is comprehensive and correctly structured.
     throw new Error(`Monthly income ${monthlyIncome.toLocaleString()} is outside the defined ranges in the provided premium table.`);
+}
+
+/**
+ * Calculates National Health Insurance premium with breakdown.
+ * @param annualIncome The annual income to base the premium on.
+ * @param age The age of the person (for LTC portion eligibility).
+ * @param region Optional region key (municipality identifier). Defaults to Tokyo.
+ * @returns Object containing breakdown of Medical, Elderly Support, and LTC portions plus total.
+ */
+export function calculateNationalHealthInsurancePremiumWithBreakdown(
+    annualIncome: number,
+    age: number,
+    region?: string
+): NationalHealthInsuranceBreakdown {
+    const params = getNationalHealthInsuranceParams(region as string);
+    if (!params) {
+        console.error(`National Health Insurance parameters not found for region: ${region}. Returning zero breakdown.`);
+        return { medicalPortion: 0, elderlySupportPortion: 0, longTermCarePortion: 0, total: 0 };
+    }
+    const includeNursingCareInsurance = age >= 40 && age <= 64;
+    return calculateNationalHealthInsurancePremiumBreakdown(annualIncome, includeNursingCareInsurance, params);
+}
+
+/**
+ * Convenience function for calculating just the total NHI premium.
+ * @param annualIncome The annual income to base the premium on.
+ * @param age The age of the person (for LTC portion eligibility).
+ * @param region Optional region key (municipality identifier). Defaults to Tokyo.
+ * @returns The total annual National Health Insurance premium.
+ */
+export function calculateNationalHealthInsurancePremium(
+    annualIncome: number,
+    age: number,
+    region?: string
+): number {
+    const breakdown = calculateNationalHealthInsurancePremiumWithBreakdown(annualIncome, age, region);
+    return breakdown.total;
 }
