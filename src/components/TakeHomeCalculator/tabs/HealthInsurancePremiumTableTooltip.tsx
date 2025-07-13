@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import type { TakeHomeResults, TakeHomeInputs } from '../../../types/tax';
 import { formatJPY } from '../../../utils/formatters';
-import { HealthInsuranceProvider } from '../../../types/healthInsurance';
+import { HealthInsuranceProvider, DEFAULT_PROVIDER_REGION } from '../../../types/healthInsurance';
 import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from '../../../data/employeesHealthInsurance';
 import { getNationalHealthInsuranceParams } from '../../../data/nationalHealthInsurance';
 import PremiumTableTooltip from './PremiumTableTooltip';
@@ -259,7 +259,7 @@ const HealthInsurancePremiumTableTooltip: React.FC<HealthInsurancePremiumTableTo
 
     return (
       <PremiumTableTooltip
-        title={`Health Insurance Premium Table - ${provider.displayName} (${region})`}
+        title={`Health Insurance Premium Table - ${provider.displayName}${region === DEFAULT_PROVIDER_REGION ? '' : ` (${region})`}`}
         description="Monthly premiums by income bracket. Your income: {monthlyIncome}/month"
         hint="💡 LTC stands for Long-Term Care, which is an additional premium insured people ages 40-64 need to pay."
         tableData={premiumTableAsRows}
