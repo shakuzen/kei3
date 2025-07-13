@@ -296,14 +296,23 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
                   children={
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Taxable Income = Net Income - Social Insurance Deduction - Basic Deduction - Other Deductions
+                        Taxable Income Calculation
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        Taxable income is calculated by subtracting all applicable deductions from your net income.
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Formula:</strong> Net Income - Applicable Deductions = Taxable Income
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Rounding:</strong> The taxable income is rounded down to the nearest 1,000 yen before applying tax rates.
                       </Typography>
                       <Box sx={{ mt: 1 }}>
                         Official Sources:
                         <ul>
                           <li>
                             <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                              所得税のしくみ (NTA)
+                              No.2260 所得税の税率 - NTA
                             </a>
                           </li>
                         </ul>
@@ -447,8 +456,8 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
                             </a>
                           </li>
                           <li>
-                            <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260-2.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                              復興特別所得税について - NTA
+                            <a href="https://www.nta.go.jp/publication/pamph/shotoku/fukko_tokubetsu/index.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              個人の方に係る復興特別所得税のあらまし - NTA
                             </a>
                           </li>
                         </ul>
@@ -606,12 +615,26 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
                   children={
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                        Taxable Income = Net Income - Social Insurance Deduction - Basic Deduction - Other Deductions
+                        Taxable Income Calculation
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        Taxable income for residence tax is calculated by subtracting all applicable deductions from your net income.
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Formula:</strong> Net Income - Applicable Deductions = Taxable Income
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Rounding:</strong> The taxable income is rounded down to the nearest 1,000 yen before applying tax rates.
                       </Typography>
                       <Box sx={{ mt: 1 }}>
-                        <a href="https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
-                          個人住民税 (Tokyo Bureau of Taxation)
-                        </a>
+                        Official Sources:
+                        <ul>
+                          <li>
+                            <a href="https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              個人住民税 (Tokyo Bureau of Taxation)
+                            </a>
+                          </li>
+                        </ul>
                       </Box>
                     </Box>
                   }
