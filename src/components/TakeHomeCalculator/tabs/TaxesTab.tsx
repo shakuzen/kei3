@@ -699,6 +699,9 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
                     <Typography variant="body2" sx={{ mt: 1, fontSize: '0.85em' }}>
                       Note: Small adjustment credits (調整控除) may apply to reduce the final amount.
                     </Typography>
+                    <Typography variant="body2" sx={{ mt: 1, fontSize: '0.85em' }}>
+                      <strong>Rounding:</strong> The municipal and prefectural portions are each rounded down to the nearest 100 yen after applying any tax credits.
+                    </Typography>
                     <Box sx={{ mt: 1 }}>
                       Official Sources:
                       <ul>
