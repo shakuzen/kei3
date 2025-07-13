@@ -78,6 +78,11 @@ const EmploymentIncomeDeductionTooltip: React.FC = () => (
           </a>
         </li>
         <li>
+          <a href="https://www.nta.go.jp/english/taxes/individual/12012.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+            No.12012 Overview of deduction for employment income - NTA (English)
+          </a>
+        </li>
+        <li>
           <a href="https://www.nta.go.jp/users/gensen/2025kiso/index.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
             令和７年度税制改正による所得税の基礎控除の見直し等について - NTA
           </a>
