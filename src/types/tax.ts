@@ -46,13 +46,16 @@ export interface ResidenceTaxDetails {
     cityTaxableIncome: number;
     cityAdjustmentCredit: number;
     cityIncomeTax: number;
+    cityPerCapitaTax: number;
   }
   prefecture: {
     prefecturalTaxableIncome: number;
     prefecturalAdjustmentCredit: number;
     prefecturalIncomeTax: number;
+    prefecturalPerCapitaTax: number;
   }
   perCapitaTax: number;
+  forestEnvironmentTax: number; // 森林環境税
   totalResidenceTax: number;
 }
 

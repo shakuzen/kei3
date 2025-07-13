@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   useTheme,
   useMediaQuery,
+  Collapse,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import type { TakeHomeResults } from '../../../types/tax';
 import { formatJPY } from '../../../utils/formatters';
@@ -92,6 +95,7 @@ const EmploymentIncomeDeductionTooltip: React.FC = () => (
 const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false);
 
   const totalSocialInsurance = results.healthInsurance + results.pensionPayments + (results.employmentInsurance ?? 0);
   // Almost taxable income but before applying the basic deduction
@@ -189,7 +193,7 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
         <ResultRow 
           label={
             <span>
-              Income Tax Basic Deduction
+              Basic Deduction
               <DetailInfoTooltip
                 title="National Income Tax Basic Deduction"
                 children={
@@ -502,10 +506,34 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
           Residence Tax Calculation
         </Typography>
         
+        {/* Detailed breakdown toggle */}
+        <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'center' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showDetailedBreakdown}
+                onChange={(e) => setShowDetailedBreakdown(e.target.checked)}
+                size="small"
+                color="primary"
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary' }}>
+                Show detailed breakdown
+              </Typography>
+            }
+            sx={{
+              '& .MuiFormControlLabel-label': {
+                fontSize: '0.85rem'
+              }
+            }}
+          />
+        </Box>
+        
         <ResultRow 
           label={
             <span>
-              Residence Tax Basic Deduction
+              Basic Deduction
               <DetailInfoTooltip
                 title="Residence Tax Basic Deduction"
                 children={
@@ -593,8 +621,219 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
             value={formatJPY(results.taxableIncomeForResidenceTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
         )}
         
+        {/* Income-based portion breakdown */}
         <ResultRow 
-          label="Residence Tax" 
+          label={
+            <span>
+              Income-based Portion
+              <DetailInfoTooltip
+                title="Income-based Residence Tax Breakdown"
+                children={
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Income-based Portion (所得割): 10% of Taxable Income
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      This portion is calculated as a percentage of your taxable income and split between municipal and prefectural governments.
+                    </Typography>
+                    <Box
+                      component="table"
+                      sx={{
+                        borderCollapse: 'collapse',
+                        width: '100%',
+                        fontSize: '0.95em',
+                        '& td': {
+                          padding: '2px 6px'
+                        },
+                        '& th': {
+                          borderBottom: '1px solid #ccc',
+                          padding: '2px 6px',
+                          textAlign: 'left'
+                        }
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th>Component</th>
+                          <th>Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Municipal Tax (市町村民税)</td>
+                          <td>6%</td>
+                        </tr>
+                        <tr>
+                          <td>Prefectural Tax (都道府県民税)</td>
+                          <td>4%</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Total</strong></td>
+                          <td><strong>10%</strong></td>
+                        </tr>
+                      </tbody>
+                    </Box>
+                    <Typography variant="body2" sx={{ mt: 1, fontSize: '0.85em' }}>
+                      Note: Small adjustment credits (調整控除) may apply to reduce the final amount.
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      Official Sources:
+                      <ul>
+                        <li>
+                          <a href="https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                            個人住民税 (Tokyo Bureau of Taxation)
+                          </a>
+                        </li>
+                      </ul>
+                    </Box>
+                  </Box>
+                }
+              />
+            </span>
+          }
+          value={formatJPY(results.residenceTax.city.cityIncomeTax + results.residenceTax.prefecture.prefecturalIncomeTax)} 
+          type="detail" 
+        />
+        
+        {/* Municipal/Prefectural breakdown for income-based portion */}
+        <Collapse in={showDetailedBreakdown}>
+          <Box sx={{ ml: 2, mb: 1 }}>
+            <ResultRow 
+              label="Municipal portion (6%)"
+              value={formatJPY(Math.round(results.residenceTax.taxableIncome * 0.06))} 
+              type="detail" 
+              sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+            />
+            {results.residenceTax.city.cityAdjustmentCredit > 0 && (
+              <ResultRow 
+                label="Adjustment credit"
+                value={formatJPY(-results.residenceTax.city.cityAdjustmentCredit)} 
+                type="detail" 
+                sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+              />
+            )}
+            
+            <ResultRow 
+              label="Prefectural portion (4%)"
+              value={formatJPY(Math.round(results.residenceTax.taxableIncome * 0.04))} 
+              type="detail" 
+              sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+            />
+            {results.residenceTax.prefecture.prefecturalAdjustmentCredit > 0 && (
+              <ResultRow 
+                label="Adjustment credit"
+                value={formatJPY(-results.residenceTax.prefecture.prefecturalAdjustmentCredit)} 
+                type="detail" 
+                sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+              />
+            )}
+          </Box>
+        </Collapse>
+        
+        {/* Per capita portion */}
+        <ResultRow 
+          label={
+            <span>
+              Per Capita Portion
+              <DetailInfoTooltip
+                title="Per Capita Residence Tax"
+                children={
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Per Capita Portion (均等割): Fixed Annual Amount
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      A fixed amount paid by all residents regardless of income level, split between municipal, prefectural, and forest environment taxes.
+                    </Typography>
+                    <Box
+                      component="table"
+                      sx={{
+                        borderCollapse: 'collapse',
+                        width: '100%',
+                        fontSize: '0.95em',
+                        '& td': {
+                          padding: '2px 6px'
+                        },
+                        '& th': {
+                          borderBottom: '1px solid #ccc',
+                          padding: '2px 6px',
+                          textAlign: 'left'
+                        }
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th>Component</th>
+                          <th>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Municipal Tax (市町村民税)</td>
+                          <td>¥3,000</td>
+                        </tr>
+                        <tr>
+                          <td>Prefectural Tax (都道府県民税)</td>
+                          <td>¥1,000</td>
+                        </tr>
+                        <tr>
+                          <td>Forest Environment Tax (森林環境税)</td>
+                          <td>¥1,000</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Total</strong></td>
+                          <td><strong>¥5,000</strong></td>
+                        </tr>
+                      </tbody>
+                    </Box>
+                    <Typography variant="body2" sx={{ mb: 1, mt: 1 }}>
+                      <strong>Purpose:</strong> Covers basic administrative costs and local services that benefit all residents equally.
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      Official Sources:
+                      <ul>
+                        <li>
+                          <a href="https://www.tax.metro.tokyo.lg.jp/kazei/life/kojin_ju" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                            個人住民税 (Tokyo Bureau of Taxation)
+                          </a>
+                        </li>
+                      </ul>
+                    </Box>
+                  </Box>
+                }
+              />
+            </span>
+          }
+          value={formatJPY(results.residenceTax.perCapitaTax)} 
+          type="detail" 
+        />
+        
+        {/* Municipal/Prefectural breakdown for per capita portion */}
+        <Collapse in={showDetailedBreakdown}>
+          <Box sx={{ ml: 2, mb: 1 }}>
+            <ResultRow 
+              label="Municipal portion"
+              value={formatJPY(results.residenceTax.city.cityPerCapitaTax)} 
+              type="detail" 
+              sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+            />
+            <ResultRow 
+              label="Prefectural portion"
+              value={formatJPY(results.residenceTax.prefecture.prefecturalPerCapitaTax)} 
+              type="detail" 
+              sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+            />
+            <ResultRow 
+              label="Forest Environment Tax"
+              value={formatJPY(results.residenceTax.forestEnvironmentTax)} 
+              type="detail" 
+              sx={{ fontSize: '0.85rem', color: 'text.secondary' }}
+            />
+          </Box>
+        </Collapse>
+        
+        <ResultRow 
+          label="Total Residence Tax" 
           value={formatJPY(results.residenceTax.totalResidenceTax)} 
           type="subtotal" 
         />
