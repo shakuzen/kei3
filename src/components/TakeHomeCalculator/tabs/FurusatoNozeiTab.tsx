@@ -51,7 +51,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
         Furusato Nozei Details
       </Typography>
 
-      <Box sx={{ mb: 1, p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'info.contrastText' }}>
+      {/* <Box sx={{ mb: 1, p: 2, bgcolor: 'info.light', borderRadius: 2, color: 'info.contrastText' }}>
         <Typography variant="body2">
           For comprehensive information about Furusato Nozei, see{' '}
           <a 
@@ -63,7 +63,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
             this wiki
           </a>.
         </Typography>
-      </Box>
+      </Box> */}
 
       {/* Limit */}
       <Box sx={{ mb: 1 }}>
@@ -119,7 +119,13 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
                       Income Tax Reduction (Furusato Nozei)
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      This reduction is applied to your income tax if you file a tax return (確定申告) for Furusato Nozei. It is applied in the form of a donation deduction that reduces your taxable income.
+                      This reduction is received if you file a tax return (確定申告) including your Furusato Nozei donations. It is applied in the form of a donation deduction that reduces your taxable income.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Donation Deduction (寄付金控除):</strong> {formatJPY(Math.max(results.furusatoNozei.limit - 2000, 0))} (donation amount minus 2,000 yen)
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      The income tax reduction is calculated as the difference in income tax with and without this donation deduction.
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       If you use the One-Stop Exception system (ワンストップ特例制度), the reduction will instead be applied to your residence tax, not your income tax.
@@ -139,9 +145,48 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
         />
         
         <ResultRow
-          label="Residence Tax Reduction"
+          label={
+            <span>
+              Residence Tax Reduction
+              <InfoTooltip
+                title="Residence Tax Credits on Tax Notice"
+                children={
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Tax Credits vs. Realized Reduction
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      The total tax credits shown on your residence tax notice may differ slightly from the effective tax reduction due to rounding in the calculation process.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Basic Deduction (基本控除):</strong> {formatJPY(results.furusatoNozei.residenceTaxDonationBasicDeduction)} (10% of donation amount minus 2,000 yen)
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Special Deduction (特例控除):</strong> {formatJPY(results.furusatoNozei.residenceTaxSpecialDeduction)} (remaining amount to keep out-of-pocket cost at 2,000 yen, up to a limit)
+                    </Typography>
+                    <Typography variant="body2">
+                      The residence tax reduction is calculated as the difference in residence tax with and without the above tax credits.
+                    </Typography>
+                  </Box>
+                }
+              />
+            </span>
+          }
           value={formatJPY(results.furusatoNozei.residenceTaxReduction)}
           type="indented" 
+        />
+        
+        {/* Municipal and Prefectural breakdown */}
+        <ResultRow
+          label="Municipal tax credit"
+          value={formatJPY(Math.round((results.furusatoNozei.residenceTaxDonationBasicDeduction + results.furusatoNozei.residenceTaxSpecialDeduction) * results.residenceTax.cityProportion))}
+          type="detail" 
+        />
+        
+        <ResultRow
+          label="Prefectural tax credit"
+          value={formatJPY(Math.round((results.furusatoNozei.residenceTaxDonationBasicDeduction + results.furusatoNozei.residenceTaxSpecialDeduction) * results.residenceTax.prefecturalProportion))}
+          type="detail" 
         />
         
         <ResultRow
@@ -149,26 +194,6 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
           value={formatJPY(results.furusatoNozei.incomeTaxReduction + results.furusatoNozei.residenceTaxReduction)}
           type="subtotal" 
         />
-      </Box>
-
-      {/* Cost Analysis */}
-      <Box sx={{ mb: 1 }}>
-        <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
-          Cost Analysis (at limit)
-        </Typography>
-        
-        <ResultRow
-          label="Donation Amount"
-          value={formatJPY(results.furusatoNozei.limit)}
-          type="indented" 
-        />
-        
-        <ResultRow
-          label="Total Tax Reduction"
-          value={formatJPY(-(results.furusatoNozei.incomeTaxReduction + results.furusatoNozei.residenceTaxReduction))}
-          type="indented" 
-        />
-        
         <ResultRow
           label={
             <span>
@@ -214,13 +239,33 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
         </Typography>
         
         <ResultRow
-          label="Value of Goods Received"
-          value={`≈ ${formatJPY(Math.round(results.furusatoNozei.limit * 0.3))}`}
+          label="Value of Goods* Received"
+          value={`≈ ${formatJPY(Math.round(results.furusatoNozei.limit * 0.271))}`}
           type="indented" 
         />
         
+        <ResultRow
+          label="Out-of-Pocket Cost"
+          value={formatJPY(-results.furusatoNozei.outOfPocketCost)}
+          type="indented" 
+        />
+        
+        <ResultRow
+          label="Net Estimated Benefit"
+          value={`≈ ${formatJPY(Math.round(results.furusatoNozei.limit * 0.271) - results.furusatoNozei.outOfPocketCost)}`}
+          type="subtotal" 
+        />
+        
         <Typography variant="caption" sx={{ color: 'text.secondary', fontStyle: 'italic', mt: 1, display: 'block' }}>
-          * Goods value estimated at 30% of donation amount, as per typical Furusato Nozei return rates.
+          * Estimated at 27% of donation amount, based on the{' '}
+          <a 
+            href="https://www.soumu.go.jp/main_sosiki/jichi_zeisei/czaisei/czaisei_seido/furusato/archive/#ac02" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={{ color: 'inherit', textDecoration: 'underline' }}
+          >
+            average Furusato Nozei gift cost
+          </a>.
         </Typography>
       </Box>
 
@@ -237,7 +282,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
             ⚠️ Warning: High Out-of-Pocket Cost
           </Typography>
           <Typography variant="body2">
-            Your out-of-pocket cost is higher than the expected 2,000 yen. This can happen if your income straddles two tax brackets and you file via a tax return (確定申告).
+            Your out-of-pocket cost is higher than the expected ~2,000 yen. This happens if you file a tax return (確定申告) when your taxable income changes income tax brackets after applying the Furusato Nozei donation deduction.
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
             This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).
