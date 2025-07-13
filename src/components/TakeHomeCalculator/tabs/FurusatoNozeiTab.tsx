@@ -8,6 +8,7 @@ import {
 import type { TakeHomeResults } from '../../../types/tax';
 import { formatJPY } from '../../../utils/formatters';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import WarningIcon from '@mui/icons-material/Warning';
 import InfoTooltip from '../../ui/InfoTooltip';
 import { ResultRow } from '../ResultRow';
 
@@ -128,7 +129,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
                       The income tax reduction is calculated as the difference in income tax with and without this donation deduction.
                     </Typography>
                     <Typography variant="body2" sx={{ mb: 1 }}>
-                      If you use the One-Stop Exception system (ワンストップ特例制度), the reduction will instead be applied to your residence tax, not your income tax.
+                      If you use the One-Stop Exception system (ワンストップ特例制度), this reduction will be applied to your residence tax instead of your income tax.
                     </Typography>
                     <Box sx={{ mt: 1 }}>
                       <a href="https://japanfinance.github.io/tax/residence/furusato-nozei/" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
@@ -196,21 +197,16 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
         />
         <ResultRow
           label={
-            <span>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
               Out-of-Pocket Cost
               {results.furusatoNozei.outOfPocketCost > 2200 && (
-                <InfoTooltip
-                  title="Warning: High Out-of-Pocket Cost"
-                  children={
-                    <Box>
-                      <Typography variant="body2">
-                        Your out-of-pocket cost is higher than the expected 2,000 yen. This can happen if your income straddles two tax brackets and you file for Furusato Nozei via a tax return (確定申告).
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
-                        This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).
-                      </Typography>
-                    </Box>
-                  }
+                <WarningIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    ml: 0.5, 
+                    color: 'error.main',
+                    fontSize: '1rem'
+                  }} 
                 />
               )}
             </span>
@@ -282,7 +278,7 @@ const FurusatoNozeiTab: React.FC<FurusatoNozeiTabProps> = ({ results }) => {
             ⚠️ Warning: High Out-of-Pocket Cost
           </Typography>
           <Typography variant="body2">
-            Your out-of-pocket cost is higher than the expected ~2,000 yen. This happens if you file a tax return (確定申告) when your taxable income changes income tax brackets after applying the Furusato Nozei donation deduction.
+            Your out-of-pocket cost is higher than the expected ≈2,000 yen. This happens if you file a tax return (確定申告) when your taxable income changes income tax brackets after applying the Furusato Nozei donation deduction.
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
             This issue is avoided if you use the One-Stop Exception system (ワンストップ特例制度).
