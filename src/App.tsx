@@ -22,7 +22,7 @@ function App({ mode, toggleColorMode }: AppProps) {
   const defaultInputs: TakeHomeInputs = {
     annualIncome: 5000000, // 5 million yen
     isEmploymentIncome: true,
-    isOver40: false,
+    isSubjectToLongTermCarePremium: false,
     prefecture: "Tokyo",
     showDetailedInput: false,
     healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
@@ -191,7 +191,7 @@ function App({ mode, toggleColorMode }: AppProps) {
         <TakeHomeChart 
           currentIncome={inputs.annualIncome}
           isEmploymentIncome={inputs.isEmploymentIncome}
-          isOver40={inputs.isOver40}
+          isSubjectToLongTermCarePremium={inputs.isSubjectToLongTermCarePremium}
           healthInsuranceProvider={inputs.healthInsuranceProvider}
           prefecture={inputs.prefecture}
           dcPlanContributions={inputs.dcPlanContributions}

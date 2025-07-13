@@ -53,7 +53,7 @@ describe('calculateFurusatoNozeiLimit', () => {
     const fn = calculateTaxes({
       annualIncome: 5_000_000,
       isEmploymentIncome: true,
-      isOver40: false,
+      isSubjectToLongTermCarePremium: false,
       prefecture: 'Tokyo',
       showDetailedInput: false,
       healthInsuranceProvider: 'KyokaiKenpo',
@@ -73,7 +73,7 @@ function calculateFNForIncome(income: number) : FurusatoNozeiDetails {
   return calculateTaxes({
     annualIncome: income,
     isEmploymentIncome: true,
-    isOver40: false,
+    isSubjectToLongTermCarePremium: false,
     prefecture: 'Tokyo',
     showDetailedInput: false,
     healthInsuranceProvider: 'KyokaiKenpo',

@@ -183,7 +183,7 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     const healthInsurance = calculateHealthInsurancePremium(
         inputs.annualIncome,
-        inputs.isOver40,
+        inputs.isSubjectToLongTermCarePremium,
         inputs.healthInsuranceProvider,
         inputs.prefecture
     );
@@ -191,11 +191,10 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     // Calculate NHI breakdown if National Health Insurance is selected
     let nhiBreakdown = null;
     if (inputs.healthInsuranceProvider === 'NationalHealthInsurance') {
-        // For NHI, we need to use age instead of isOver40 boolean and convert prefecture to string
-        const age = inputs.isOver40 ? 45 : 30; // Estimate age based on LTC eligibility
+        // Use the new function that accepts boolean directly
         nhiBreakdown = calculateNationalHealthInsurancePremiumWithBreakdown(
             inputs.annualIncome,
-            age,
+            inputs.isSubjectToLongTermCarePremium,
             inputs.prefecture as string
         );
     }

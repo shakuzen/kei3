@@ -2,7 +2,7 @@ import type { HealthInsuranceProviderId } from "./healthInsurance";
 export interface TakeHomeInputs {
   annualIncome: number;
   isEmploymentIncome: boolean;
-  isOver40: boolean;
+  isSubjectToLongTermCarePremium: boolean; // Person is 40-64 years old (must pay long-term care insurance premiums)
   prefecture: string;
   showDetailedInput: boolean;
   healthInsuranceProvider: HealthInsuranceProviderId;

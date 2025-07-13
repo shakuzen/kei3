@@ -53,7 +53,7 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
 
     // Return National Health Insurance parameters display
     const annualIncome = results.annualIncome;
-    const includeNursingCareInsurance = inputs.isOver40;
+    const includeNursingCareInsurance = inputs.isSubjectToLongTermCarePremium;
     
     // Calculate step-by-step breakdown like the actual calculation
     // Note: NHI premiums are based on previous year's income, but we're using current year as assumption
@@ -254,7 +254,7 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
 
     const getCurrentRowSummary = (row: PremiumTableRow) => {
       const healthRow = row as unknown as { employeePremiumNoLTC: number; employeePremiumWithLTC: number };
-      return `Your premium: ${formatJPY(inputs.isOver40 ? healthRow.employeePremiumWithLTC : healthRow.employeePremiumNoLTC)}/month`;
+      return `Your premium: ${formatJPY(inputs.isSubjectToLongTermCarePremium ? healthRow.employeePremiumWithLTC : healthRow.employeePremiumNoLTC)}/month`;
     };
 
     return (
