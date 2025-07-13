@@ -27,6 +27,9 @@ export interface TakeHomeResults {
   taxableIncomeForResidenceTax?: number;
   furusatoNozei: FurusatoNozeiDetails;
   dcPlanContributions: number;
+  // Income tax breakdown
+  nationalIncomeTaxBase?: number;
+  reconstructionSurtax?: number;
   // National Health Insurance breakdown (only for non-employment income)
   nhiMedicalPortion?: number;
   nhiElderlySupportPortion?: number;

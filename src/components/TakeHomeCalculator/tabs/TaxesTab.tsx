@@ -131,7 +131,7 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
               </span>
             }
             value={formatJPY(results.netEmploymentIncome)} 
-            type="indented" 
+            type="default" 
           />
         )}
 
@@ -172,12 +172,12 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
               </span>
             } 
             value={formatJPY(-results.dcPlanContributions)} 
-            type="detail" 
+            type="default" 
           />
         )}
         
-        <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="detail" />
-        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="subtotal" sx={{ mt: 0.5 }} />
+        <ResultRow label="Social Insurance Deduction" value={formatJPY(-totalSocialInsurance)} type="default" />
+        <ResultRow label="Subtotal Taxable Income" value={formatJPY(subtotalIncome)} type="subtotal" sx={{ mt: 0.5 }} />
       </Box>
 
       {/* Income Tax Calculation */}
@@ -185,12 +185,11 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Income Tax Calculation
         </Typography>
-        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="indented" />
         
         <ResultRow 
           label={
             <span>
-              Basic Deduction
+              Income Tax Basic Deduction
               <DetailInfoTooltip
                 title="National Income Tax Basic Deduction"
                 children={
@@ -313,8 +312,185 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
             value={formatJPY(results.taxableIncomeForNationalIncomeTax)} type="detail-subtotal" sx={{ mt: 0.5 }} />
         )}
         
+        {results.nationalIncomeTaxBase !== undefined && (
+          <ResultRow 
+            label={
+              <span>
+                Base Income Tax
+                <DetailInfoTooltip
+                  title="Base Income Tax Calculation"
+                  children={
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Base Income Tax (before reconstruction surtax)
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        This is the income tax calculated using the standard progressive tax brackets.
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          2025 Income Tax Brackets:
+                        </Typography>
+                        <Box
+                          component="table"
+                          sx={{
+                            borderCollapse: 'collapse',
+                            width: '100%',
+                            fontSize: '0.95em',
+                            '& td': {
+                              padding: '2px 6px'
+                            },
+                            '& th': {
+                              borderBottom: '1px solid #ccc',
+                              padding: '2px 6px',
+                              textAlign: 'left'
+                            }
+                          }}
+                        >
+                          <thead>
+                            <tr>
+                              <th>Taxable Income (¥)</th>
+                              <th>Tax Rate</th>
+                              <th>Deduction (¥)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Up to 1,949,000</td>
+                              <td>5%</td>
+                              <td>0</td>
+                            </tr>
+                            <tr>
+                              <td>1,949,001 - 3,299,000</td>
+                              <td>10%</td>
+                              <td>97,500</td>
+                            </tr>
+                            <tr>
+                              <td>3,299,001 - 6,949,000</td>
+                              <td>20%</td>
+                              <td>427,500</td>
+                            </tr>
+                            <tr>
+                              <td>6,949,001 - 8,999,000</td>
+                              <td>23%</td>
+                              <td>636,000</td>
+                            </tr>
+                            <tr>
+                              <td>8,999,001 - 17,999,000</td>
+                              <td>33%</td>
+                              <td>1,536,000</td>
+                            </tr>
+                            <tr>
+                              <td>17,999,001 - 39,999,000</td>
+                              <td>40%</td>
+                              <td>2,796,000</td>
+                            </tr>
+                            <tr>
+                              <td>40,000,000 and above</td>
+                              <td>45%</td>
+                              <td>4,796,000</td>
+                            </tr>
+                          </tbody>
+                        </Box>
+                        <Box sx={{ mt: 1 }}>
+                          Official Sources:
+                          <ul>
+                            <li>
+                              <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                                No.2260 所得税の税率 - NTA
+                              </a>
+                            </li>
+                          </ul>
+                        </Box>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </span>
+            } 
+            value={formatJPY(results.nationalIncomeTaxBase)} 
+            type="detail" 
+          />
+        )}
+        
+        {results.reconstructionSurtax !== undefined && (
+          <ResultRow 
+            label={
+              <span>
+                Reconstruction Surtax
+                <DetailInfoTooltip
+                  title="Special Reconstruction Surtax (復興特別所得税)"
+                  children={
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        Special Reconstruction Surtax (復興特別所得税)
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        A temporary surtax of 2.1% applied to the base income tax amount. Originally introduced to help fund reconstruction efforts after the 2011 Great East Japan Earthquake and tsunami.
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Rate:</strong> 2.1% of base income tax
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Period:</strong> January 1, 2013 - December 31, 2037 (25 years)
+                      </Typography>
+                      <Box sx={{ mt: 1 }}>
+                        Official Sources:
+                        <ul>
+                          <li>
+                            <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              No.2260 所得税の税率 - NTA
+                            </a>
+                          </li>
+                          <li>
+                            <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260-2.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                              復興特別所得税について - NTA
+                            </a>
+                          </li>
+                        </ul>
+                      </Box>
+                    </Box>
+                  }
+                />
+              </span>
+            } 
+            value={formatJPY(results.reconstructionSurtax)} 
+            type="detail" 
+          />
+        )}
+        
         <ResultRow 
-          label="Income Tax" 
+          label={
+            <span>
+              Total Income Tax
+              <DetailInfoTooltip
+                title="Total Income Tax Calculation"
+                children={
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Total Income Tax = Base Income Tax + Reconstruction Surtax
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      The total income tax is calculated by adding the base income tax (calculated using progressive tax brackets) and the 2.1% reconstruction surtax.
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <strong>Rounding:</strong> The sum of base tax + surtax is rounded down to the nearest 100 yen for the final amount.
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
+                      Official Sources:
+                      <ul>
+                        <li>
+                          <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm" target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline', fontSize: '0.95em' }}>
+                            No.2260 所得税の税率 - NTA
+                          </a>
+                        </li>
+                      </ul>
+                    </Box>
+                  </Box>
+                }
+              />
+            </span>
+          } 
           value={formatJPY(results.nationalIncomeTax)} 
           type="subtotal" 
         />
@@ -325,12 +501,11 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
         <Typography variant="h6" sx={{ mb: 1, fontSize: '1.1rem', fontWeight: 600 }}>
           Residence Tax Calculation
         </Typography>
-        <ResultRow label="Subtotal Income" value={formatJPY(subtotalIncome)} type="indented" />
         
         <ResultRow 
           label={
             <span>
-              Basic Deduction
+              Residence Tax Basic Deduction
               <DetailInfoTooltip
                 title="Residence Tax Basic Deduction"
                 children={
@@ -431,11 +606,6 @@ const TaxesTab: React.FC<TaxesTabProps> = ({ results }) => {
           label="Total Taxes" 
           value={formatJPY(totalTaxes)} 
           type="total" 
-        />
-        <ResultRow 
-          label="Monthly Total" 
-          value={formatJPY(Math.round(totalTaxes / 12))} 
-          type="detail" 
         />
       </Box>
     </Box>
