@@ -50,7 +50,7 @@ describe('calculateTaxes', () => {
       annualIncome: 1_500_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo", // Default for Kyokai Kenpo in tests
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -71,7 +71,7 @@ describe('calculateTaxes', () => {
       annualIncome: 2_500_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -92,7 +92,7 @@ describe('calculateTaxes', () => {
       annualIncome: 5_000_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -114,7 +114,7 @@ describe('calculateTaxes', () => {
       annualIncome: 50_000_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -136,7 +136,7 @@ describe('calculateTaxes', () => {
       annualIncome: 0,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -154,7 +154,7 @@ describe('calculateTaxes', () => {
       annualIncome: -1_000_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -172,7 +172,7 @@ describe('calculateTaxes', () => {
       annualIncome: 5_000_000,
       isEmploymentIncome: false,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id,
+      healthInsuranceProvider: HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE,
       prefecture: "Tokyo", // For NHI
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };
@@ -191,7 +191,7 @@ describe('calculateTaxes', () => {
       annualIncome: 5_000_000,
       isEmploymentIncome: true,
       isSubjectToLongTermCarePremium: false,
-      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       prefecture: "Tokyo",
       numberOfDependents: 0, showDetailedInput: false, dcPlanContributions: 0,
     };

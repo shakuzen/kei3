@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import type { TakeHomeResults } from '../../../types/tax';
 import { formatJPY } from '../../../utils/formatters';
 import { EMPLOYEES_PENSION_PREMIUM, type IncomeBracketToPensionPremium } from '../../../utils/pensionCalculator';
-import GenericPremiumTableTooltip from './PremiumTableTooltip';
+import PremiumTableTooltip from './PremiumTableTooltip';
 
 interface PensionPremiumTableTooltipProps {
   results: TakeHomeResults;
@@ -38,7 +38,7 @@ const PensionPremiumTableTooltip: React.FC<PensionPremiumTableTooltipProps> = ({
     );
 
     return (
-      <GenericPremiumTableTooltip
+      <PremiumTableTooltip
         title=""
         description=""
         tableData={[]}
@@ -80,7 +80,7 @@ const PensionPremiumTableTooltip: React.FC<PensionPremiumTableTooltipProps> = ({
     const pensionRow = row as unknown as IncomeBracketToPensionPremium;
     return `Your contribution: ${formatJPY(pensionRow.halfAmount)}/month (employee portion)`;
   }; return (
-    <GenericPremiumTableTooltip
+    <PremiumTableTooltip
       title="Employees Pension Premium Table (厚生年金)"
       description="Monthly pension contributions by income bracket. Your income: {monthlyIncome}/month"
       hint="💡 Employees pay half the contribution, employers pay the other half"

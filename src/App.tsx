@@ -25,7 +25,7 @@ function App({ mode, toggleColorMode }: AppProps) {
     isSubjectToLongTermCarePremium: false,
     prefecture: "Tokyo",
     showDetailedInput: false,
-    healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO.id,
+    healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
     numberOfDependents: 0,
     dcPlanContributions: 0
   }
@@ -81,27 +81,34 @@ function App({ mode, toggleColorMode }: AppProps) {
       if (name === 'isEmploymentIncome') {
         const isNowEmploymentIncome = processedInputValue as boolean;
         if (isNowEmploymentIncome) {
-          newInputs.healthInsuranceProvider = HealthInsuranceProvider.KYOKAI_KENPO.id;
-          const providerRegions = Object.keys(ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[newInputs.healthInsuranceProvider] || {});
+          newInputs.healthInsuranceProvider = HealthInsuranceProvider.KYOKAI_KENPO;
+          const providerRegions = Object.keys(ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[HealthInsuranceProvider.KYOKAI_KENPO.id] || {});
           newInputs.prefecture = providerRegions.length > 0 ? providerRegions[0] : DEFAULT_PROVIDER_REGION;
         } else {
-          newInputs.healthInsuranceProvider = HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id;
+          newInputs.healthInsuranceProvider = HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE;
           newInputs.prefecture = NATIONAL_HEALTH_INSURANCE_REGIONS.length > 0 ? NATIONAL_HEALTH_INSURANCE_REGIONS[0] : DEFAULT_PROVIDER_REGION;
         }
       } else if (name === 'healthInsuranceProvider') {
         const newProviderId = processedInputValue as string;
-        if (newProviderId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
-          newInputs.prefecture = NATIONAL_HEALTH_INSURANCE_REGIONS.length > 0 ? NATIONAL_HEALTH_INSURANCE_REGIONS[0] : DEFAULT_PROVIDER_REGION;
-        } else {
-          // For employee providers (Kyokai Kenpo, ITS Kenpo, etc.)
-          const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[newProviderId];
-          if (providerData) {
-            const providerRegions = Object.keys(providerData);
-            newInputs.prefecture = providerRegions.length > 0 ? providerRegions[0] : DEFAULT_PROVIDER_REGION;
+        // Find the provider object by ID
+        const providerObject = Object.values(HealthInsuranceProvider).find(p => p.id === newProviderId);
+        if (providerObject) {
+          newInputs.healthInsuranceProvider = providerObject;
+          if (newProviderId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+            newInputs.prefecture = NATIONAL_HEALTH_INSURANCE_REGIONS.length > 0 ? NATIONAL_HEALTH_INSURANCE_REGIONS[0] : DEFAULT_PROVIDER_REGION;
           } else {
-            newInputs.prefecture = DEFAULT_PROVIDER_REGION;
-            console.warn(`Data for employee provider ${newProviderId} not found in ALL_EMPLOYEES_HEALTH_INSURANCE_DATA. Defaulting prefecture.`);
+            // For employee providers (Kyokai Kenpo, ITS Kenpo, etc.)
+            const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[newProviderId];
+            if (providerData) {
+              const providerRegions = Object.keys(providerData);
+              newInputs.prefecture = providerRegions.length > 0 ? providerRegions[0] : DEFAULT_PROVIDER_REGION;
+            } else {
+              newInputs.prefecture = DEFAULT_PROVIDER_REGION;
+              console.warn(`Data for employee provider ${newProviderId} not found in ALL_EMPLOYEES_HEALTH_INSURANCE_DATA. Defaulting prefecture.`);
+            }
           }
+        } else {
+          console.warn(`Unknown health insurance provider ID: ${newProviderId}`);
         }
       }
       return newInputs;

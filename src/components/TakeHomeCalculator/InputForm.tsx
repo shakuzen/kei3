@@ -88,7 +88,7 @@ function AdvancedOptionsFields({
         <Select
           id="healthInsuranceProvider"
           name="healthInsuranceProvider"
-          value={inputs.healthInsuranceProvider}
+          value={inputs.healthInsuranceProvider.id}
           onChange={handleSelectChange}
           disabled={isHealthInsuranceProviderDropdownDisabled}
           fullWidth
@@ -368,16 +368,16 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
 
   // Derive regions for the currently selected health insurance provider
   const derivedProviderRegions = React.useMemo(() => {
-    const providerId = inputs.healthInsuranceProvider;
-    if (!providerId) return [];
+    const provider = inputs.healthInsuranceProvider;
+    if (!provider) return [];
 
     let regionKeys: string[] = [];
 
-    if (providerId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+    if (provider.id === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
       regionKeys = NATIONAL_HEALTH_INSURANCE_REGIONS;
     } else {
       // Employee health insurance provider
-      const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[providerId];
+      const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[provider.id];
       if (providerData) {
         regionKeys = Object.keys(providerData);
       }

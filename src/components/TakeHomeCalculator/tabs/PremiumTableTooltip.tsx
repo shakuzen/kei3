@@ -35,7 +35,7 @@ interface PremiumTableTooltipProps {
   fallbackContent?: React.ReactNode;
 }
 
-const GenericPremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({
+const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({
   title,
   description,
   hint,
@@ -263,4 +263,4 @@ const GenericPremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({
   );
 };
 
-export default GenericPremiumTableTooltip;
+export default PremiumTableTooltip;

@@ -1,4 +1,4 @@
-import type { EmployeesHealthInsurancePremiumTableRow, ProviderRegion, NationalHealthInsuranceRegionParams, HealthInsuranceProviderId } from '../types/healthInsurance';
+import type { EmployeesHealthInsurancePremiumTableRow, ProviderRegion, NationalHealthInsuranceRegionParams, HealthInsuranceProviderType } from '../types/healthInsurance';
 import { getHealthInsurancePremiumTable } from '../data/employeesHealthInsurance';
 import { getNationalHealthInsuranceParams } from '../data/nationalHealthInsurance';
 import { DEFAULT_PROVIDER_REGION, HealthInsuranceProvider } from '../types/healthInsurance';
@@ -29,14 +29,14 @@ export interface NationalHealthInsuranceBreakdown {
 export function calculateHealthInsurancePremium(
     annualIncome: number,
     isSubjectToLongTermCarePremium: boolean,
-    provider: HealthInsuranceProviderId,
+    provider: HealthInsuranceProviderType,
     region: ProviderRegion = DEFAULT_PROVIDER_REGION
 ): number {
     if (annualIncome < 0) {
         throw new Error('Income cannot be negative.');
     }
 
-    if (provider === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+    if (provider.id === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
         // The 'region' parameter for NHI is expected to be a string (municipality key).
         const nhiParams = getNationalHealthInsuranceParams(region as string);
         if (!nhiParams) {
@@ -46,9 +46,9 @@ export function calculateHealthInsurancePremium(
         return calculateNationalHealthInsurancePremiumLogic(annualIncome, isSubjectToLongTermCarePremium, nhiParams);
     } else {
         // For employee-based insurance providers (Kyokai Kenpo, other unions, etc.)
-        const premiumTable = getHealthInsurancePremiumTable(provider, region);
+        const premiumTable = getHealthInsurancePremiumTable(provider.id, region);
         if (!premiumTable) {
-            console.error(`Premium table not found for provider ${provider} and region ${region}. Returning 0 premium.`);
+            console.error(`Premium table not found for provider ${provider.id} and region ${region}. Returning 0 premium.`);
             return 0; // Or throw an error
         }
         return calculateEmployeesHealthInsurancePremium(annualIncome / 12, isSubjectToLongTermCarePremium, premiumTable);

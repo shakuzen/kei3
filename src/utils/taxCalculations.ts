@@ -190,7 +190,7 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     // Calculate NHI breakdown if National Health Insurance is selected
     let nhiBreakdown = null;
-    if (inputs.healthInsuranceProvider === 'NationalHealthInsurance') {
+    if (inputs.healthInsuranceProvider.id === 'NationalHealthInsurance') {
         // Use the new function that accepts boolean directly
         nhiBreakdown = calculateNationalHealthInsurancePremiumWithBreakdown(
             inputs.annualIncome,

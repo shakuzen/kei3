@@ -12,7 +12,7 @@ import InfoTooltip from '../../ui/InfoTooltip';
 import DetailInfoTooltip from '../../ui/DetailInfoTooltip';
 import { ResultRow } from '../ResultRow';
 import { employmentInsuranceRate } from '../../../utils/taxCalculations';
-import PremiumTableTooltip from './HealthInsurancePremiumTableTooltip';
+import HealthInsurancePremiumTableTooltip from './HealthInsurancePremiumTableTooltip';
 import PensionPremiumTableTooltip from './PensionPremiumTableTooltip';
 
 interface SocialInsuranceTabProps {
@@ -59,7 +59,7 @@ const SocialInsuranceTab: React.FC<SocialInsuranceTabProps> = ({ results, inputs
           {results.isEmploymentIncome ? "Employees' Health Insurance" : "National Health Insurance"}
           <DetailInfoTooltip
             title="Health Insurance Premium Details"
-            children={<PremiumTableTooltip results={results} inputs={inputs} />}
+            children={<HealthInsurancePremiumTableTooltip results={results} inputs={inputs} />}
           />
         </Typography>
         {results.isEmploymentIncome ? (

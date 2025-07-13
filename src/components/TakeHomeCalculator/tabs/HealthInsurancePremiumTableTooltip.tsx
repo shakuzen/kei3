@@ -5,21 +5,21 @@ import { formatJPY } from '../../../utils/formatters';
 import { HealthInsuranceProvider } from '../../../types/healthInsurance';
 import { ALL_EMPLOYEES_HEALTH_INSURANCE_DATA } from '../../../data/employeesHealthInsurance';
 import { getNationalHealthInsuranceParams } from '../../../data/nationalHealthInsurance';
-import GenericPremiumTableTooltip from './PremiumTableTooltip';
+import PremiumTableTooltip from './PremiumTableTooltip';
 
 type PremiumTableRow = Record<string, unknown>;
 
-interface PremiumTableTooltipProps {
+interface HealthInsurancePremiumTableTooltipProps {
   results: TakeHomeResults;
   inputs: TakeHomeInputs;
 }
 
-const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inputs }) => {
-  const providerId = inputs.healthInsuranceProvider;
+const HealthInsurancePremiumTableTooltip: React.FC<HealthInsurancePremiumTableTooltipProps> = ({ results, inputs }) => {
+  const provider = inputs.healthInsuranceProvider;
   const region = inputs.prefecture;
   const monthlyIncome = results.annualIncome / 12;
 
-  if (providerId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+  if (provider.id === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
     // National Health Insurance - show region parameters
     const regionData = getNationalHealthInsuranceParams(region);
     if (!regionData) {
@@ -35,7 +35,7 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
       );
 
       return (
-        <GenericPremiumTableTooltip
+        <PremiumTableTooltip
           title=""
           description=""
           tableData={[]}
@@ -184,7 +184,7 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
     );
 
     return (
-      <GenericPremiumTableTooltip
+      <PremiumTableTooltip
         title=""
         description=""
         tableData={[]}
@@ -200,7 +200,7 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
     );
   } else {
     // Employee Health Insurance - show premium table
-    const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[providerId];
+    const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[provider.id];
     if (!providerData || !providerData[region]) {
       const fallbackContent = (
         <Box>
@@ -208,13 +208,13 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
             Premium Table
           </Typography>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Premium table for {providerId} in {region} is not available in the current data.
+            Premium table for {provider.displayName} in {region} is not available in the current data.
           </Typography>
         </Box>
       );
 
       return (
-        <GenericPremiumTableTooltip
+        <PremiumTableTooltip
           title=""
           description=""
           tableData={[]}
@@ -258,8 +258,8 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
     };
 
     return (
-      <GenericPremiumTableTooltip
-        title={`Health Insurance Premium Table - ${providerId} (${region})`}
+      <PremiumTableTooltip
+        title={`Health Insurance Premium Table - ${provider.displayName} (${region})`}
         description="Monthly premiums by income bracket. Your income: {monthlyIncome}/month"
         hint="💡 LTC stands for Long-Term Care, which is an additional premium insured people ages 40-64 need to pay."
         tableData={premiumTableAsRows}
@@ -275,4 +275,4 @@ const PremiumTableTooltip: React.FC<PremiumTableTooltipProps> = ({ results, inpu
   }
 };
 
-export default PremiumTableTooltip;
+export default HealthInsurancePremiumTableTooltip;
