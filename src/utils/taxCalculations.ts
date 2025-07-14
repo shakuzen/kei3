@@ -1,6 +1,6 @@
 import type { TakeHomeInputs, TakeHomeResults } from '../types/tax'
 import { calculatePensionPremium } from './pensionCalculator';
-import { calculateHealthInsurancePremium } from './healthInsuranceCalculator';
+import { calculateHealthInsurancePremium, calculateNationalHealthInsurancePremiumWithBreakdown } from './healthInsuranceCalculator';
 import { calculateFurusatoNozeiDetails, calculateResidenceTax, calculateResidenceTaxBasicDeduction, NON_TAXABLE_RESIDENCE_TAX_DETAIL } from './residenceTax';
 
 /** https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000108634.html */
@@ -110,12 +110,11 @@ export const calculateNationalIncomeTaxBasicDeduction = (netIncome: number): num
 }
 
 /**
- * Calculates national income tax based on taxable income, including the 2.1% reconstruction surtax
+ * Calculates the base national income tax (before reconstruction surtax) based on taxable income
  * Source: National Tax Agency tax brackets for 2025
  * https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm
- * Note: Result is rounded down to the nearest 100 yen
  */
-export const calculateNationalIncomeTax = (taxableIncome: number): number => {
+export const calculateNationalIncomeTaxBase = (taxableIncome: number): number => {
     // Clamp taxable income to 0 if negative
     taxableIncome = Math.max(0, taxableIncome);
 
@@ -136,10 +135,28 @@ export const calculateNationalIncomeTax = (taxableIncome: number): number => {
         baseTax = taxableIncome * 0.45 - 4796000;
     }
 
-    // Add 2.1% reconstruction surtax
-    const reconstructionSurtax = baseTax * 0.021;
+    return baseTax;
+}
 
-    // Round down to the nearest 100 yen
+/**
+ * Calculates the reconstruction surtax (復興特別所得税) at 2.1% of base income tax
+ * Source: https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm
+ */
+export const calculateReconstructionSurtax = (baseTax: number): number => {
+    return baseTax * 0.021;
+}
+
+/**
+ * Calculates national income tax based on taxable income, including the 2.1% reconstruction surtax
+ * Source: National Tax Agency tax brackets for 2025
+ * https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2260.htm
+ * Note: Result is rounded down to the nearest 100 yen
+ */
+export const calculateNationalIncomeTax = (taxableIncome: number): number => {
+    const baseTax = calculateNationalIncomeTaxBase(taxableIncome);
+    const reconstructionSurtax = calculateReconstructionSurtax(baseTax);
+    
+    // Round down to the nearest 100 yen (total tax)
     return Math.floor((baseTax + reconstructionSurtax) / 100) * 100;
 }
 
@@ -166,10 +183,21 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
 
     const healthInsurance = calculateHealthInsurancePremium(
         inputs.annualIncome,
-        inputs.isOver40,
+        inputs.isSubjectToLongTermCarePremium,
         inputs.healthInsuranceProvider,
         inputs.prefecture
     );
+
+    // Calculate NHI breakdown if National Health Insurance is selected
+    let nhiBreakdown = null;
+    if (inputs.healthInsuranceProvider.id === 'NationalHealthInsurance') {
+        // Use the new function that accepts boolean directly
+        nhiBreakdown = calculateNationalHealthInsurancePremiumWithBreakdown(
+            inputs.annualIncome,
+            inputs.isSubjectToLongTermCarePremium,
+            inputs.prefecture as string
+        );
+    }
 
     const pensionPayments = calculatePensionPremium(isEmploymentIncome, annualIncome / 12);
 
@@ -185,6 +213,11 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
     const taxableIncomeForNationalIncomeTax = Math.max(0, Math.floor((netIncome - socialInsuranceDeduction - idecoDeduction - nationalIncomeTaxBasicDeduction) / 1000) * 1000);
 
     const nationalIncomeTax = calculateNationalIncomeTax(taxableIncomeForNationalIncomeTax);
+    
+    // Calculate base tax and reconstruction surtax breakdown for display
+    // Show the actual calculated amounts (before final rounding)
+    const nationalIncomeTaxBase = calculateNationalIncomeTaxBase(taxableIncomeForNationalIncomeTax);
+    const reconstructionSurtax = calculateReconstructionSurtax(nationalIncomeTaxBase);
 
     const residenceTaxBasicDeduction = calculateResidenceTaxBasicDeduction(netIncome);
     const taxableIncomeForResidenceTax = Math.max(0, Math.floor(Math.max(0, netIncome - socialInsuranceDeduction - idecoDeduction - residenceTaxBasicDeduction) / 1000) * 1000);
@@ -213,5 +246,12 @@ export const calculateTaxes = (inputs: TakeHomeInputs): TakeHomeResults => {
         taxableIncomeForResidenceTax,
         furusatoNozei: furusatoNozeiLimit,
         dcPlanContributions: inputs.dcPlanContributions,
+        // Income tax breakdown
+        nationalIncomeTaxBase: taxableIncomeForNationalIncomeTax > 0 ? nationalIncomeTaxBase : undefined,
+        reconstructionSurtax: taxableIncomeForNationalIncomeTax > 0 ? reconstructionSurtax : undefined,
+        // NHI breakdown fields (populated only when NHI is selected)
+        nhiMedicalPortion: nhiBreakdown?.medicalPortion,
+        nhiElderlySupportPortion: nhiBreakdown?.elderlySupportPortion,
+        nhiLongTermCarePortion: nhiBreakdown?.longTermCarePortion,
     };
 }

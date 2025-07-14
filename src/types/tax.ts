@@ -1,11 +1,11 @@
-import type { HealthInsuranceProviderId } from "./healthInsurance";
+import type { HealthInsuranceProviderType } from "./healthInsurance";
 export interface TakeHomeInputs {
   annualIncome: number;
   isEmploymentIncome: boolean;
-  isOver40: boolean;
+  isSubjectToLongTermCarePremium: boolean; // Person is 40-64 years old (must pay long-term care insurance premiums)
   prefecture: string;
   showDetailedInput: boolean;
-  healthInsuranceProvider: HealthInsuranceProviderId;
+  healthInsuranceProvider: HealthInsuranceProviderType;
   numberOfDependents: number;
   dcPlanContributions: number;
 }
@@ -27,6 +27,13 @@ export interface TakeHomeResults {
   taxableIncomeForResidenceTax?: number;
   furusatoNozei: FurusatoNozeiDetails;
   dcPlanContributions: number;
+  // Income tax breakdown
+  nationalIncomeTaxBase?: number;
+  reconstructionSurtax?: number;
+  // National Health Insurance breakdown (only for non-employment income)
+  nhiMedicalPortion?: number;
+  nhiElderlySupportPortion?: number;
+  nhiLongTermCarePortion?: number;
 }
 
 export interface ResidenceTaxDetails {
@@ -39,13 +46,16 @@ export interface ResidenceTaxDetails {
     cityTaxableIncome: number;
     cityAdjustmentCredit: number;
     cityIncomeTax: number;
+    cityPerCapitaTax: number;
   }
   prefecture: {
     prefecturalTaxableIncome: number;
     prefecturalAdjustmentCredit: number;
     prefecturalIncomeTax: number;
+    prefecturalPerCapitaTax: number;
   }
   perCapitaTax: number;
+  forestEnvironmentTax: number; // 森林環境税
   totalResidenceTax: number;
 }
 

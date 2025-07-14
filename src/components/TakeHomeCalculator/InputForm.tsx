@@ -88,7 +88,7 @@ function AdvancedOptionsFields({
         <Select
           id="healthInsuranceProvider"
           name="healthInsuranceProvider"
-          value={inputs.healthInsuranceProvider}
+          value={inputs.healthInsuranceProvider.id}
           onChange={handleSelectChange}
           disabled={isHealthInsuranceProviderDropdownDisabled}
           fullWidth
@@ -368,16 +368,16 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
 
   // Derive regions for the currently selected health insurance provider
   const derivedProviderRegions = React.useMemo(() => {
-    const providerId = inputs.healthInsuranceProvider;
-    if (!providerId) return [];
+    const provider = inputs.healthInsuranceProvider;
+    if (!provider) return [];
 
     let regionKeys: string[] = [];
 
-    if (providerId === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
+    if (provider.id === HealthInsuranceProvider.NATIONAL_HEALTH_INSURANCE.id) {
       regionKeys = NATIONAL_HEALTH_INSURANCE_REGIONS;
     } else {
       // Employee health insurance provider
-      const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[providerId];
+      const providerData = ALL_EMPLOYEES_HEALTH_INSURANCE_DATA[provider.id];
       if (providerData) {
         regionKeys = Object.keys(providerData);
       }
@@ -614,22 +614,22 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 color: 'text.primary',
               }}
             >
-              Age
-              <InfoTooltip title="Your obligation to pay nursing insurance premiums depends on your age." />
+              Age Range
+              <InfoTooltip title="People aged 40-64 are required to pay long-term care insurance premiums as part of their health insurance." />
             </Typography>
             <Box sx={styles.sharedSwitchControlBox}>
               <Typography
-                color={!inputs.isOver40 ? 'primary' : 'text.secondary'}
-                fontWeight={!inputs.isOver40 ? 600 : 400}
-                sx={{ minWidth: 36, textAlign: 'center', fontSize: '0.95rem' }}
+                color={!inputs.isSubjectToLongTermCarePremium ? 'primary' : 'text.secondary'}
+                fontWeight={!inputs.isSubjectToLongTermCarePremium ? 600 : 400}
+                sx={{ minWidth: 45, textAlign: 'center', fontSize: '0.9rem' }}
               >
-                &lt;40
+                &lt;40 or 65+
               </Typography>
               <Switch
-                checked={inputs.isOver40}
+                checked={inputs.isSubjectToLongTermCarePremium}
                 onChange={(e) => onInputChange({
                   target: {
-                    name: 'isOver40',
+                    name: 'isSubjectToLongTermCarePremium',
                     checked: e.target.checked,
                     type: 'checkbox'
                   }
@@ -639,11 +639,11 @@ export const TakeHomeInputForm: React.FC<TaxInputFormProps> = ({ inputs, onInput
                 sx={{ mx: 0.5 }}
               />
               <Typography
-                color={inputs.isOver40 ? 'primary' : 'text.secondary'}
-                fontWeight={inputs.isOver40 ? 600 : 400}
-                sx={{ minWidth: 36, textAlign: 'center', fontSize: '0.95rem' }}
+                color={inputs.isSubjectToLongTermCarePremium ? 'primary' : 'text.secondary'}
+                fontWeight={inputs.isSubjectToLongTermCarePremium ? 600 : 400}
+                sx={{ minWidth: 45, textAlign: 'center', fontSize: '0.9rem' }}
               >
-                40+
+                40-64
               </Typography>
             </Box>
           </Box>

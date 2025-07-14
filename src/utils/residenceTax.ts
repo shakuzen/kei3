@@ -32,13 +32,16 @@ export const NON_TAXABLE_RESIDENCE_TAX_DETAIL: ResidenceTaxDetails = {
         cityTaxableIncome: 0,
         cityAdjustmentCredit: 0,
         cityIncomeTax: 0,
+        cityPerCapitaTax: 0,
     },
     prefecture: {
         prefecturalTaxableIncome: 0,
         prefecturalAdjustmentCredit: 0,
         prefecturalIncomeTax: 0,
+        prefecturalPerCapitaTax: 0,
     },
     perCapitaTax: 0,
+    forestEnvironmentTax: 0,
     totalResidenceTax: 0,
 }
 
@@ -78,7 +81,12 @@ export const calculateResidenceTax = (
 
     const cityIncomeTax = Math.floor(((taxableIncome * 0.06) - cityAdjustmentCredit - (taxCredit * cityProportion)) / 100) * 100;
     const prefecturalIncomeTax = Math.floor(((taxableIncome * 0.04) - prefecturalAdjustmentCredit - (taxCredit * prefecturalProportion)) / 100) * 100;
-    const perCapitaTax = 5000; // 均等割額 (fixed amount per person, varies by municipality)
+    
+    // Per capita tax breakdown
+    const cityPerCapitaTax = 3000; // Municipal per capita tax
+    const prefecturalPerCapitaTax = 1000; // Prefectural per capita tax  
+    const forestEnvironmentTax = 1000; // Forest environment tax (森林環境税)
+    const perCapitaTax = cityPerCapitaTax + prefecturalPerCapitaTax + forestEnvironmentTax; // Total per capita tax
 
     return {
         taxableIncome,
@@ -90,13 +98,16 @@ export const calculateResidenceTax = (
             cityTaxableIncome: taxableIncome * cityProportion,
             cityAdjustmentCredit,
             cityIncomeTax,
+            cityPerCapitaTax,
         },
         prefecture: {
             prefecturalTaxableIncome: taxableIncome * prefecturalProportion,
             prefecturalAdjustmentCredit,
             prefecturalIncomeTax,
+            prefecturalPerCapitaTax,
         },
         perCapitaTax,
+        forestEnvironmentTax,
         totalResidenceTax: cityIncomeTax + prefecturalIncomeTax + perCapitaTax,
     };
 }

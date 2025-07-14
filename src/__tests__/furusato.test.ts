@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateTaxes } from '../utils/taxCalculations';
+import { HealthInsuranceProvider } from '../types/healthInsurance';
 import type { FurusatoNozeiDetails } from '../types/tax';
 
 describe('calculateFurusatoNozeiLimit', () => {
@@ -53,10 +54,10 @@ describe('calculateFurusatoNozeiLimit', () => {
     const fn = calculateTaxes({
       annualIncome: 5_000_000,
       isEmploymentIncome: true,
-      isOver40: false,
+      isSubjectToLongTermCarePremium: false,
       prefecture: 'Tokyo',
       showDetailedInput: false,
-      healthInsuranceProvider: 'KyokaiKenpo',
+      healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
       numberOfDependents: 0,
       dcPlanContributions: 240_000 // 20,000 yen per month
     }).furusatoNozei;
@@ -73,10 +74,10 @@ function calculateFNForIncome(income: number) : FurusatoNozeiDetails {
   return calculateTaxes({
     annualIncome: income,
     isEmploymentIncome: true,
-    isOver40: false,
+    isSubjectToLongTermCarePremium: false,
     prefecture: 'Tokyo',
     showDetailedInput: false,
-    healthInsuranceProvider: 'KyokaiKenpo',
+    healthInsuranceProvider: HealthInsuranceProvider.KYOKAI_KENPO,
     numberOfDependents: 0,
     dcPlanContributions: 0
   }).furusatoNozei;

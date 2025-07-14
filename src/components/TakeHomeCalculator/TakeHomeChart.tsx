@@ -15,7 +15,7 @@ import { Box, Paper, Slider, Typography, useTheme, useMediaQuery } from '@mui/ma
 import type { ChartRange } from '../../types/tax';
 import { formatJPY } from '../../utils/formatters';
 import { generateChartData, getChartOptions, currentAndMedianIncomeChartPlugin } from '../../utils/chartConfig';
-import type { HealthInsuranceProviderId } from '../../types/healthInsurance';
+import type { HealthInsuranceProviderType } from '../../types/healthInsurance';
 import { MEDIAN_INCOME_VALUE, QUINTILE_DATA, INCOME_RANGE_DISTRIBUTION } from '../../data/income';
 import { InfoTooltip } from '../ui/InfoTooltip';
 
@@ -88,8 +88,8 @@ ChartJS.register(
 interface TakeHomeChartProps {
   currentIncome: number;
   isEmploymentIncome: boolean;
-  isOver40: boolean;
-  healthInsuranceProvider: HealthInsuranceProviderId;
+  isSubjectToLongTermCarePremium: boolean;
+  healthInsuranceProvider: HealthInsuranceProviderType;
   prefecture: string;
   dcPlanContributions: number;
   className?: string;
@@ -164,7 +164,7 @@ const getPercentileBand = (income: number): { label: string; color: string } => 
 const TakeHomeChart: React.FC<TakeHomeChartProps> = ({ 
   currentIncome, 
   isEmploymentIncome,
-  isOver40,
+  isSubjectToLongTermCarePremium,
   healthInsuranceProvider,
   prefecture,
   dcPlanContributions,
@@ -229,13 +229,13 @@ const TakeHomeChart: React.FC<TakeHomeChartProps> = ({
   const chartData = useMemo<ChartData<'bar' | 'line'>>(
     () => generateChartData(chartRange, { 
       isEmploymentIncome, 
-      isOver40, 
+      isSubjectToLongTermCarePremium, 
       healthInsuranceProvider, 
       prefecture,
       dcPlanContributions,
       numberOfDependents: 0 // TODO: Replace 0 with actual value if available
     }),
-    [chartRange, isEmploymentIncome, isOver40, healthInsuranceProvider, prefecture, dcPlanContributions]
+    [chartRange, isEmploymentIncome, isSubjectToLongTermCarePremium, healthInsuranceProvider, prefecture, dcPlanContributions]
   );
 
   // Get chart options using the utility function

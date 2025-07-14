@@ -23,6 +23,9 @@ export const HealthInsuranceProvider = {
   // Example: UNION_HEALTH: { id: 'UnionHealth', displayName: 'Union Health' }, // Add other providers here
 } as const;
 
+// Type for a health insurance provider object
+export type HealthInsuranceProviderType = typeof HealthInsuranceProvider[keyof typeof HealthInsuranceProvider];
+
 // This type will now represent the ID of the provider
 export type HealthInsuranceProviderId = typeof HealthInsuranceProvider[keyof typeof HealthInsuranceProvider]['id'];
 

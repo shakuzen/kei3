@@ -1,4 +1,4 @@
-interface IncomeBracketToPensionPremium {
+export interface IncomeBracketToPensionPremium {
   min: number;
   max: number | null;
   fullAmount: number;
@@ -10,7 +10,7 @@ interface IncomeBracketToPensionPremium {
  */
 export const monthlyNationalPensionContribution = 17510;
 
-const EMPLOYEES_PENSION_PREMIUM: IncomeBracketToPensionPremium[] = [
+export const EMPLOYEES_PENSION_PREMIUM: IncomeBracketToPensionPremium[] = [
   { min: 0, max: 93000, fullAmount: 16104.00, halfAmount: 8052.00 },
   { min: 93000, max: 101000, fullAmount: 17934.00, halfAmount: 8967.00 },
   { min: 101000, max: 107000, fullAmount: 19032.00, halfAmount: 9516.00 },
