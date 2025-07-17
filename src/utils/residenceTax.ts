@@ -71,9 +71,11 @@ export const calculateResidenceTax = (
 
     // 調整控除額
     let adjustmentCredit = 0;
-    if (netIncome <= 2_000_000) {
+    if (netIncome > 25_000_000) {
+        adjustmentCredit = 0;
+    } else if (taxableIncome <= 2_000_000) {
         adjustmentCredit = Math.min(personalDeductionDifference * 0.05, taxableIncome * 0.05);
-    } else if (netIncome <= 25_000_000) {
+    } else {
         adjustmentCredit = Math.max((personalDeductionDifference - (taxableIncome - 2_000_000)) * 0.05, personalDeductionDifference * 0.05);
     }
     const cityAdjustmentCredit = adjustmentCredit * cityProportion;
