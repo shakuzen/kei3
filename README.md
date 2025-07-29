@@ -1,3 +1,5 @@
+**Note: This repository has been moved to https://github.com/JapanFinance/kei3.**
+
 # Kei3
 
 A website featuring various calculators. Currently, it has a Japan take-home pay calculator.
